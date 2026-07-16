@@ -9,13 +9,23 @@ class BriefAnswers {
     this.notes,
   });
 
-  final String? shootingType;   // Çekim Türü
-  final List<String>? vibes;    // Duygu / Vibe (çoklu seçim)
-  final String? dateRange;      // Çekim Aralığı
-  final String? deliveryTime;   // Teslim Süresi
-  final String? budget;         // Bütçe Aralığı
-  final String? location;       // Lokasyon
-  final String? notes;          // Serbest metin (BriefShare ekranı)
+  final String? shootingType;
+  final List<String>? vibes;
+  final String? dateRange;
+  final String? deliveryTime;
+  final String? budget;
+  final String? location;
+  final String? notes;
+
+  BriefAnswers copyWith({String? notes}) => BriefAnswers(
+        shootingType: shootingType,
+        vibes: vibes,
+        dateRange: dateRange,
+        deliveryTime: deliveryTime,
+        budget: budget,
+        location: location,
+        notes: notes ?? this.notes,
+      );
 
   Map<String, dynamic> toJson() => {
         'shootingType': shootingType,
@@ -48,16 +58,36 @@ class BriefModel {
     required this.answers,
     required this.createdAt,
     required this.updatedAt,
+    this.sentToIds = const [],
   });
 
   final String id;
   final String ownerId;
   final String title;
   final String category;
-  final String status; // 'draft' | 'submitted'
+  final String status; // 'draft' | 'submitted' | 'offer_sent'
   final BriefAnswers answers;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<String> sentToIds;
+
+  BriefModel copyWith({
+    String? status,
+    BriefAnswers? answers,
+    List<String>? sentToIds,
+    DateTime? updatedAt,
+  }) =>
+      BriefModel(
+        id: id,
+        ownerId: ownerId,
+        title: title,
+        category: category,
+        status: status ?? this.status,
+        answers: answers ?? this.answers,
+        createdAt: createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sentToIds: sentToIds ?? this.sentToIds,
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -68,6 +98,7 @@ class BriefModel {
         'answers': answers.toJson(),
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        'sentToIds': sentToIds,
       };
 
   factory BriefModel.fromJson(Map<String, dynamic> json) => BriefModel(
@@ -81,5 +112,7 @@ class BriefModel {
         ),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
+        sentToIds:
+            (json['sentToIds'] as List<dynamic>?)?.cast<String>() ?? [],
       );
 }

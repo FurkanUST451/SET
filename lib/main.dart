@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
 import 'core/constants/app_strings.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/firebase_service.dart';

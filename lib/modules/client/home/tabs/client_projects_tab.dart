@@ -1,118 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../data/models/brief_model.dart';
 import '../../../../routes/app_routes.dart';
+import '../client_projects_controller.dart';
 
-// ---------------------------------------------------------------------------
-// Data model — kept for project_detail_view.dart
-// ---------------------------------------------------------------------------
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB); // arka plan (Keşfet ile aynı)
+const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
+const _kCardBorder = Color(0x0F000000);
 
-enum ProjectStatus { inProgress, inReview, inRevision, completed }
+// ─── Tipografi yardımcıları ───────────────────────────────────────────────────
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+  bool italic = false,
+}) =>
+    GoogleFonts.cormorantGaramond(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+    );
 
-class ProjectData {
-  const ProjectData({
-    required this.title,
-    required this.subtitle,
-    required this.status,
-    required this.progress,
-    required this.workers,
-    required this.budget,
-    required this.daysLeft,
-    required this.gradientColors,
-    required this.stage,
-    required this.overview,
-    required this.deadline,
-    required this.startDate,
-    required this.deliverables,
-  });
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) =>
+    GoogleFonts.spaceMono(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      letterSpacing: spacing,
+    );
 
-  final String title;
-  final String subtitle;
-  final ProjectStatus status;
-  final double progress;
-  final int workers;
-  final String budget;
-  final int daysLeft;
-  final List<Color> gradientColors;
-  final int stage;
-  final String overview;
-  final String deadline;
-  final String startDate;
-  final String deliverables;
-}
-
-const allProjects = [
-  ProjectData(
-    title: 'Cafe Tanıtım Filmi',
-    subtitle: 'SET Halletsin · Ekip kuruluyor',
-    status: ProjectStatus.inProgress,
-    progress: 0.42,
-    workers: 3,
-    budget: r'₺42.000',
-    daysLeft: 7,
-    gradientColors: [Color(0xFF2A1A08), Color(0xFF1A0D04)],
-    stage: 0,
-    overview:
-        'Butik kafe için ürün ve atmosfer odaklı tanıtım filmi. SET ekibi çekim ve kurgu sürecini yönetiyor.',
-    deadline: 'Haz 14',
-    startDate: 'May 28',
-    deliverables: '3 versiyon',
-  ),
-  ProjectData(
-    title: 'Aria Editoryal Kampanya',
-    subtitle: 'Moda editoryal · Kış \'26 lookbook',
-    status: ProjectStatus.inProgress,
-    progress: 0.65,
-    workers: 5,
-    budget: r'$8.400',
-    daysLeft: 12,
-    gradientColors: [Color(0xFF3B2510), Color(0xFF1A0D04)],
-    stage: 1,
-    overview:
-        'İpek ve kaşmir parçaların düşük anahtar tungsten aydınlatmasıyla çekildiği altı görünümlük kış editoryal.',
-    deadline: 'Ara 14',
-    startDate: 'Kas 22',
-    deliverables: '12 varlık',
-  ),
-  ProjectData(
-    title: 'Velour Marka Kimliği',
-    subtitle: 'Logo sistemi · Restoran markası',
-    status: ProjectStatus.inReview,
-    progress: 0.80,
-    workers: 3,
-    budget: r'$4.200',
-    daysLeft: 6,
-    gradientColors: [Color(0xFF1C1C1C), Color(0xFF0D0D0D)],
-    stage: 1,
-    overview:
-        'Butik restoran için tam marka kimliği paketi. Logo, tipografi, renk paleti ve sosyal medya şablonları dahil.',
-    deadline: 'Ara 20',
-    startDate: 'Kas 10',
-    deliverables: '8 dosya',
-  ),
-  ProjectData(
-    title: 'Noctis Ses Spotu',
-    subtitle: 'Ses tasarımı · 30s ticari',
-    status: ProjectStatus.inRevision,
-    progress: 0.40,
-    workers: 4,
-    budget: r'$6.750',
-    daysLeft: 18,
-    gradientColors: [Color(0xFF1A1208), Color(0xFF0E0A04)],
-    stage: 2,
-    overview:
-        'Lüks otomobil markası için 30 saniyelik sinematik ses tasarımı.',
-    deadline: 'Oca 5',
-    startDate: 'Kas 18',
-    deliverables: '3 versiyon',
-  ),
+const _months = [
+  '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+  'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
 ];
 
-// ---------------------------------------------------------------------------
-// Tab widget
-// ---------------------------------------------------------------------------
+String _formatDate(DateTime d) => '${d.day} ${_months[d.month]} ${d.year}';
 
+// ─────────────────────────────────────────────────────────────────
+// TAB
+// ─────────────────────────────────────────────────────────────────
 class ClientProjectsTab extends StatefulWidget {
   const ClientProjectsTab({super.key});
 
@@ -120,79 +61,474 @@ class ClientProjectsTab extends StatefulWidget {
   State<ClientProjectsTab> createState() => _ClientProjectsTabState();
 }
 
-class _ClientProjectsTabState extends State<ClientProjectsTab>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab;
+class _ClientProjectsTabState extends State<ClientProjectsTab> {
+  int _filterIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _tab = TabController(length: 3, vsync: this);
-    _tab.addListener(() => setState(() {}));
-  }
+  static const _filterLabels = ['TÜMÜ', 'TEKLİF AŞAMASINDA', 'ANLAŞMA BEKLİYOR'];
+  static const _filterStatus = <String?>[null, 'offer_sent', 'submitted'];
 
-  @override
-  void dispose() {
-    _tab.dispose();
-    super.dispose();
+  List<BriefModel> _apply(List<BriefModel> all) {
+    final st = _filterStatus[_filterIndex];
+    if (st == null) return all;
+    return all.where((b) => b.status == st).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ClientProjectsController>();
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+    // Kayan nav bar (68 yükseklik + 16 alt boşluk) üstünde kalması için pay.
+    final double navClear = MediaQuery.paddingOf(context).bottom + 68 + 16 + 14;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
-      body: SafeArea(
-        bottom: false,
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(s, controller),
+                  SizedBox(height: 20 * s),
+                  _buildFilterBar(s),
+                  SizedBox(height: 8 * s),
+                  Expanded(
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: _kGold),
+                        );
+                      }
+                      if (controller.errorMsg.isNotEmpty) {
+                        return _ErrorView(
+                            scale: s, onRetry: controller.loadBriefs);
+                      }
+                      final list = _apply(controller.briefs);
+                      if (list.isEmpty) return _EmptyState(scale: s);
+                      return RefreshIndicator(
+                        color: _kGold,
+                        onRefresh: controller.loadBriefs,
+                        child: ListView.separated(
+                          padding: EdgeInsets.fromLTRB(
+                              24 * s, 6 * s, 24 * s, 130 * s),
+                          itemCount: list.length,
+                          separatorBuilder: (_, _) => SizedBox(height: 18 * s),
+                          itemBuilder: (_, i) =>
+                              _BriefCard(scale: s, brief: list[i]),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              _buildSetFab(s, navClear),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Header ──────────────────────────────────────────────────────
+  Widget _buildHeader(double s, ClientProjectsController controller) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 22 * s, 18 * s, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SET · ÜRETİM',
+                  style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
+                ),
+                SizedBox(height: 8 * s),
+                Text(
+                  'Projelerim',
+                  style: _serif(
+                      size: 40 * s, weight: FontWeight.w600, color: _kInk),
+                ),
+                SizedBox(height: 6 * s),
+                Obx(() => Text(
+                      '${_apply(controller.briefs).length} proje görüntüleniyor',
+                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.5),
+                    )),
+              ],
+            ),
+          ),
+          SizedBox(width: 10 * s),
+          _IconBtn(scale: s, icon: Icons.search_rounded, onTap: () {}),
+          SizedBox(width: 8 * s),
+          _IconBtn(
+              scale: s,
+              icon: Icons.notifications_none_rounded,
+              badge: true,
+              onTap: () {}),
+        ],
+      ),
+    );
+  }
+
+  // ── Filtre pilleri ──────────────────────────────────────────────
+  Widget _buildFilterBar(double s) {
+    return SizedBox(
+      height: 40 * s,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+        itemCount: _filterLabels.length,
+        separatorBuilder: (_, _) => SizedBox(width: 10 * s),
+        itemBuilder: (_, i) {
+          final active = i == _filterIndex;
+          return GestureDetector(
+            onTap: () => setState(() => _filterIndex = i),
+            behavior: HitTestBehavior.opaque,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(horizontal: 16 * s),
+              decoration: BoxDecoration(
+                color: active ? _kInk : Colors.transparent,
+                borderRadius: BorderRadius.zero,
+                border: Border.all(
+                  color: active
+                      ? _kInk
+                      : Colors.black.withValues(alpha: 0.14),
+                ),
+              ),
+              child: Text(
+                _filterLabels[i],
+                style: _mono(
+                  size: 9 * s,
+                  weight: active ? FontWeight.w700 : FontWeight.w400,
+                  color: active ? Colors.white : _kTaupe,
+                  spacing: 1,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Kayan SET butonu (sağ alt) ──────────────────────────────────
+  // SET Halletsin ile ilerleyen projelerin takip ekranına götürür.
+  Widget _buildSetFab(double s, double bottom) {
+    return Positioned(
+      right: 24 * s,
+      bottom: bottom,
+      child: GestureDetector(
+        onTap: () => Get.toNamed(AppRoutes.setProjects),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 56 * s,
+          height: 56 * s,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.zero,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.22),
+                blurRadius: 16 * s,
+                offset: Offset(0, 6 * s),
+              ),
+            ],
+          ),
+          child: Text(
+            'SET',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13 * s,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BRIEF CARD
+// ─────────────────────────────────────────────────────────────────
+class _BriefCard extends StatelessWidget {
+  const _BriefCard({required this.scale, required this.brief});
+
+  final double scale;
+  final BriefModel brief;
+
+  String get _statusLabel {
+    switch (brief.status) {
+      case 'offer_sent':
+        return 'TEKLİF AŞAMASINDA';
+      case 'submitted':
+        return 'ANLAŞMA BEKLİYOR';
+      default:
+        return 'TASLAK';
+    }
+  }
+
+  Color get _statusColor {
+    switch (brief.status) {
+      case 'offer_sent':
+      case 'submitted':
+        return _kGold;
+      default:
+        return _kMuted;
+    }
+  }
+
+  String get _bigTitle =>
+      brief.category.isNotEmpty ? brief.category : brief.title;
+
+  String get _subtitle {
+    final type = brief.answers.shootingType;
+    final project = brief.title;
+    if (type != null && type.isNotEmpty && project.isNotEmpty) {
+      return '$type · «$project»';
+    }
+    if (project.isNotEmpty) return '«$project»';
+    return type ?? '';
+  }
+
+  IconData get _categoryIcon {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
+    }
+    return Icons.work_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.briefDetail, arguments: {'brief': brief}),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: _kCardBorder),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────────────
+            // Durum satırı
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Projeler',
-                    style: AppTextStyles.displayXL.copyWith(
-                      color: Colors.black87,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'SET işleri, teklifler ve biten üretimler.',
-                    style: AppTextStyles.body2.copyWith(color: Colors.black45),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ── Custom tab bar ───────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
               child: Row(
                 children: [
-                  _TabBtn(label: 'Devam Eden', selected: _tab.index == 0, onTap: () => _tab.animateTo(0)),
-                  const SizedBox(width: 8),
-                  _TabBtn(label: 'Teklifler', selected: _tab.index == 1, onTap: () => _tab.animateTo(1)),
-                  const SizedBox(width: 8),
-                  _TabBtn(label: 'Tamamlanan', selected: _tab.index == 2, onTap: () => _tab.animateTo(2)),
+                  Container(
+                    width: 8 * s,
+                    height: 8 * s,
+                    color: _statusColor,
+                  ),
+                  SizedBox(width: 8 * s),
+                  Text(
+                    _statusLabel,
+                    style: _mono(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kInk,
+                        spacing: 1.4),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
+                      'category': brief.category,
+                      'brief': brief,
+                    }),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: EdgeInsets.all(6 * s),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.zero,
+                        border: Border.all(
+                            color: Colors.black.withValues(alpha: 0.12)),
+                      ),
+                      child: Icon(Icons.edit_outlined,
+                          size: 14 * s, color: _kTaupe),
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
 
-            // ── Tab content ──────────────────────────────────────────────────
-            Expanded(
-              child: TabBarView(
-                controller: _tab,
-                children: const [
-                  _DevamEdenTab(),
-                  _TekliflerTab(),
-                  _TamamlananTab(),
+            // Kimlik satırı
+            Padding(
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 18 * s, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48 * s,
+                    height: 48 * s,
+                    decoration: BoxDecoration(
+                      color: _kGold,
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    child: Icon(_categoryIcon,
+                        size: 24 * s, color: Colors.white),
+                  ),
+                  SizedBox(width: 14 * s),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _bigTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _serif(
+                              size: 20 * s,
+                              weight: FontWeight.w600,
+                              color: _kInk),
+                        ),
+                        if (_subtitle.isNotEmpty) ...[
+                          SizedBox(height: 3 * s),
+                          Text(
+                            _subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _mono(
+                                size: 8 * s, color: _kMuted, spacing: 1),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (brief.sentToIds.isNotEmpty) ...[
+                    SizedBox(width: 10 * s),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${brief.sentToIds.length}',
+                          style: _serif(
+                              size: 22 * s,
+                              weight: FontWeight.w700,
+                              color: _kGold),
+                        ),
+                        Text(
+                          'TEKLİF',
+                          style: _mono(
+                              size: 7 * s, color: _kMuted, spacing: 1.2),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            // Meta satırı (teslim / bütçe / çekim)
+            if (brief.answers.deliveryTime != null ||
+                brief.answers.budget != null ||
+                brief.answers.dateRange != null) ...[
+              SizedBox(height: 18 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.schedule_rounded,
+                        label: 'TESLİM',
+                        value: brief.answers.deliveryTime ?? '—',
+                      ),
+                    ),
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.payments_outlined,
+                        label: 'BÜTÇE',
+                        value: brief.answers.budget ?? '—',
+                      ),
+                    ),
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.calendar_today_rounded,
+                        label: 'ÇEKİM',
+                        value: brief.answers.dateRange ?? '—',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Konum
+            if (brief.answers.location != null &&
+                brief.answers.location!.isNotEmpty) ...[
+              SizedBox(height: 16 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 13 * s, color: _kTaupe),
+                    SizedBox(width: 5 * s),
+                    Expanded(
+                      child: Text(
+                        brief.answers.location!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Açıklama
+            if (brief.answers.notes != null &&
+                brief.answers.notes!.isNotEmpty) ...[
+              SizedBox(height: 14 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                child: Text(
+                  brief.answers.notes!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _mono(
+                      size: 9 * s, color: _kInk, spacing: 0.2),
+                ),
+              ),
+            ],
+
+            // Alt bilgi
+            SizedBox(height: 18 * s),
+            Container(
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: _kDivider)),
+              ),
+              padding: EdgeInsets.fromLTRB(18 * s, 12 * s, 14 * s, 14 * s),
+              child: Row(
+                children: [
+                  Text(
+                    'SON GÜNCELLEME · ${_formatDate(brief.updatedAt).toUpperCase()}',
+                    style: _mono(size: 8 * s, color: _kMuted, spacing: 0.8),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right,
+                      size: 16 * s, color: _kGold),
                 ],
               ),
             ),
@@ -203,471 +539,93 @@ class _ClientProjectsTabState extends State<ClientProjectsTab>
   }
 }
 
-class _TabBtn extends StatelessWidget {
-  const _TabBtn({
+// ─── Meta hücresi ─────────────────────────────────────────────────
+class _MetaCell extends StatelessWidget {
+  const _MetaCell({
+    required this.scale,
+    required this.icon,
     required this.label,
-    required this.selected,
-    required this.onTap,
+    required this.value,
   });
+
+  final double scale;
+  final IconData icon;
   final String label;
-  final bool selected;
-  final VoidCallback onTap;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 11 * s, color: _kTaupe),
+            SizedBox(width: 4 * s),
+            Text(
+              label,
+              style: _mono(size: 7 * s, color: _kMuted, spacing: 1),
+            ),
+          ],
+        ),
+        SizedBox(height: 5 * s),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _mono(
+              size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── İkon butonu ──────────────────────────────────────────────────
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({
+    required this.scale,
+    required this.icon,
+    required this.onTap,
+    this.badge = false,
+  });
+
+  final double scale;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-        decoration: BoxDecoration(
-          color: selected ? Colors.black87 : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected ? Colors.transparent : Colors.black12,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.button.copyWith(
-            color: selected ? Colors.white : Colors.black54,
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Devam Eden tab
-// ---------------------------------------------------------------------------
-
-class _DevamEdenTab extends StatelessWidget {
-  const _DevamEdenTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-      children: [
-        // Active project card
-        _ActiveProjectCard(project: allProjects[0]),
-        const SizedBox(height: 20),
-        // Timeline
-        ...const [
-          _TimelineItem(
-            status: _TimelineStatus.done,
-            title: 'Brief onayı',
-            date: 'Bugün',
-            project: 'Cafe Tanıtım Filmi',
-          ),
-          _TimelineItem(
-            status: _TimelineStatus.current,
-            title: 'Ekip kesinleşir',
-            date: '18:00',
-            project: 'Cafe Tanıtım Filmi',
-          ),
-          _TimelineItem(
-            status: _TimelineStatus.pending,
-            title: 'Çekim planlama',
-            date: '29 Mayıs',
-            project: 'Cafe Tanıtım Filmi',
-          ),
-          _TimelineItem(
-            status: _TimelineStatus.pending,
-            title: 'Kurgu teslim',
-            date: '4 Haziran',
-            project: 'Cafe Tanıtım Filmi',
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _ActiveProjectCard extends StatelessWidget {
-  const _ActiveProjectCard({required this.project});
-  final ProjectData project;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.projectDetail, arguments: {'index': 0}),
+      behavior: HitTestBehavior.opaque,
       child: Container(
+        width: 44 * s,
+        height: 44 * s,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: project.gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
         ),
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.title,
-                    style: AppTextStyles.heading2.copyWith(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    project.subtitle,
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.white54,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Teslim',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.white38,
-                    fontSize: 10,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${project.daysLeft} Gün',
-                  style: AppTextStyles.heading3.copyWith(
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '%${(project.progress * 100).toInt()}',
-                  style: AppTextStyles.heading3.copyWith(
-                    color: const Color(0xFFE8B84B),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-enum _TimelineStatus { done, current, pending }
-
-class _TimelineItem extends StatelessWidget {
-  const _TimelineItem({
-    required this.status,
-    required this.title,
-    required this.date,
-    required this.project,
-  });
-
-  final _TimelineStatus status;
-  final String title;
-  final String date;
-  final String project;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isDone = status == _TimelineStatus.done;
-    final bool isCurrent = status == _TimelineStatus.current;
-
-    Widget indicator;
-    if (isDone) {
-      indicator = Container(
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.black26, width: 1.5),
-        ),
-        child: const Icon(Icons.check_rounded, size: 14, color: Colors.black54),
-      );
-    } else if (isCurrent) {
-      indicator = Container(
-        width: 24,
-        height: 24,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color(0xFFE8B84B),
-        ),
-        child: const Icon(Icons.circle, size: 8, color: Colors.white),
-      );
-    } else {
-      indicator = Container(
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.black12, width: 1.5),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            indicator,
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: AppTextStyles.body2.copyWith(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        ' · $date',
-                        style: AppTextStyles.body2.copyWith(color: Colors.black45),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    project,
-                    style: AppTextStyles.caption.copyWith(
-                      color: const Color(0xFFB8860B),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Teklifler tab
-// ---------------------------------------------------------------------------
-
-const _offers = [
-  ('A', 'Alperen İ.', 'Teklifi gördü · Director'),
-  ('M', 'Mert Kaya', 'Teklifi gördü · Director of Photography'),
-  ('E', 'Ece K.', 'Beklemede'),
-  ('D', 'Deniz S.', 'Teklifi gördü · Colorist'),
-  ('B', 'Baran T.', 'Beklemede'),
-];
-
-class _TekliflerTab extends StatelessWidget {
-  const _TekliflerTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-      children: [
-        // Summary banner
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '5 davetinden 3\'ü görüntülendi',
-                style: AppTextStyles.heading2.copyWith(
-                  color: Colors.black87,
-                  fontSize: 17,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Mert Kaya ve Ece K. işi inceledi. Buradan mesajlaşabilir veya işi projeye çevirebilirsin.',
-                style: AppTextStyles.body2.copyWith(
-                  color: Colors.black54,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () {},
+            Icon(icon, size: 20 * s, color: _kInk),
+            if (badge)
+              Positioned(
+                top: 11 * s,
+                right: 12 * s,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.black87,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Mesajlara git  →',
-                    style: AppTextStyles.button.copyWith(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                  width: 6 * s,
+                  height: 6 * s,
+                  decoration: const BoxDecoration(
+                    color: _kGold,
+                    shape: BoxShape.rectangle,
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // Gelen Cevaplar
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Gelen Cevaplar',
-              style: AppTextStyles.heading3.copyWith(
-                color: Colors.black87,
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              'Tümünü Gör  →',
-              style: AppTextStyles.caption.copyWith(
-                color: const Color(0xFFB8860B),
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        ..._offers.map((o) => _OfferItem(
-              initials: o.$1,
-              name: o.$2,
-              subtitle: o.$3,
-            )),
-      ],
-    );
-  }
-}
-
-class _OfferItem extends StatelessWidget {
-  const _OfferItem({
-    required this.initials,
-    required this.name,
-    required this.subtitle,
-  });
-
-  final String initials;
-  final String name;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFE8D5C0),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                initials,
-                style: AppTextStyles.heading3.copyWith(
-                  color: const Color(0xFF8D6E63),
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: AppTextStyles.body1.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.black45,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.toNamed(
-                AppRoutes.chatDetail,
-                arguments: {'name': name},
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0E8DC),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Mesaj  →',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -675,41 +633,78 @@ class _OfferItem extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Tamamlanan tab
-// ---------------------------------------------------------------------------
-
-class _TamamlananTab extends StatelessWidget {
-  const _TamamlananTab();
+// ─── Boş durum ────────────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.scale});
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 68 * s,
+            height: 68 * s,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
-              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
             ),
-            child: const Icon(
-              Icons.check_circle_outline_rounded,
-              size: 32,
-              color: Colors.black26,
+            child: Icon(Icons.folder_open_rounded,
+                size: 30 * s, color: _kMuted),
+          ),
+          SizedBox(height: 18 * s),
+          Text(
+            'Henüz proje yok',
+            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            'Brief gönderdikten sonra buraya düşer.',
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Hata durumu ──────────────────────────────────────────────────
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.scale, required this.onRetry});
+  final double scale;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Projeler yüklenemedi',
+            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+          ),
+          SizedBox(height: 12 * s),
+          GestureDetector(
+            onTap: onRetry,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20 * s, vertical: 10 * s),
+              decoration: BoxDecoration(
+                color: _kInk,
+                borderRadius: BorderRadius.zero,
+              ),
+              child: Text(
+                'TEKRAR DENE',
+                style: _mono(
+                    size: 9 * s,
+                    weight: FontWeight.w700,
+                    color: Colors.white,
+                    spacing: 1),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Tamamlanan proje yok',
-            style: AppTextStyles.heading3.copyWith(color: Colors.black45),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Biten projeler burada görünür.',
-            style: AppTextStyles.body2.copyWith(color: Colors.black26),
           ),
         ],
       ),

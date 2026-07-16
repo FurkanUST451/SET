@@ -1,76 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../routes/app_routes.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) => GoogleFonts.cormorantGaramond(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) => GoogleFonts.spaceMono(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
 
 class ChooseAuthView extends StatelessWidget {
   const ChooseAuthView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  Image.asset(AppAssets.loginLogo, height: 80),
-                  const SizedBox(height: 28),
-                  const Text(
-                    'Tüm kreatif süreçler.\nTek yerde.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                      height: 1.35,
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32 * s),
+            child: Column(
+              children: [
+                const Spacer(),
+                Image.asset(AppAssets.loginLogo, height: 72 * s),
+                SizedBox(height: 28 * s),
+                Text(
+                  'Tüm kreatif süreçler.\nTek yerde.',
+                  textAlign: TextAlign.center,
+                  style: _serif(
+                    size: 26 * s,
+                    weight: FontWeight.w600,
+                    color: _kInk,
+                  ),
+                ),
+                const Spacer(),
+                _AuthButton(
+                  scale: s,
+                  label: 'Google ile devam et',
+                  icon: AppAssets.loginGoogle,
+                  onTap: () {},
+                  dark: false,
+                ),
+                SizedBox(height: 10 * s),
+                _AuthButton(
+                  scale: s,
+                  label: 'Apple ile devam et',
+                  icon: AppAssets.loginApple,
+                  onTap: () {},
+                  dark: true,
+                ),
+                SizedBox(height: 10 * s),
+                _AuthButton(
+                  scale: s,
+                  label: 'E-posta ile devam et',
+                  icon: AppAssets.loginEmail,
+                  onTap: () => Get.toNamed(AppRoutes.login),
+                  dark: false,
+                ),
+                SizedBox(height: 26 * s),
+                GestureDetector(
+                  onTap: () {},
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    'MİSAFİR OLARAK DEVAM ET',
+                    style: _mono(
+                      size: 9 * s,
+                      weight: FontWeight.w600,
+                      color: _kTaupe,
+                      spacing: 1,
                     ),
                   ),
-                  const Spacer(),
-                  _AuthButton(
-                    label: 'Google ile devam et',
-                    icon: AppAssets.loginGoogle,
-                    onTap: () {},
-                    dark: false,
-                  ),
-                  const SizedBox(height: 12),
-                  _AuthButton(
-                    label: 'Apple ile devam et',
-                    icon: AppAssets.loginApple,
-                    onTap: () {},
-                    dark: true,
-                  ),
-                  const SizedBox(height: 12),
-                  _AuthButton(
-                    label: 'E-posta ile devam et',
-                    icon: AppAssets.loginEmail,
-                    onTap: () => Get.toNamed(AppRoutes.login),
-                    dark: false,
-                  ),
-                  const SizedBox(height: 28),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Misafir olarak devam et',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                SizedBox(height: 20 * s),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -78,12 +112,14 @@ class ChooseAuthView extends StatelessWidget {
 
 class _AuthButton extends StatelessWidget {
   const _AuthButton({
+    required this.scale,
     required this.label,
     required this.icon,
     required this.onTap,
     required this.dark,
   });
 
+  final double scale;
   final String label;
   final String icon;
   final VoidCallback onTap;
@@ -91,26 +127,30 @@ class _AuthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 54,
+        height: 52 * s,
         decoration: BoxDecoration(
-          color: dark ? Colors.black : Colors.white.withValues(alpha: 0.85),
-          borderRadius: BorderRadius.circular(32),
-          border: dark ? null : Border.all(color: Colors.black12),
+          color: dark ? _kInk : Colors.white,
+          border: dark
+              ? null
+              : Border.all(color: Colors.black.withValues(alpha: 0.12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(icon, height: 22, width: 22),
-            const SizedBox(width: 12),
+            Image.asset(icon, height: 20 * s, width: 20 * s),
+            SizedBox(width: 12 * s),
             Text(
               label,
-              style: TextStyle(
-                color: dark ? Colors.white : Colors.black87,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
+              style: _mono(
+                size: 10.5 * s,
+                weight: FontWeight.w700,
+                color: dark ? Colors.white : _kInk,
+                spacing: 0.5,
               ),
             ),
           ],

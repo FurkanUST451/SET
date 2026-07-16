@@ -1,13 +1,45 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/constants/app_assets.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../widgets/video_viewer_page.dart';
 import 'freelancers_by_category_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kCardBorder = Color(0x14000000);
+const _kThumbTop = Color(0xFF3A342E);
+const _kThumbBot = Color(0xFF211E1A);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        height: height);
 
 class FreelancersByCategoryView
     extends GetView<FreelancersByCategoryController> {
@@ -15,164 +47,162 @@ class FreelancersByCategoryView
 
   @override
   Widget build(BuildContext context) {
+    final double s =
+        (MediaQuery.sizeOf(context).width / 390).clamp(0.85, 1.15).toDouble();
+
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
-          ),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Back button
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                  child: IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                    padding: EdgeInsets.zero,
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () => Get.back<void>(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: EdgeInsets.all(12 * s),
+                      child: Icon(Icons.arrow_back_rounded,
+                          size: 22 * s, color: _kInk),
+                    ),
                   ),
-                ),
-                // Headline
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(() => Text(
-                            'uygun ${controller.freelancers.isEmpty ? 0 : controller.freelancers.length * 10} kreatif.',
-                            style: AppTextStyles.displayXL.copyWith(
-                              color: Colors.black87,
-                              fontSize: 38,
-                            ),
-                          )),
-                      const SizedBox(height: 6),
-                      Text(
-                        '5 kişiye ücretsiz teklif gönder.\nFazlası için kredi gerekir.',
-                        style: AppTextStyles.body2.copyWith(
-                          color: Colors.black54,
-                          height: 1.5,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(24 * s, 4 * s, 24 * s, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Obx(() => Text(
+                              'uygun ${controller.freelancers.isEmpty ? 0 : controller.freelancers.length * 10} kreatif.',
+                              style: _serif(
+                                  size: 38 * s,
+                                  weight: FontWeight.w600,
+                                  color: _kInk),
+                            )),
+                        SizedBox(height: 8 * s),
+                        Text(
+                          '5 kişiye ücretsiz teklif gönder. Fazlası için kredi gerekir.',
+                          style: _mono(
+                              size: 9 * s,
+                              color: _kTaupe,
+                              spacing: 0.2,
+                              height: 1.5),
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      // Selection counter chip
-                      Obx(() => Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${controller.selectedIds.length}/5 seçildi',
-                                  style: AppTextStyles.heading3.copyWith(
-                                    color: Colors.black87,
-                                    fontSize: 15,
+                        SizedBox(height: 14 * s),
+                        Obx(() => Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16 * s, vertical: 12 * s),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                border: Border(
+                                    left: BorderSide(color: _kGold, width: 3),
+                                    top: BorderSide(color: _kCardBorder),
+                                    right: BorderSide(color: _kCardBorder),
+                                    bottom: BorderSide(color: _kCardBorder)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${controller.selectedIds.length}/5 seçildi',
+                                    style: _serif(
+                                        size: 17 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kInk),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Öne çıkan işlere bak, doğru ekibi seç',
-                                  style: AppTextStyles.body2.copyWith(
-                                    color: Colors.black45,
-                                    fontSize: 12,
+                                  SizedBox(height: 2 * s),
+                                  Text(
+                                    'Öne çıkan işlere bak, doğru ekibi seç',
+                                    style: _mono(
+                                        size: 8 * s,
+                                        color: _kTaupe,
+                                        spacing: 0.2),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )),
-                      const SizedBox(height: 14),
-                    ],
-                  ),
-                ),
-                // List
-                Expanded(
-                  child: Obx(() {
-                    if (controller.isLoading.value) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFE8B84B),
-                        ),
-                      );
-                    }
-                    if (controller.errorMsg.isNotEmpty) {
-                      return Center(
-                        child: Text(
-                          controller.errorMsg.value,
-                          style: AppTextStyles.body2.copyWith(
-                            color: Colors.black54,
-                          ),
-                        ),
-                      );
-                    }
-                    if (controller.freelancers.isEmpty) {
-                      return _EmptyState(category: controller.category);
-                    }
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                      itemCount: controller.freelancers.length,
-                      separatorBuilder: (context, i) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) {
-                        final f = controller.freelancers[i];
-                        return Obx(() => _FreelancerCard(
-                              freelancer: f,
-                              user: controller.userFor(f),
-                              selected: controller.isSelected(f),
-                              onProfile: () => controller.openDetail(f),
-                              onInvite: () => controller.toggleSelect(f),
-                            ));
-                      },
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-          // Bottom CTA
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 24,
-            child: Obx(() {
-              final count = controller.selectedIds.length;
-              return GestureDetector(
-                onTap: controller.sendOffers,
-                child: AnimatedOpacity(
-                  opacity: count > 0 ? 1.0 : 0.45,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8B84B),
-                      borderRadius: BorderRadius.circular(32),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.18),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
+                                ],
+                              ),
+                            )),
+                        SizedBox(height: 14 * s),
                       ],
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Seçilenlere Teklif Gönder  →',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: _kGold),
+                        );
+                      }
+                      if (controller.errorMsg.isNotEmpty) {
+                        return Center(
+                          child: Text(controller.errorMsg.value,
+                              style: _mono(
+                                  size: 10 * s, color: _kTaupe, spacing: 0.2)),
+                        );
+                      }
+                      if (controller.freelancers.isEmpty) {
+                        return _EmptyState(scale: s, category: controller.category);
+                      }
+                      return ListView.separated(
+                        padding: EdgeInsets.fromLTRB(24 * s, 0, 24 * s, 100 * s),
+                        itemCount: controller.freelancers.length,
+                        separatorBuilder: (_, _) => SizedBox(height: 14 * s),
+                        itemBuilder: (_, i) {
+                          final f = controller.freelancers[i];
+                          return Obx(() => _FreelancerCard(
+                                scale: s,
+                                freelancer: f,
+                                user: controller.userFor(f),
+                                selected: controller.isSelected(f),
+                                onProfile: () => controller.openDetail(f),
+                                onInvite: () => controller.toggleSelect(f),
+                              ));
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              // Alt CTA
+              Positioned(
+                left: 24 * s,
+                right: 24 * s,
+                bottom: 24 * s,
+                child: Obx(() {
+                  final count = controller.selectedIds.length;
+                  final sending = controller.isSending.value;
+                  return GestureDetector(
+                    onTap: sending ? null : controller.sendOffers,
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedOpacity(
+                      opacity: count > 0 ? 1.0 : 0.45,
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        height: 54 * s,
+                        color: _kGold,
+                        alignment: Alignment.center,
+                        child: sending
+                            ? SizedBox(
+                                width: 22 * s,
+                                height: 22 * s,
+                                child: const CircularProgressIndicator(
+                                    strokeWidth: 2.5, color: Colors.white),
+                              )
+                            : Text('SEÇİLENLERE TEKLİF GÖNDER  →',
+                                style: _mono(
+                                    size: 10 * s,
+                                    weight: FontWeight.w700,
+                                    color: Colors.white,
+                                    spacing: 1.2)),
                       ),
                     ),
-                  ),
-                ),
-              );
-            }),
+                  );
+                }),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -180,6 +210,7 @@ class FreelancersByCategoryView
 
 class _FreelancerCard extends StatelessWidget {
   const _FreelancerCard({
+    required this.scale,
     required this.freelancer,
     required this.user,
     required this.selected,
@@ -187,6 +218,7 @@ class _FreelancerCard extends StatelessWidget {
     required this.onInvite,
   });
 
+  final double scale;
   final FreelancerModel freelancer;
   final UserModel user;
   final bool selected;
@@ -196,31 +228,13 @@ class _FreelancerCard extends StatelessWidget {
   int get _jobCount => freelancer.experience * 12 + 15;
   int get _trustScore => (freelancer.rating * 19.5).round();
 
-  List<List<Color>> _thumbColors() {
-    final seed = freelancer.userId.codeUnits.fold(0, (a, b) => a + b);
-    const palettes = [
-      [Color(0xFFBCAA99), Color(0xFF8D7B6A)],
-      [Color(0xFF9E8B7A), Color(0xFF6D5C4A)],
-      [Color(0xFFD4B896), Color(0xFFA08060)],
-      [Color(0xFF7A6A5A), Color(0xFF5A4A3A)],
-      [Color(0xFFC4A882), Color(0xFF8A6A4A)],
-      [Color(0xFF8A7060), Color(0xFF6A5040)],
-    ];
-    return [
-      palettes[seed % palettes.length],
-      palettes[(seed + 2) % palettes.length],
-      palettes[(seed + 4) % palettes.length],
-    ];
-  }
-
-  // Freelancer ve user dokümanlarından en eksiksiz ad+soyadı oluşturur
   String _buildDisplayName(FreelancerModel f, UserModel u) {
     final name = f.name.isNotEmpty ? f.name : u.name;
-    final surname = (f.surname?.isNotEmpty == true) ? f.surname! : (u.surname ?? '');
+    final surname =
+        (f.surname?.isNotEmpty == true) ? f.surname! : (u.surname ?? '');
     return surname.isNotEmpty ? '$name $surname' : name;
   }
 
-  // YouTube video ID'sini URL'den çıkar
   String? _youtubeId(String url) {
     final uri = Uri.tryParse(url);
     if (uri == null) return null;
@@ -242,85 +256,76 @@ class _FreelancerCard extends StatelessWidget {
 
   void _openVideo(String url) {
     Navigator.of(Get.context!).push(
-      MaterialPageRoute(
-        builder: (_) => VideoViewerPage(videoUrl: url),
-      ),
+      MaterialPageRoute(builder: (_) => VideoViewerPage(videoUrl: url)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final thumbColors = _thumbColors();
-
+    final s = scale;
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      padding: EdgeInsets.all(16 * s),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
+              SizedBox(
+                width: 64 * s,
+                height: 64 * s,
                 child: freelancer.profileImageUrl != null
                     ? CachedNetworkImage(
                         imageUrl: freelancer.profileImageUrl!,
-                        width: 72,
-                        height: 72,
+                        width: 64 * s,
+                        height: 64 * s,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => _AvatarPlaceholder(size: 72),
-                        errorWidget: (_, __, ___) => _AvatarPlaceholder(size: 72),
+                        placeholder: (_, _) => _AvatarPlaceholder(size: 64 * s),
+                        errorWidget: (_, _, _) =>
+                            _AvatarPlaceholder(size: 64 * s),
                       )
-                    : _AvatarPlaceholder(size: 72),
+                    : _AvatarPlaceholder(size: 64 * s),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12 * s),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _buildDisplayName(freelancer, user),
-                      style: AppTextStyles.heading3.copyWith(
-                        color: Colors.black87,
-                        fontSize: 16,
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _serif(
+                          size: 18 * s,
+                          weight: FontWeight.w600,
+                          color: _kInk),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 3 * s),
                     Text(
                       'Direktör · ${freelancer.categories.join(', ')}',
-                      style: AppTextStyles.body2.copyWith(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 3 * s),
                     Text(
                       '${freelancer.location}, Türkiye · ${freelancer.experience} Yıl',
-                      style: AppTextStyles.caption.copyWith(
-                        color: Colors.black45,
-                        fontSize: 12,
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _mono(size: 8 * s, color: _kMuted, spacing: 0.2),
                     ),
-                    const SizedBox(height: 8),
-                    // Stat chips
+                    SizedBox(height: 8 * s),
                     Wrap(
-                      spacing: 6,
+                      spacing: 6 * s,
+                      runSpacing: 6 * s,
                       children: [
-                        _Chip(label: freelancer.rating.toStringAsFixed(1)),
-                        _Chip(label: '$_jobCount iş'),
-                        _Chip(label: 'Trust $_trustScore'),
+                        _Chip(scale: s, label: freelancer.rating.toStringAsFixed(1)),
+                        _Chip(scale: s, label: '$_jobCount iş'),
+                        _Chip(scale: s, label: 'Trust $_trustScore'),
                       ],
                     ),
                   ],
@@ -328,27 +333,25 @@ class _FreelancerCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          // Portfolio thumbnails
+          SizedBox(height: 12 * s),
           Row(
             children: List.generate(3, (i) {
               final videoUrl = i < freelancer.projects.length
                   ? freelancer.projects[i].videoUrl
                   : null;
-              final thumbnail = videoUrl != null ? _youtubeThumbnail(videoUrl) : null;
-
+              final thumbnail =
+                  videoUrl != null ? _youtubeThumbnail(videoUrl) : null;
               return Expanded(
                 child: GestureDetector(
                   onTap: videoUrl != null ? () => _openVideo(videoUrl) : null,
                   child: Container(
-                    margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
-                    height: 72,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                    margin: EdgeInsets.only(right: i < 2 ? 6 * s : 0),
+                    height: 68 * s,
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: thumbColors[i],
+                        colors: [_kThumbTop, _kThumbBot],
                       ),
                     ),
                     clipBehavior: Clip.hardEdge,
@@ -359,27 +362,24 @@ class _FreelancerCard extends StatelessWidget {
                           CachedNetworkImage(
                             imageUrl: thumbnail,
                             fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) => const SizedBox.shrink(),
                           )
                         else if (videoUrl != null)
                           Container(
                             color: Colors.black.withValues(alpha: 0.35),
                             alignment: Alignment.center,
-                            child: const Icon(Icons.videocam_outlined,
-                                color: Colors.white70, size: 24),
+                            child: Icon(Icons.videocam_outlined,
+                                color: Colors.white70, size: 22 * s),
                           ),
                         if (videoUrl != null)
                           Positioned(
-                            bottom: 4,
-                            right: 4,
+                            bottom: 4 * s,
+                            right: 4 * s,
                             child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Icon(Icons.play_arrow,
-                                  color: Colors.white, size: 14),
+                              padding: EdgeInsets.all(3 * s),
+                              color: Colors.black54,
+                              child: Icon(Icons.play_arrow,
+                                  color: Colors.white, size: 13 * s),
                             ),
                           ),
                       ],
@@ -389,51 +389,42 @@ class _FreelancerCard extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: 12),
-          // Action buttons
+          SizedBox(height: 12 * s),
           Row(
             children: [
               Expanded(
                 child: GestureDetector(
                   onTap: onProfile,
+                  behavior: HitTestBehavior.opaque,
                   child: Container(
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.black12),
-                    ),
+                    height: 44 * s,
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.black12)),
                     alignment: Alignment.center,
-                    child: Text(
-                      'Profili Gör',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.black87,
-                        fontSize: 14,
-                      ),
-                    ),
+                    child: Text('PROFİLİ GÖR',
+                        style: _mono(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: _kInk,
+                            spacing: 1)),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10 * s),
               Expanded(
                 child: GestureDetector(
                   onTap: onInvite,
+                  behavior: HitTestBehavior.opaque,
                   child: Container(
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? const Color(0xFFE8B84B)
-                          : Colors.black87,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    height: 44 * s,
+                    color: selected ? _kGold : _kInk,
                     alignment: Alignment.center,
-                    child: Text(
-                      selected ? 'Seçildi ✓' : 'Davet Et',
-                      style: AppTextStyles.button.copyWith(
-                        color: selected ? Colors.black : Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
+                    child: Text(selected ? 'SEÇİLDİ ✓' : 'DAVET ET',
+                        style: _mono(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                            spacing: 1)),
                   ),
                 ),
               ),
@@ -454,52 +445,50 @@ class _AvatarPlaceholder extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      color: const Color(0xFFE8D5C0),
-      child: Icon(Icons.person, size: size * 0.56, color: const Color(0xFF8D6E63)),
+      color: const Color(0xFFEADCBB),
+      child: Icon(Icons.person, size: size * 0.56, color: _kTaupe),
     );
   }
 }
 
 class _Chip extends StatelessWidget {
-  const _Chip({required this.label});
+  const _Chip({required this.scale, required this.label});
+  final double scale;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0E8DC),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 9 * s, vertical: 4 * s),
+      color: _kGold.withValues(alpha: 0.12),
       child: Text(
         label,
-        style: AppTextStyles.caption.copyWith(
-          color: Colors.black87,
-          fontWeight: FontWeight.w600,
-          fontSize: 11,
-        ),
+        style: _mono(
+            size: 8 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.3),
       ),
     );
   }
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.category});
+  const _EmptyState({required this.scale, required this.category});
+  final double scale;
   final String category;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.search_off_rounded, size: 56, color: Colors.black26),
-          const SizedBox(height: 16),
+          Icon(Icons.search_off_rounded, size: 52 * s, color: _kMuted),
+          SizedBox(height: 16 * s),
           Text(
             '"$category" alanında\nhenüz kreatif yok',
-            style: AppTextStyles.heading3.copyWith(color: Colors.black54),
             textAlign: TextAlign.center,
+            style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
           ),
         ],
       ),

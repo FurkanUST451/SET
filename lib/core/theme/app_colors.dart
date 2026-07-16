@@ -15,7 +15,7 @@ class AppColors {
   static const Color surfaceDarkElevated = Color(0xFF1B232C);
 
   // Light theme — soft cool greys
-  static const Color backgroundLight = Color(0xFFF5F7FA);
+  static const Color backgroundLight = Color(0xFFFEFDFB);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceLightElevated = Color(0xFFECEFF3);
 

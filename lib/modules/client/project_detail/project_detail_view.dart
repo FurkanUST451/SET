@@ -3,7 +3,63 @@ import 'package:get/get.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../home/tabs/client_projects_tab.dart';
+
+// ---------------------------------------------------------------------------
+// Dummy project data (used only for the legacy project detail demo)
+// ---------------------------------------------------------------------------
+
+enum _ProjectStatus { inProgress }
+
+class _ProjectData {
+  const _ProjectData({
+    required this.title,
+    required this.subtitle,
+    required this.status,
+    required this.progress,
+    required this.workers,
+    required this.budget,
+    required this.daysLeft,
+    required this.gradientColors,
+    required this.stage,
+    required this.overview,
+    required this.deadline,
+    required this.startDate,
+    required this.deliverables,
+  });
+
+  final String title;
+  final String subtitle;
+  final _ProjectStatus status;
+  final double progress;
+  final int workers;
+  final String budget;
+  final int daysLeft;
+  final List<Color> gradientColors;
+  final int stage;
+  final String overview;
+  final String deadline;
+  final String startDate;
+  final String deliverables;
+}
+
+const _allProjects = [
+  _ProjectData(
+    title: 'Cafe Tanıtım Filmi',
+    subtitle: 'SET Halletsin · Ekip kuruluyor',
+    status: _ProjectStatus.inProgress,
+    progress: 0.42,
+    workers: 3,
+    budget: r'₺42.000',
+    daysLeft: 7,
+    gradientColors: [Color(0xFF2A1A08), Color(0xFF1A0D04)],
+    stage: 0,
+    overview:
+        'Butik kafe için ürün ve atmosfer odaklı tanıtım filmi. SET ekibi çekim ve kurgu sürecini yönetiyor.',
+    deadline: 'Haz 14',
+    startDate: 'May 28',
+    deliverables: '3 versiyon',
+  ),
+];
 
 // ---------------------------------------------------------------------------
 // Static data
@@ -43,11 +99,11 @@ class ProjectDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = Get.arguments as Map<String, dynamic>?;
     final index = (args?['index'] as int?) ?? 0;
-    final project = allProjects[index.clamp(0, allProjects.length - 1)];
+    final project = _allProjects[index.clamp(0, _allProjects.length - 1)];
     const currentStep = 2;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EBD8),
+      backgroundColor: const Color(0xFFFEFDFB),
       body: Stack(
         children: [
           // ── Hero background image ──────────────────────────────────────────
@@ -57,7 +113,7 @@ class ProjectDetailView extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+                Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
                 DecoratedBox(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(

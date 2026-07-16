@@ -1,10 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:rive/rive.dart' hide RadialGradient, LinearGradient;
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../../routes/app_routes.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) => GoogleFonts.cormorantGaramond(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+}) => GoogleFonts.spaceMono(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
 
 class ClientHomeTab extends StatefulWidget {
   const ClientHomeTab({super.key});
@@ -36,133 +66,101 @@ class _ClientHomeTabState extends State<ClientHomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Golden radial glow — centered on button area
-        Positioned.fill(
-          child: Center(
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Color(0x55D4A843),
-                    Color(0x22A07828),
-                    Colors.transparent,
-                  ],
+    final width = MediaQuery.sizeOf(context).width;
+    final double s = (width / 390).clamp(0.85, 1.15).toDouble();
+
+    return SizedBox.expand(
+      child: ColoredBox(
+        color: _kCream,
+        child: MediaQuery.withNoTextScaling(
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 20 * s),
+                // Marka eyebrow
+                Text(
+                  'SET · ÜRETİM',
+                  textAlign: TextAlign.center,
+                  style: _mono(size: 8 * s, color: _kMuted, spacing: 2),
                 ),
-              ),
+                const Spacer(),
+                // Başlık
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 32 * s),
+                  child: Text(
+                    'Projeni başlat,\nduygusallıkla,\nyaratıcılıkla',
+                    textAlign: TextAlign.center,
+                    style: _serif(
+                      size: 40 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                      height: 1.15,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 52 * s),
+                // Kare buton + Rive pulse
+                GestureDetector(
+                  onTap: _onButtonTap,
+                  child: SizedBox(
+                    width: 190 * s,
+                    height: 190 * s,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        RiveAnimation.asset(
+                          'assets/animations/pulse.riv',
+                          onInit: _onRiveInit,
+                          fit: BoxFit.contain,
+                        ),
+                        Container(
+                          width: 128 * s,
+                          height: 128 * s,
+                          color: _kGold,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.rocket_launch_outlined,
+                                color: Colors.white,
+                                size: 26 * s,
+                              ),
+                              SizedBox(height: 8 * s),
+                              Text(
+                                'PROJE\nBAŞLAT',
+                                textAlign: TextAlign.center,
+                                style: _mono(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 44 * s),
+                // Açıklama
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 48 * s),
+                  child: Text(
+                    'Danışmanlarınla iletişim kur,\nhız, güven ve yaratıcılıkla\nprojeni hayata geçir.',
+                    textAlign: TextAlign.center,
+                    style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.3),
+                  ),
+                ),
+                const Spacer(),
+              ],
             ),
           ),
         ),
-        SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              // Brand eyebrow
-              Text(
-                'SET',
-                style: AppTextStyles.eyebrow.copyWith(
-                  color: AppColors.accentGold,
-                  fontSize: 13,
-                  letterSpacing: 3,
-                ),
-              ),
-              const Spacer(),
-              // Bold title
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  'Projeni başlat,\nduygusallıkla,\nyaratıcılıkla',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.displayXL.copyWith(
-                    fontSize: 36,
-                    height: 1.18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 52),
-              // Circular button + Rive pulse
-              GestureDetector(
-                onTap: _onButtonTap,
-                child: SizedBox(
-                  width: 210,
-                  height: 210,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Rive pulse animation — fills the container
-                      RiveAnimation.asset(
-                        'assets/animations/pulse.riv',
-                        onInit: _onRiveInit,
-                        fit: BoxFit.contain,
-                      ),
-                      // Gold circle
-                      Container(
-                        width: 136,
-                        height: 136,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFD4A843),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFD4A843)
-                                  .withValues(alpha: 0.45),
-                              blurRadius: 40,
-                              offset: const Offset(0, 14),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.rocket_launch_outlined,
-                              color: Color(0xFF1A1200),
-                              size: 28,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Proje\nBaşlat',
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.button.copyWith(
-                                color: const Color(0xFF1A1200),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 44),
-              // Light description
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
-                child: Text(
-                  'Danışmanlarınla iletişim kur,\nhız, güven ve yaratıcılıkla\nprojeni hayata geçir.',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.body2.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 15,
-                    height: 1.65,
-                  ),
-                ),
-              ),
-              const Spacer(),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

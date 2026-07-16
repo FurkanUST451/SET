@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../core/theme/app_text_styles.dart';
+// ─── Palet (uygulamanın geri kalanıyla aynı) ──────────────────────────────────
+const _kNavBg = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
 
 class SetNavItem {
   const SetNavItem({required this.icon, required this.label});
@@ -23,45 +28,30 @@ class SetBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Bar background
-            Container(
-              height: 68,
-              decoration: BoxDecoration(
-                color: const Color(0xFF141210),
-                borderRadius: BorderRadius.circular(34),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+    return Container(
+      decoration: const BoxDecoration(
+        color: _kNavBg,
+        border: Border(top: BorderSide(color: _kDivider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            children: List.generate(items.length, (i) {
+              final selected = i == currentIndex;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: _NavTile(
+                    item: items[i],
+                    selected: selected,
                   ),
-                ],
-              ),
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  final selected = i == currentIndex;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => onTap(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: _NavTile(
-                        item: items[i],
-                        selected: selected,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ],
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -76,68 +66,26 @@ class _NavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (selected) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Glowing circular bubble
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(
-                colors: [Color(0xFF6B4E1A), Color(0xFF3A2A0A)],
-                radius: 0.85,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFD4A843).withValues(alpha: 0.55),
-                  blurRadius: 22,
-                  spreadRadius: 2,
-                  offset: const Offset(0, -4),
-                ),
-                BoxShadow(
-                  color: const Color(0xFFD4A843).withValues(alpha: 0.25),
-                  blurRadius: 40,
-                  spreadRadius: 6,
-                  offset: const Offset(0, -8),
-                ),
-              ],
-            ),
-            child: Icon(
-              item.icon,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            item.label,
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      );
-    }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          item.icon,
-          size: 22,
-          color: Colors.white.withValues(alpha: 0.45),
-        ),
-        const SizedBox(height: 3),
         Text(
-          item.label,
-          style: AppTextStyles.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.45),
-            fontSize: 11,
+          item.label.toUpperCase(),
+          style: GoogleFonts.spaceMono(
+            fontSize: 10.5,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            color: selected ? _kGold : _kMuted,
+            letterSpacing: 0.6,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: selected ? 18 : 0,
+          height: 2,
+          decoration: BoxDecoration(
+            color: _kGold,
+            borderRadius: BorderRadius.circular(999),
           ),
         ),
       ],

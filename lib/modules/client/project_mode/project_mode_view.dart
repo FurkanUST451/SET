@@ -1,9 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/constants/app_assets.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF23212B);
+const _kTextInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kCardBorder = Color(0x14000000);
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        height: height);
+
+Widget _wordmark(double s) => RichText(
+      text: TextSpan(children: [
+        TextSpan(
+          text: 'SE',
+          style: GoogleFonts.spaceGrotesk(
+              fontSize: 18 * s,
+              fontWeight: FontWeight.w700,
+              color: _kTextInk,
+              letterSpacing: 2.5),
+        ),
+        TextSpan(
+          text: 'T',
+          style: GoogleFonts.spaceGrotesk(
+              fontSize: 18 * s,
+              fontWeight: FontWeight.w800,
+              color: _kGold,
+              letterSpacing: 2.5),
+        ),
+      ]),
+    );
 
 class ProjectModeView extends StatefulWidget {
   const ProjectModeView({super.key});
@@ -13,211 +65,174 @@ class ProjectModeView extends StatefulWidget {
 }
 
 class _ProjectModeViewState extends State<ProjectModeView> {
-  // null = seçilmedi, 'freelancer' veya 'set'
-  String? _selected;
+  String? _selected; // 'freelancer' | 'set'
 
   void _proceed() {
     if (_selected == null) return;
     final args = Get.arguments as Map<String, dynamic>?;
     final category = (args?['category'] as String?) ?? '';
+    final briefId = (args?['briefId'] as String?) ?? '';
     if (_selected == 'set') {
+      // Atanmış operasyon ekibiyle doğrudan sohbet ekranına git.
       Get.toNamed(AppRoutes.chatDetail,
-          arguments: {'name': 'SET Destek', 'mode': 'set'});
+          arguments: {'name': 'SET · Operasyon Ekibi', 'mode': 'set'});
     } else {
       Get.toNamed(AppRoutes.freelancersByCategory,
-          arguments: {'category': category});
+          arguments: {'category': category, 'briefId': briefId});
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final double s =
+        (MediaQuery.sizeOf(context).width / 390).clamp(0.85, 1.15).toDouble();
+
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Top bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.black87),
-                        onPressed: () => Get.back(),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'SET',
-                        style: AppTextStyles.wordmark.copyWith(
-                          color: Colors.black87,
-                          fontSize: 22,
-                          letterSpacing: 2,
+      backgroundColor: _kCream,
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 48 * s,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () => Get.back<void>(),
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: EdgeInsets.all(12 * s),
+                          child: Icon(Icons.arrow_back_rounded,
+                              size: 22 * s, color: _kTextInk),
                         ),
                       ),
-                      const Spacer(),
-                      const SizedBox(width: 48),
-                    ],
-                  ),
+                    ),
+                    _wordmark(s),
+                  ],
                 ),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Projene en uygun üretim sürecini seç.',
-                          style: AppTextStyles.body2
-                              .copyWith(color: Colors.black45),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Nasıl\nilerleyelim?',
-                          style: AppTextStyles.displayXL.copyWith(
-                            color: Colors.black87,
-                            fontSize: 40,
-                            height: 1.1,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Two cards
-                        IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Left — Freelancer Bul
-                              Expanded(
-                                child: _ModeCard(
-                                  selected: _selected == 'freelancer',
-                                  onTap: () =>
-                                      setState(() => _selected = 'freelancer'),
-                                  dark: false,
-                                  child: _FreelancerCard(),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Right — SET Halletsin
-                              Expanded(
-                                child: _ModeCard(
-                                  selected: _selected == 'set',
-                                  onTap: () =>
-                                      setState(() => _selected = 'set'),
-                                  dark: true,
-                                  child: _SetCard(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        // Devam Et button
-                        GestureDetector(
-                          onTap: _proceed,
-                          child: AnimatedOpacity(
-                            opacity: _selected != null ? 1.0 : 0.45,
-                            duration: const Duration(milliseconds: 200),
-                            child: Container(
-                              width: double.infinity,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE8B84B),
-                                borderRadius: BorderRadius.circular(32),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Devam Et  →',
-                                style: AppTextStyles.button.copyWith(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(24 * s, 12 * s, 24 * s, 32 * s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Projene en uygun üretim sürecini seç.',
+                          style:
+                              _mono(size: 9 * s, color: _kTaupe, spacing: 0.3)),
+                      SizedBox(height: 8 * s),
+                      Text('Nasıl\nilerleyelim?',
+                          style: _serif(
+                              size: 44 * s,
+                              weight: FontWeight.w600,
+                              color: _kTextInk,
+                              height: 1.0)),
+                      SizedBox(height: 24 * s),
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: _ModeCard(
+                                scale: s,
+                                selected: _selected == 'freelancer',
+                                dark: false,
+                                onTap: () =>
+                                    setState(() => _selected = 'freelancer'),
+                                child: _FreelancerCard(scale: s),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.lock_outline,
-                                size: 12, color: Colors.black38),
-                            const SizedBox(width: 5),
-                            Text(
-                              'Seçimin daha sonra değiştirilebilir.',
-                              style: AppTextStyles.caption.copyWith(
-                                color: Colors.black38,
-                                fontSize: 11,
+                            SizedBox(width: 12 * s),
+                            Expanded(
+                              child: _ModeCard(
+                                scale: s,
+                                selected: _selected == 'set',
+                                dark: true,
+                                onTap: () => setState(() => _selected = 'set'),
+                                child: _SetCard(scale: s),
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 28 * s),
+                      GestureDetector(
+                        onTap: _proceed,
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedOpacity(
+                          opacity: _selected != null ? 1.0 : 0.45,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            width: double.infinity,
+                            height: 54 * s,
+                            color: _kGold,
+                            alignment: Alignment.center,
+                            child: Text('DEVAM ET  →',
+                                style: _mono(
+                                    size: 11 * s,
+                                    weight: FontWeight.w700,
+                                    color: Colors.white,
+                                    spacing: 1.5)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12 * s),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
+                          SizedBox(width: 5 * s),
+                          Text('Seçimin daha sonra değiştirilebilir.',
+                              style: _mono(
+                                  size: 8 * s, color: _kMuted, spacing: 0.3)),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// ─── Mode Card wrapper ────────────────────────────────────────────────────────
-
+// ─── Kart sarmalayıcı ─────────────────────────────────────────────────────────
 class _ModeCard extends StatelessWidget {
   const _ModeCard({
+    required this.scale,
     required this.selected,
-    required this.onTap,
     required this.dark,
+    required this.onTap,
     required this.child,
   });
 
+  final double scale;
   final bool selected;
-  final VoidCallback onTap;
   final bool dark;
+  final VoidCallback onTap;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: dark ? const Color(0xFF1A1200) : Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(20),
+          color: dark ? _kInk : Colors.white,
           border: Border.all(
             color: selected
-                ? const Color(0xFFE8B84B)
-                : Colors.transparent,
-            width: 2,
+                ? _kGold
+                : (dark ? Colors.transparent : _kCardBorder),
+            width: selected ? 2 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: dark ? 0.3 : 0.1),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: child,
       ),
@@ -225,108 +240,85 @@ class _ModeCard extends StatelessWidget {
   }
 }
 
-// ─── Left card content ────────────────────────────────────────────────────────
-
+// ─── Sol kart ─────────────────────────────────────────────────────────────────
 class _FreelancerCard extends StatelessWidget {
+  const _FreelancerCard({required this.scale});
+  final double scale;
+
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     const freelancers = [
       ('Video Editor', '4.9'),
       ('Cinematographer', '4.8'),
       ('Colorist', '4.9'),
     ];
-
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38 * s,
+            height: 38 * s,
             decoration: BoxDecoration(
-              color: const Color(0xFFF0E8DC),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.search_rounded,
-                color: Color(0xFF8D6E63), size: 22),
+                border: Border.all(color: Colors.black.withValues(alpha: 0.12))),
+            child: Icon(Icons.search_rounded, color: _kTaupe, size: 20 * s),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Freelancer\nBul',
-            style: AppTextStyles.heading2.copyWith(
-              color: Colors.black87,
-              fontSize: 18,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Kendi freelancer\'ını bul, projeni sen yönet.',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.black45,
-              fontSize: 11,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Mini freelancer list
+          SizedBox(height: 12 * s),
+          Text('Freelancer\nBul',
+              style: _serif(
+                  size: 22 * s,
+                  weight: FontWeight.w600,
+                  color: _kTextInk,
+                  height: 1.05)),
+          SizedBox(height: 6 * s),
+          Text("Kendi freelancer'ını bul, projeni sen yönet.",
+              style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.2)),
+          SizedBox(height: 14 * s),
           ...freelancers.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: EdgeInsets.only(bottom: 6 * s),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5EBD8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 8 * s, vertical: 7 * s),
+                  color: const Color(0xFFF3EEE2),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_outline,
-                          size: 14, color: Color(0xFF8D6E63)),
-                      const SizedBox(width: 5),
+                      Icon(Icons.person_outline, size: 13 * s, color: _kTaupe),
+                      SizedBox(width: 5 * s),
                       Expanded(
-                        child: Text(
-                          f.$1,
-                          style: AppTextStyles.caption.copyWith(
-                              color: Colors.black87,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: Text(f.$1,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _mono(
+                                size: 8 * s,
+                                weight: FontWeight.w700,
+                                color: _kTextInk,
+                                spacing: 0.2)),
                       ),
-                      const Icon(Icons.star_rounded,
-                          size: 10, color: Color(0xFFE8B84B)),
-                      Text(
-                        ' ${f.$2}',
-                        style: AppTextStyles.caption
-                            .copyWith(fontSize: 10, color: Colors.black54),
-                      ),
+                      Icon(Icons.star_rounded, size: 10 * s, color: _kGold),
+                      Text(' ${f.$2}',
+                          style: _mono(
+                              size: 8 * s, color: _kTaupe, spacing: 0.2)),
                     ],
                   ),
                 ),
               )),
-          const SizedBox(height: 12),
-          // Bullets
+          SizedBox(height: 12 * s),
           ...[
             'Binlerce freelancer profili',
             'Kendini seç, kendin yönet',
             'Esnek ve hızlı başlangıç',
           ].map((b) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: EdgeInsets.only(bottom: 4 * s),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('• ',
-                        style: TextStyle(
-                            color: Color(0xFF8D6E63), fontSize: 11)),
+                    Text('• ', style: _mono(size: 9 * s, color: _kGold)),
                     Expanded(
-                      child: Text(
-                        b,
-                        style: AppTextStyles.caption.copyWith(
-                            color: Colors.black54, fontSize: 10),
-                      ),
-                    ),
+                        child: Text(b,
+                            style: _mono(
+                                size: 8 * s, color: _kTaupe, spacing: 0.2))),
                   ],
                 ),
               )),
@@ -336,97 +328,85 @@ class _FreelancerCard extends StatelessWidget {
   }
 }
 
-// ─── Right card content ───────────────────────────────────────────────────────
-
+// ─── Sağ kart (koyu) ──────────────────────────────────────────────────────────
 class _SetCard extends StatelessWidget {
+  const _SetCard({required this.scale});
+  final double scale;
+
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     final checklist = [
       ('Ekibi Oluşturuyoruz', true),
       ('Planlıyoruz', true),
       ('Üretiyoruz', true),
       ('Teslim Ediyoruz', false),
     ];
-
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SET logo chip
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'SET',
-              style: AppTextStyles.button.copyWith(
-                color: Colors.white,
-                fontSize: 13,
-                letterSpacing: 1,
-              ),
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 10 * s, vertical: 5 * s),
+            color: Colors.black,
+            child: Text('SET',
+                style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12 * s,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 1.5)),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'SET\nHalletsin',
-            style: AppTextStyles.heading2.copyWith(
-              color: Colors.white,
-              fontSize: 18,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Tüm prodüksiyon sürecini biz yönetelim, seninle sonuca odaklanalım.',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white54,
-              fontSize: 11,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Checklist
+          SizedBox(height: 12 * s),
+          Text('SET\nHalletsin',
+              style: _serif(
+                  size: 22 * s,
+                  weight: FontWeight.w600,
+                  color: Colors.white,
+                  height: 1.05)),
+          SizedBox(height: 6 * s),
+          Text('Tüm prodüksiyon sürecini biz yönetelim, seninle sonuca odaklanalım.',
+              style: _mono(
+                  size: 8 * s,
+                  color: Colors.white.withValues(alpha: 0.55),
+                  spacing: 0.2)),
+          SizedBox(height: 14 * s),
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.07),
-              borderRadius: BorderRadius.circular(10),
-            ),
+            padding: EdgeInsets.all(10 * s),
+            color: Colors.white.withValues(alpha: 0.06),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'SÜREÇ YÖNETİMİ',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.white38,
-                    fontSize: 9,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 6),
+                Text('SÜREÇ YÖNETİMİ',
+                    style: _mono(
+                        size: 7 * s,
+                        color: Colors.white.withValues(alpha: 0.4),
+                        spacing: 1.2)),
+                SizedBox(height: 8 * s),
                 ...checklist.map((item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
+                      padding: EdgeInsets.only(bottom: 6 * s),
                       child: Row(
                         children: [
                           Icon(
                             item.$2
                                 ? Icons.check_circle_rounded
                                 : Icons.radio_button_unchecked_rounded,
-                            size: 13,
+                            size: 13 * s,
                             color: item.$2
-                                ? const Color(0xFFE8B84B)
-                                : Colors.white24,
+                                ? _kGold
+                                : Colors.white.withValues(alpha: 0.25),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            item.$1,
-                            style: AppTextStyles.caption.copyWith(
-                              color: item.$2 ? Colors.white70 : Colors.white30,
-                              fontSize: 10,
-                            ),
+                          SizedBox(width: 6 * s),
+                          Expanded(
+                            child: Text(item.$1,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _mono(
+                                    size: 8 * s,
+                                    color: item.$2
+                                        ? Colors.white.withValues(alpha: 0.75)
+                                        : Colors.white.withValues(alpha: 0.3),
+                                    spacing: 0.2)),
                           ),
                         ],
                       ),
@@ -434,27 +414,23 @@ class _SetCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          // Bullets
+          SizedBox(height: 12 * s),
           ...[
             'Uzman ekibi biz kurarız',
             'Tüm süreci biz yönetiriz',
             'Zaman kazandırır, stressiz ilerler',
           ].map((b) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: EdgeInsets.only(bottom: 4 * s),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('• ',
-                        style: TextStyle(
-                            color: Color(0xFFE8B84B), fontSize: 11)),
+                    Text('• ', style: _mono(size: 9 * s, color: _kGold)),
                     Expanded(
-                      child: Text(
-                        b,
-                        style: AppTextStyles.caption.copyWith(
-                            color: Colors.white38, fontSize: 10),
-                      ),
-                    ),
+                        child: Text(b,
+                            style: _mono(
+                                size: 8 * s,
+                                color: Colors.white.withValues(alpha: 0.4),
+                                spacing: 0.2))),
                   ],
                 ),
               )),

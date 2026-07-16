@@ -16,7 +16,7 @@ class RoleSelectionView extends GetView<RoleSelectionController> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover),
+          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),

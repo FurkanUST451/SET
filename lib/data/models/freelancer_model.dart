@@ -4,12 +4,14 @@ class PortfolioProject {
     required this.jobType,
     required this.description,
     this.videoUrl,
+    this.thumbnailUrl,
   });
 
   final String title;
   final String jobType;
   final String description;
   final String? videoUrl;
+  final String? thumbnailUrl;
 
   factory PortfolioProject.fromJson(Map<String, dynamic> json) =>
       PortfolioProject(
@@ -17,6 +19,7 @@ class PortfolioProject {
         jobType: json['jobType'] as String? ?? '',
         description: json['description'] as String? ?? '',
         videoUrl: json['videoUrl'] as String?,
+        thumbnailUrl: json['thumbnailUrl'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -24,6 +27,7 @@ class PortfolioProject {
         'jobType': jobType,
         'description': description,
         'videoUrl': videoUrl,
+        'thumbnailUrl': thumbnailUrl,
       };
 }
 

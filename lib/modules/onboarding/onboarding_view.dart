@@ -29,8 +29,7 @@ class OnboardingView extends GetView<OnboardingController> {
           return Stack(
             clipBehavior: Clip.hardEdge,
             children: [
-              // Her sayfa baştan build edilir; Transform.translate ile konumlandırılır.
-              // Lazy loading yok — flash yok.
+              // Sadece aktif sayfa ve komşusu render edilir; bellek baskısını azaltır.
               for (int i = 0; i < pages.length; i++)
                 AnimatedBuilder(
                   animation: controller.pageController,
@@ -38,6 +37,7 @@ class OnboardingView extends GetView<OnboardingController> {
                     final p = controller.pageController.hasClients
                         ? (controller.pageController.page ?? 0.0)
                         : 0.0;
+                    if ((i - p).abs() > 1.5) return const SizedBox.shrink();
                     return Transform.translate(
                       offset: Offset((i - p) * w, 0),
                       child: child,
@@ -53,10 +53,14 @@ class OnboardingView extends GetView<OnboardingController> {
                           Image.asset(
                             pages[i].backgroundImage!,
                             fit: BoxFit.cover,
+                            cacheWidth: w.toInt().clamp(1, 1080),
                           ),
                         if (pages[i].mascotImage != null)
                           Center(
-                            child: Image.asset(pages[i].mascotImage!),
+                            child: Image.asset(
+                              pages[i].mascotImage!,
+                              cacheWidth: (w * 0.8).toInt().clamp(1, 800),
+                            ),
                           ),
                       ],
                     ),

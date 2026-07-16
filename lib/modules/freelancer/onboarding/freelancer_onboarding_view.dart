@@ -1,83 +1,256 @@
-  import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/freelancer_model.dart';
-import '../../../widgets/set_button.dart';
-import '../../../widgets/set_text_field.dart';
 import 'freelancer_onboarding_controller.dart';
+
+// ─── Palet ────────────────────────────────────────────────────────────────────
+const _kCream = Color(0xFFFEFDFB);
+const _kGold = Color(0xFFD9A84E);
+const _kInk = Color(0xFF35333F);
+const _kTaupe = Color(0xFF9B8E7B);
+const _kMuted = Color(0xFFB6AD9A);
+const _kDivider = Color(0x12000000);
+const _kCardBorder = Color(0x14000000);
+
+double _scaleOf(BuildContext c) =>
+    (MediaQuery.sizeOf(c).width / 390).clamp(0.85, 1.15).toDouble();
+
+TextStyle _serif({
+  required double size,
+  FontWeight weight = FontWeight.w500,
+  required Color color,
+  double height = 1.05,
+}) =>
+    GoogleFonts.cormorantGaramond(
+        fontSize: size, fontWeight: weight, color: color, height: height);
+
+TextStyle _mono({
+  required double size,
+  FontWeight weight = FontWeight.w400,
+  required Color color,
+  double spacing = 0.5,
+  double height = 1.4,
+}) =>
+    GoogleFonts.spaceMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        height: height);
+
+Widget _bottomSheetHandle(double s) => Container(
+      margin: EdgeInsets.only(top: 10 * s, bottom: 4 * s),
+      width: 40 * s,
+      height: 4 * s,
+      decoration: BoxDecoration(
+        color: _kCardBorder,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
 
 class FreelancerOnboardingView extends GetView<FreelancerOnboardingController> {
   const FreelancerOnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final s = _scaleOf(context);
     return Scaffold(
+      backgroundColor: _kCream,
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: const Text('Freelancer Profili')),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Obx(() => _StepIndicator(
-                    total: FreelancerOnboardingController.totalSteps,
-                    current: controller.currentStep.value,
-                  )),
-            ),
-            Expanded(
-              child: PageView(
-                controller: controller.pageController,
-                onPageChanged: controller.onPageChanged,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _PersonalInfoStep(),
-                  _CategoryStep(),
-                  _BioStep(controller: controller),
-                  _PortfolioStep(controller: controller),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.lg,
-              ),
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return Row(
+      body: MediaQuery.withNoTextScaling(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(12 * s, 8 * s, 20 * s, 0),
+                child: Row(
                   children: [
-                    if (controller.currentStep.value > 0) ...[
-                      Expanded(
-                        child: SetButton(
-                          text: 'Geri',
-                          variant: SetButtonVariant.outline,
-                          onPressed: controller.previous,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                    ],
-                    Expanded(
-                      child: SetButton(
-                        text: controller.isLastStep ? 'Bitir' : 'Devam Et',
-                        onPressed: controller.next,
+                    GestureDetector(
+                      onTap: () => Get.back<void>(),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(Icons.arrow_back_rounded, size: 22 * s, color: _kInk),
                       ),
                     ),
+                    SizedBox(width: 8 * s),
+                    Text(
+                      'Freelancer Profili',
+                      style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+                    ),
                   ],
-                );
-              }),
-            ),
-          ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(24 * s, 16 * s, 24 * s, 0),
+                child: Obx(() => _StepIndicator(
+                      total: FreelancerOnboardingController.totalSteps,
+                      current: controller.currentStep.value,
+                      scale: s,
+                    )),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: controller.pageController,
+                  onPageChanged: controller.onPageChanged,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: const [
+                    _PersonalInfoStep(),
+                    _CategoryStep(),
+                    _BioStep(),
+                    _PortfolioStep(),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 20 * s),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator(color: _kGold));
+                  }
+                  return Row(
+                    children: [
+                      if (controller.currentStep.value > 0) ...[
+                        Expanded(
+                          child: _OutlineButton(label: 'Geri', onTap: controller.previous),
+                        ),
+                        SizedBox(width: 12 * s),
+                      ],
+                      Expanded(
+                        child: _PrimaryButton(
+                          label: controller.isLastStep ? 'Bitir' : 'Devam Et',
+                          onTap: controller.next,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Butonlar ─────────────────────────────────────────────────────────────────
+
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _scaleOf(context);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        height: 52 * s,
+        color: _kGold,
+        alignment: Alignment.center,
+        child: Text(
+          label.toUpperCase(),
+          style: _mono(size: 11 * s, weight: FontWeight.w700, color: Colors.white, spacing: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _OutlineButton extends StatelessWidget {
+  const _OutlineButton({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _scaleOf(context);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        height: 52 * s,
+        decoration: BoxDecoration(border: Border.all(color: _kGold)),
+        alignment: Alignment.center,
+        child: Text(
+          label.toUpperCase(),
+          style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kGold, spacing: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Etiketli metin alanı ───────────────────────────────────────────────────────
+
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({
+    required this.label,
+    required this.controller,
+    this.hint,
+    this.maxLines = 1,
+    this.suffixIcon,
+    this.onTap,
+    this.readOnly = false,
+    this.textInputAction,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String? hint;
+  final int maxLines;
+  final Widget? suffixIcon;
+  final VoidCallback? onTap;
+  final bool readOnly;
+  final TextInputAction? textInputAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _scaleOf(context);
+    OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: c, width: w),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label.isNotEmpty) ...[
+          Text(
+            label.toUpperCase(),
+            style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.2),
+          ),
+          SizedBox(height: 7 * s),
+        ],
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          readOnly: readOnly,
+          onTap: onTap,
+          textInputAction: textInputAction,
+          cursorColor: _kGold,
+          style: _mono(size: 11 * s, color: _kInk, spacing: 0.2, height: 1.3),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: Colors.white,
+            hintText: hint,
+            hintStyle: _mono(size: 11 * s, color: _kMuted, spacing: 0.2),
+            suffixIcon: suffixIcon,
+            contentPadding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 12 * s),
+            border: border(Colors.black.withValues(alpha: 0.12)),
+            enabledBorder: border(Colors.black.withValues(alpha: 0.12)),
+            focusedBorder: border(_kGold, 1.4),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -85,23 +258,22 @@ class FreelancerOnboardingView extends GetView<FreelancerOnboardingController> {
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
 class _StepIndicator extends StatelessWidget {
-  const _StepIndicator({required this.total, required this.current});
+  const _StepIndicator({required this.total, required this.current, required this.scale});
   final int total;
   final int current;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Row(
       children: List.generate(total, (i) {
         final active = i <= current;
         return Expanded(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            height: 6,
-            decoration: BoxDecoration(
-              color: active ? AppColors.primary : AppColors.border,
-              borderRadius: BorderRadius.circular(AppRadius.full),
-            ),
+            margin: EdgeInsets.symmetric(horizontal: 3 * s),
+            height: 3 * s,
+            color: active ? _kGold : _kCardBorder,
           ),
         );
       }),
@@ -112,16 +284,20 @@ class _StepIndicator extends StatelessWidget {
 // ─── Step 0: Personal Info ───────────────────────────────────────────────────
 
 class _PersonalInfoStep extends StatelessWidget {
+  const _PersonalInfoStep();
+
   @override
   Widget build(BuildContext context) {
     final c = Get.find<FreelancerOnboardingController>();
+    final s = _scaleOf(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(24 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kişisel Bilgiler', style: AppTextStyles.heading2),
-          const SizedBox(height: AppSpacing.lg),
+          Text('Kişisel Bilgiler',
+              style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+          SizedBox(height: 20 * s),
 
           // Profil Fotoğrafı
           Center(
@@ -130,39 +306,37 @@ class _PersonalInfoStep extends StatelessWidget {
               return GestureDetector(
                 onTap: c.pickProfileImage,
                 child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    CircleAvatar(
-                      radius: 52,
-                      backgroundColor: AppColors.surfaceDark,
-                      backgroundImage:
-                          file != null ? FileImage(file) : null,
+                    Container(
+                      width: 96 * s,
+                      height: 96 * s,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.45),
+                        border: Border.all(color: _kGold, width: 1.8),
+                        image: file != null
+                            ? DecorationImage(image: FileImage(file), fit: BoxFit.cover)
+                            : null,
+                      ),
+                      alignment: Alignment.center,
                       child: file == null
-                          ? const Icon(
-                              Icons.person_outline,
-                              size: 48,
-                              color: AppColors.textTertiary,
-                            )
+                          ? Icon(Icons.person_outline, size: 40 * s, color: _kTaupe)
                           : null,
                     ),
                     Positioned(
-                      right: 0,
-                      bottom: 0,
+                      right: -2 * s,
+                      bottom: -2 * s,
                       child: Container(
-                        width: 30,
-                        height: 30,
+                        width: 30 * s,
+                        height: 30 * s,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            width: 2,
-                          ),
+                          color: _kGold,
+                          border: Border.all(color: _kCream, width: 2),
                         ),
-                        child: const Icon(
-                          Icons.edit,
-                          size: 15,
-                          color: Colors.white,
-                        ),
+                        alignment: Alignment.center,
+                        child: Icon(Icons.edit, size: 14 * s, color: Colors.white),
                       ),
                     ),
                   ],
@@ -170,107 +344,85 @@ class _PersonalInfoStep extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: 24 * s),
 
           // Ad + Soyad
           Row(
             children: [
               Expanded(
-                child: SetTextField(
+                child: _LabeledField(
                   label: 'Ad',
-                  hint: 'Adın',
                   controller: c.nameController,
+                  hint: 'Adın',
                   textInputAction: TextInputAction.next,
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              SizedBox(width: 12 * s),
               Expanded(
-                child: SetTextField(
+                child: _LabeledField(
                   label: 'Soyad',
-                  hint: 'Soyadın',
                   controller: c.surnameController,
+                  hint: 'Soyadın',
                   textInputAction: TextInputAction.next,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: 16 * s),
 
           // Doğum Tarihi
-          Obx(() => GestureDetector(
+          Obx(() => _LabeledField(
+                label: 'Doğum Tarihi',
+                controller: TextEditingController(text: c.formattedBirthDate),
+                hint: 'GG.AA.YYYY',
+                readOnly: true,
+                suffixIcon: Icon(Icons.calendar_today_outlined, size: 16 * s, color: _kTaupe),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: c.birthDate.value ?? DateTime(1995, 1, 1),
                     firstDate: DateTime(1940),
-                    lastDate: DateTime.now()
-                        .subtract(const Duration(days: 365 * 16)),
+                    lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
                   );
                   if (picked != null) c.setBirthDate(picked);
                 },
-                child: AbsorbPointer(
-                  child: SetTextField(
-                    label: 'Doğum Tarihi',
-                    hint: 'GG.AA.YYYY',
-                    controller:
-                        TextEditingController(text: c.formattedBirthDate),
-                    suffixIcon: const Icon(
-                      Icons.calendar_today_outlined,
-                      size: 18,
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ),
               )),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: 16 * s),
 
           // Şehir
-          Obx(() => GestureDetector(
+          Obx(() => _LabeledField(
+                label: 'Yaşadığı Şehir',
+                controller: TextEditingController(text: c.selectedCity.value ?? ''),
+                hint: 'Şehir seçin',
+                readOnly: true,
+                suffixIcon: Icon(Icons.keyboard_arrow_down, size: 18 * s, color: _kTaupe),
                 onTap: () => _showCityPicker(context, c),
-                child: AbsorbPointer(
-                  child: SetTextField(
-                    label: 'Yaşadığı Şehir',
-                    hint: 'Şehir seçin',
-                    controller:
-                        TextEditingController(text: c.selectedCity.value ?? ''),
-                    suffixIcon: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ),
               )),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: 16 * s),
 
           // Deneyim Yılı
-          Obx(() => GestureDetector(
-                onTap: () => _showExperiencePicker(context, c),
-                child: AbsorbPointer(
-                  child: SetTextField(
-                    label: 'Deneyim Yılı',
-                    hint: '0 yıl',
-                    controller: TextEditingController(
-                      text: c.selectedExperience.value == 0
-                          ? '0 yıl'
-                          : '${c.selectedExperience.value} yıl',
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
+          Obx(() => _LabeledField(
+                label: 'Deneyim Yılı',
+                controller: TextEditingController(
+                  text: c.selectedExperience.value == 0
+                      ? '0 yıl'
+                      : '${c.selectedExperience.value} yıl',
                 ),
+                hint: '0 yıl',
+                readOnly: true,
+                suffixIcon: Icon(Icons.keyboard_arrow_down, size: 18 * s, color: _kTaupe),
+                onTap: () => _showExperiencePicker(context, c),
               )),
         ],
       ),
     );
   }
 
-  void _showCityPicker(
-      BuildContext context, FreelancerOnboardingController c) {
+  void _showCityPicker(BuildContext context, FreelancerOnboardingController c) {
     final searchCtrl = TextEditingController();
-    final filtered = ValueNotifier<List<String>>(
-        FreelancerOnboardingController.turkishCities);
+    final filtered =
+        ValueNotifier<List<String>>(FreelancerOnboardingController.turkishCities);
+    final s = _scaleOf(context);
 
     showModalBottomSheet(
       context: context,
@@ -278,49 +430,66 @@ class _PersonalInfoStep extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.75,
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-        ),
+        decoration: const BoxDecoration(color: _kCream),
         child: Column(
           children: [
-            _BottomSheetHandle(),
+            _bottomSheetHandle(s),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-              child: Text('Şehir Seçin', style: AppTextStyles.heading3),
+              padding: EdgeInsets.symmetric(horizontal: 20 * s, vertical: 8 * s),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Şehir Seçin',
+                    style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(horizontal: 20 * s),
               child: TextField(
                 controller: searchCtrl,
                 autofocus: true,
+                cursorColor: _kGold,
+                style: _mono(size: 11 * s, color: _kInk),
                 decoration: InputDecoration(
                   hintText: 'Şehir ara...',
-                  prefixIcon: const Icon(Icons.search),
+                  hintStyle: _mono(size: 11 * s, color: _kMuted),
+                  prefixIcon: Icon(Icons.search, size: 18 * s, color: _kTaupe),
+                  filled: true,
+                  fillColor: Colors.white,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 12 * s),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.12)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: const BorderSide(color: _kGold, width: 1.4),
+                  ),
                 ),
                 onChanged: (val) {
                   filtered.value = FreelancerOnboardingController.turkishCities
-                      .where((city) =>
-                          city.toLowerCase().contains(val.toLowerCase()))
+                      .where((city) => city.toLowerCase().contains(val.toLowerCase()))
                       .toList();
                 },
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            SizedBox(height: 8 * s),
             Expanded(
               child: ValueListenableBuilder<List<String>>(
                 valueListenable: filtered,
-                builder: (_, cities, _) => ListView.builder(
+                builder: (_, cities, _) => ListView.separated(
+                  padding: EdgeInsets.symmetric(horizontal: 20 * s),
                   itemCount: cities.length,
+                  separatorBuilder: (_, _) =>
+                      const Divider(height: 1, thickness: 1, color: _kDivider),
                   itemBuilder: (_, i) => ListTile(
-                    title: Text(cities[i], style: AppTextStyles.body1),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(cities[i],
+                        style: _serif(size: 15 * s, weight: FontWeight.w500, color: _kInk)),
                     onTap: () {
                       c.selectedCity.value = cities[i];
                       Navigator.of(context).pop();
@@ -335,55 +504,47 @@ class _PersonalInfoStep extends StatelessWidget {
     );
   }
 
-  void _showExperiencePicker(
-      BuildContext context, FreelancerOnboardingController c) {
+  void _showExperiencePicker(BuildContext context, FreelancerOnboardingController c) {
     int tempValue = c.selectedExperience.value;
+    final s = _scaleOf(context);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        height: 300,
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-        ),
+        height: 300 * s,
+        decoration: const BoxDecoration(color: _kCream),
         child: Column(
           children: [
-            _BottomSheetHandle(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: Text('Deneyim Yılı', style: AppTextStyles.heading3),
-            ),
+            _bottomSheetHandle(s),
+            SizedBox(height: 6 * s),
+            Text('Deneyim Yılı',
+                style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
             Expanded(
               child: CupertinoPicker(
-                itemExtent: 48,
-                scrollController: FixedExtentScrollController(
-                    initialItem: c.selectedExperience.value),
+                itemExtent: 42 * s,
+                scrollController:
+                    FixedExtentScrollController(initialItem: c.selectedExperience.value),
                 onSelectedItemChanged: (i) => tempValue = i,
                 children: List.generate(
                   21,
                   (i) => Center(
                     child: Text(
                       i == 0 ? '0 yıl' : '$i yıl',
-                      style: AppTextStyles.body1,
+                      style: _mono(size: 13 * s, color: _kInk, spacing: 0.2),
                     ),
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: SizedBox(
-                width: double.infinity,
-                child: SetButton(
-                  text: 'Seç',
-                  onPressed: () {
-                    c.selectedExperience.value = tempValue;
-                    Navigator.of(context).pop();
-                  },
-                ),
+              padding: EdgeInsets.all(16 * s),
+              child: _PrimaryButton(
+                label: 'Seç',
+                onTap: () {
+                  c.selectedExperience.value = tempValue;
+                  Navigator.of(context).pop();
+                },
               ),
             ),
           ],
@@ -396,55 +557,47 @@ class _PersonalInfoStep extends StatelessWidget {
 // ─── Step 1: Categories ───────────────────────────────────────────────────────
 
 class _CategoryStep extends StatelessWidget {
+  const _CategoryStep();
+
   @override
   Widget build(BuildContext context) {
     final c = Get.find<FreelancerOnboardingController>();
+    final s = _scaleOf(context);
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.all(24 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kategoriler', style: AppTextStyles.heading2),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Birden fazla seçebilirsin',
-            style: AppTextStyles.body2.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.lg),
+          Text('Kategoriler', style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+          SizedBox(height: 4 * s),
+          Text('Birden fazla seçebilirsin',
+              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2)),
+          SizedBox(height: 20 * s),
           Expanded(
             child: SingleChildScrollView(
               child: Obx(() => Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
+                    spacing: 8 * s,
+                    runSpacing: 8 * s,
                     children: c.categories.map((cat) {
                       final selected = c.selectedCategories.contains(cat);
-                      return GestureDetector(
+                      return InkWell(
                         onTap: () => c.toggleCategory(cat),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 9 * s),
                           decoration: BoxDecoration(
-                            color: selected
-                                ? AppColors.primary.withValues(alpha: 0.18)
-                                : AppColors.surfaceDark,
+                            color: selected ? _kGold.withValues(alpha: 0.14) : Colors.white,
                             border: Border.all(
-                              color: selected
-                                  ? AppColors.primary
-                                  : AppColors.border,
+                              color: selected ? _kGold : _kCardBorder,
+                              width: selected ? 1.2 : 1,
                             ),
-                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Text(
                             cat,
-                            style: AppTextStyles.body2.copyWith(
-                              color: selected
-                                  ? AppColors.primary
-                                  : AppColors.textPrimary,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                            style: _mono(
+                              size: 10 * s,
+                              weight: selected ? FontWeight.w700 : FontWeight.w400,
+                              color: selected ? _kGold : _kInk,
+                              spacing: 0.3,
                             ),
                           ),
                         ),
@@ -462,29 +615,31 @@ class _CategoryStep extends StatelessWidget {
 // ─── Step 2: Bio ─────────────────────────────────────────────────────────────
 
 class _BioStep extends StatelessWidget {
-  const _BioStep({required this.controller});
-  final FreelancerOnboardingController controller;
+  const _BioStep();
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.find<FreelancerOnboardingController>();
+    final s = _scaleOf(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          left: 24 * s,
+          right: 24 * s,
+          top: 24 * s,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24 * s,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Kendini kısaca tanıt:', style: AppTextStyles.heading2),
-            const SizedBox(height: AppSpacing.lg),
-            SetTextField(
+            Text('Kendini kısaca tanıt:',
+                style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+            SizedBox(height: 20 * s),
+            _LabeledField(
               label: '',
+              controller: c.bioController,
               hint: 'Neler yapıyorsun, hangi işlere odaklanıyorsun?',
-              controller: controller.bioController,
               maxLines: 8,
             ),
           ],
@@ -497,54 +652,71 @@ class _BioStep extends StatelessWidget {
 // ─── Step 3: Portfolio ────────────────────────────────────────────────────────
 
 class _PortfolioStep extends StatelessWidget {
-  const _PortfolioStep({required this.controller});
-  final FreelancerOnboardingController controller;
+  const _PortfolioStep();
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.find<FreelancerOnboardingController>();
+    final s = _scaleOf(context);
     return Obx(() {
-      final projects = controller.addedProjects;
+      final projects = c.addedProjects;
       return ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(24 * s),
         children: [
-          Text('Bize projelerinden bahset', style: AppTextStyles.heading2),
-          const SizedBox(height: AppSpacing.xs),
+          Text('Bize projelerinden bahset',
+              style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+          SizedBox(height: 4 * s),
           Text(
             'Bize daha önce yaptığın projelerden bahseder misin?',
-            style:
-                AppTextStyles.body2.copyWith(color: AppColors.textSecondary),
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          SizedBox(height: 4 * s),
           Text(
             '(Profil kısmından projelerini eklemeye devam edebilirsin)',
-            style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+            style: _mono(size: 8 * s, color: _kMuted, spacing: 0.2),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: 20 * s),
 
           // Eklenen proje kartları
           ...projects.asMap().entries.map((entry) {
             final i = entry.key;
             final p = entry.value;
             return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: EdgeInsets.only(bottom: 10 * s),
               child: _ProjectCard(
                 project: p,
-                onDelete: () => controller.removeProject(i),
+                scale: s,
+                onDelete: () => c.removeProject(i),
               ),
             );
           }),
 
           // + Buton
-          _AddProjectButton(
-            onTap: () => _showAddProjectSheet(context, controller),
+          InkWell(
+            onTap: () => _showAddProjectSheet(context, c),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 16 * s),
+              decoration: BoxDecoration(border: Border.all(color: _kCardBorder)),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, size: 18 * s, color: _kGold),
+                  SizedBox(width: 8 * s),
+                  Text('Proje Ekle',
+                      style: _mono(
+                          size: 10 * s, weight: FontWeight.w600, color: _kGold, spacing: 0.4)),
+                ],
+              ),
+            ),
           ),
         ],
       );
     });
   }
 
-  void _showAddProjectSheet(
-      BuildContext context, FreelancerOnboardingController c) {
+  void _showAddProjectSheet(BuildContext context, FreelancerOnboardingController c) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -557,19 +729,21 @@ class _PortfolioStep extends StatelessWidget {
 // ─── Proje Kartı ─────────────────────────────────────────────────────────────
 
 class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({required this.project, required this.onDelete});
+  const _ProjectCard({required this.project, required this.scale, required this.onDelete});
   final PortfolioProject project;
+  final double scale;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+      width: double.infinity,
+      padding: EdgeInsets.all(14 * s),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
-      padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -579,34 +753,31 @@ class _ProjectCard extends StatelessWidget {
               children: [
                 if (project.title.isNotEmpty)
                   Text(project.title,
-                      style: AppTextStyles.body1
-                          .copyWith(fontWeight: FontWeight.w600)),
+                      style: _serif(size: 15 * s, weight: FontWeight.w600, color: _kInk)),
                 if (project.jobType.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2 * s),
                   Text(project.jobType,
-                      style: AppTextStyles.body2
-                          .copyWith(color: AppColors.textSecondary)),
+                      style: _mono(size: 8.5 * s, color: _kTaupe, spacing: 0.2)),
                 ],
                 if (project.description.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(project.description,
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.textTertiary),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis),
+                  SizedBox(height: 6 * s),
+                  Text(
+                    project.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: _mono(size: 8.5 * s, color: _kMuted, spacing: 0.2),
+                  ),
                 ],
                 if (project.videoUrl != null && project.videoUrl!.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
+                  SizedBox(height: 6 * s),
                   Row(
                     children: [
-                      const Icon(Icons.play_circle_outline,
-                          size: 14, color: AppColors.primary),
-                      const SizedBox(width: 4),
+                      Icon(Icons.play_circle_outline, size: 13 * s, color: _kGold),
+                      SizedBox(width: 4 * s),
                       Expanded(
                         child: Text(
                           project.videoUrl!,
-                          style: AppTextStyles.caption
-                              .copyWith(color: AppColors.primary),
+                          style: _mono(size: 8 * s, color: _kGold, spacing: 0.2),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -619,8 +790,7 @@ class _ProjectCard extends StatelessWidget {
           ),
           IconButton(
             onPressed: onDelete,
-            icon: const Icon(Icons.close, size: 18),
-            color: AppColors.textTertiary,
+            icon: Icon(Icons.close, size: 16 * s, color: _kTaupe),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -628,86 +798,6 @@ class _ProjectCard extends StatelessWidget {
       ),
     );
   }
-}
-
-// ─── + Buton ─────────────────────────────────────────────────────────────────
-
-class _AddProjectButton extends StatelessWidget {
-  const _AddProjectButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: DottedBorderContainer(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add, color: AppColors.textSecondary),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              'Proje Ekle',
-              style:
-                  AppTextStyles.body2.copyWith(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DottedBorderContainer extends StatelessWidget {
-  const DottedBorderContainer({super.key, required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _DashedBorderPainter(),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.md, horizontal: AppSpacing.lg),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.border
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    const dashWidth = 6.0;
-    const dashSpace = 4.0;
-    const radius = Radius.circular(AppRadius.lg);
-
-    final rRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height), radius);
-    final path = Path()..addRRect(rRect);
-
-    final metric = path.computeMetrics().first;
-    double distance = 0;
-    while (distance < metric.length) {
-      canvas.drawPath(
-        metric.extractPath(distance, distance + dashWidth),
-        paint,
-      );
-      distance += dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ─── Proje Ekleme Modal ───────────────────────────────────────────────────────
@@ -750,77 +840,41 @@ class _AddProjectSheetState extends State<_AddProjectSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final s = _scaleOf(context);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.md, AppSpacing.lg, bottom + AppSpacing.lg),
+      decoration: const BoxDecoration(color: _kCream),
+      padding: EdgeInsets.fromLTRB(20 * s, 14 * s, 20 * s, bottom + 20 * s),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Center(child: _BottomSheetHandle()),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Proje Ekle', style: AppTextStyles.heading3),
-            const SizedBox(height: AppSpacing.lg),
-            SetTextField(
-              label: 'Proje Başlığı',
-              hint: 'Migros',
-              controller: _titleCtrl,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SetTextField(
-              label: 'İş Tanımı',
-              hint: 'Reklam filmi',
-              controller: _jobTypeCtrl,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SetTextField(
+            Center(child: _bottomSheetHandle(s)),
+            SizedBox(height: 14 * s),
+            Text('Proje Ekle', style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+            SizedBox(height: 16 * s),
+            _LabeledField(label: 'Proje Başlığı', controller: _titleCtrl, hint: 'Migros'),
+            SizedBox(height: 14 * s),
+            _LabeledField(label: 'İş Tanımı', controller: _jobTypeCtrl, hint: 'Reklam filmi'),
+            SizedBox(height: 14 * s),
+            _LabeledField(
               label: 'Kısa Açıklama',
-              hint: 'Projeni kısaca anlat...',
               controller: _descCtrl,
+              hint: 'Projeni kısaca anlat...',
               maxLines: 4,
             ),
-            const SizedBox(height: AppSpacing.md),
-            SetTextField(
+            SizedBox(height: 14 * s),
+            _LabeledField(
               label: 'Video Linki',
-              hint: 'YouTube, Vimeo veya doğrudan video URL\'i',
               controller: _videoUrlCtrl,
-              suffixIcon: const Icon(
-                Icons.play_circle_outline,
-                size: 20,
-                color: AppColors.textTertiary,
-              ),
+              hint: 'YouTube, Vimeo veya doğrudan video URL\'i',
+              suffixIcon: Icon(Icons.play_circle_outline, size: 18 * s, color: _kTaupe),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: SetButton(text: 'Ekle', onPressed: _submit),
-            ),
+            SizedBox(height: 20 * s),
+            _PrimaryButton(label: 'Ekle', onTap: _submit),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Ortak Yardımcı ───────────────────────────────────────────────────────────
-
-class _BottomSheetHandle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: AppColors.border,
-        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
     );
   }

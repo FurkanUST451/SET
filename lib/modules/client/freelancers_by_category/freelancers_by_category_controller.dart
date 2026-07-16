@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/repositories/brief_repository.dart';
 import '../../../data/repositories/freelancer_repository.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../routes/app_routes.dart';
@@ -9,15 +10,18 @@ import '../../../routes/app_routes.dart';
 class FreelancersByCategoryController extends GetxController {
   final FreelancerRepository _freelancerRepo;
   final UserRepository _userRepo;
+  final BriefRepository _briefRepo = Get.find<BriefRepository>();
 
   FreelancersByCategoryController(this._freelancerRepo, this._userRepo);
 
   late final String category;
+  late final String briefId;
 
   final RxList<FreelancerModel> freelancers = <FreelancerModel>[].obs;
   final RxBool isLoading = true.obs;
   final RxString errorMsg = ''.obs;
   final RxList<String> selectedIds = <String>[].obs;
+  final RxBool isSending = false.obs;
   static const int maxSelections = 5;
 
   final Map<String, UserModel> _userCache = {};
@@ -27,6 +31,7 @@ class FreelancersByCategoryController extends GetxController {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     category = (args?['category'] as String?) ?? '';
+    briefId = (args?['briefId'] as String?) ?? '';
     _load();
   }
 
@@ -35,13 +40,15 @@ class FreelancersByCategoryController extends GetxController {
       isLoading.value = true;
       errorMsg.value = '';
       final list = await _freelancerRepo.filterByCategory(category);
-      final users = await Future.wait(list.map((f) => _userRepo.fetchUser(f.userId)));
-      for (int i = 0; i < list.length; i++) {
-        if (users[i] != null) _userCache[list[i].userId] = users[i]!;
+      for (final f in list) {
+        try {
+          final user = await _userRepo.fetchUser(f.userId);
+          if (user != null) _userCache[f.userId] = user;
+        } catch (_) {}
       }
       freelancers.assignAll(list);
-    } catch (_) {
-      errorMsg.value = 'Freelancerlar yüklenemedi.';
+    } catch (e) {
+      errorMsg.value = e.toString();
     } finally {
       isLoading.value = false;
     }
@@ -74,14 +81,18 @@ class FreelancersByCategoryController extends GetxController {
     );
   }
 
-  void sendOffers() {
-    if (selectedIds.isEmpty) return;
-    Get.toNamed(
-      AppRoutes.chatDetail,
-      arguments: {
-        'name': 'Proje Teklifi',
-        'selectedIds': selectedIds.toList(),
-      },
-    );
+  Future<void> sendOffers() async {
+    if (selectedIds.isEmpty || isSending.value) return;
+    isSending.value = true;
+    try {
+      if (briefId.isNotEmpty) {
+        await _briefRepo.updateSentToIds(briefId, selectedIds.toList());
+      }
+    } catch (_) {
+      // proceed even if Firestore update fails
+    } finally {
+      isSending.value = false;
+    }
+    Get.offAllNamed(AppRoutes.clientHome, arguments: {'tab': 3});
   }
 }

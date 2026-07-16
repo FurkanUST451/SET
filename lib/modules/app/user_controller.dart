@@ -8,6 +8,7 @@ class UserController extends GetxController {
 
   UserModel? get currentUser => _currentUser.value;
   bool get hasUser => _currentUser.value != null;
+  Rxn<UserModel> get userObs => _currentUser;
 
   void setUser(UserModel user) {
     _currentUser.value = user;

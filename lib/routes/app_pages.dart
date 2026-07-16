@@ -11,6 +11,8 @@ import '../modules/client/category_picker/category_picker_binding.dart';
 import '../modules/client/category_picker/category_picker_view.dart';
 import '../modules/client/chat_detail/chat_detail_binding.dart';
 import '../modules/client/chat_detail/chat_detail_view.dart';
+import '../modules/client/brief_detail/brief_detail_binding.dart';
+import '../modules/client/brief_detail/brief_detail_view.dart';
 import '../modules/client/project_detail/project_detail_view.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_binding.dart';
 import '../modules/client/freelancer_detail/freelancer_detail_view.dart';
@@ -21,10 +23,14 @@ import '../modules/client/home/client_home_view.dart';
 import '../modules/client/project_mode/project_mode_view.dart';
 import '../modules/client/send_offer/send_offer_binding.dart';
 import '../modules/client/send_offer/send_offer_view.dart';
+import '../modules/client/set_projects/set_projects_view.dart';
 import '../modules/freelancer/home/freelancer_home_binding.dart';
 import '../modules/freelancer/home/freelancer_home_view.dart';
+import '../modules/freelancer/offer_detail/freelancer_offer_detail_binding.dart';
+import '../modules/freelancer/offer_detail/freelancer_offer_detail_view.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
+import '../modules/freelancer/project_detail/freelancer_project_detail_view.dart';
 import '../modules/onboarding/onboarding_binding.dart';
 import '../modules/onboarding/onboarding_view.dart';
 import '../modules/role_selection/role_selection_binding.dart';
@@ -111,6 +117,15 @@ class AppPages {
       name: AppRoutes.projectDetail,
       page: () => const ProjectDetailView(),
     ),
+    GetPage(
+      name: AppRoutes.briefDetail,
+      page: () => const BriefDetailView(),
+      binding: BriefDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.setProjects,
+      page: () => const SetProjectsView(),
+    ),
 
     // Freelancer (Hizmet Ver) — implementation pending
     GetPage(
@@ -122,6 +137,15 @@ class AppPages {
       name: AppRoutes.freelancerHome,
       page: () => const FreelancerHomeView(),
       binding: FreelancerHomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancerOfferDetail,
+      page: () => const FreelancerOfferDetailView(),
+      binding: FreelancerOfferDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancerProjectDetail,
+      page: () => const FreelancerProjectDetailView(),
     ),
   ];
 }

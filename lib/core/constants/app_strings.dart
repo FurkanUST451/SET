@@ -30,6 +30,7 @@ class AppStrings {
   static const String tabHome = 'Ana Sayfa';
   static const String tabMyProjects = 'Projelerim';
   static const String tabProfile = 'Profil';
+  static const String tabJobOffers = 'Teklifler';
 
   // Common
   static const String continueLabel = 'Devam';
