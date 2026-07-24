@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../core/utils/avatar_image.dart';
@@ -27,7 +29,9 @@ class AuthController extends GetxController {
       // Firestore'dan tam profili çek
       final stored = await _userRepo.fetchUser(authUser.id);
       _user.setUser(stored ?? authUser);
-      await _notifications.registerDevice(authUser.id);
+      // Bildirim izni diyaloğu + FCM token alımı saniyeler sürebilir; login'i
+      // bloklamasın diye arka planda çalıştırıyoruz.
+      unawaited(_notifications.registerDevice(authUser.id));
       return true;
     } catch (e) {
       errorMessage.value = e.toString();
@@ -62,7 +66,7 @@ class AuthController extends GetxController {
       // Firestore'a kullanıcı profilini kaydet
       await _userRepo.upsertUser(fullUser);
       _user.setUser(fullUser);
-      await _notifications.registerDevice(fullUser.id);
+      unawaited(_notifications.registerDevice(fullUser.id));
       return true;
     } catch (e) {
       errorMessage.value = e.toString();

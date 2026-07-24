@@ -2,6 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     match /users/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
@@ -104,6 +108,92 @@ service cloud.firestore {
         );
 
       allow update, delete: if false;
+    }
+
+    // ---- Keşfet (Discover) ----
+    // "works" = keşfette gösterilen post/video kartları.
+    match /works/{workId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.resource.data.id == workId
+        && request.resource.data.freelancerId == request.auth.uid
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdAt.size() > 0
+        && request.resource.data.mediaUrl is string
+        && request.resource.data.mediaUrl.size() > 0
+        && request.resource.data.isVideo is bool
+        && request.resource.data.type in ['video', 'photo', 'cgiVfx', 'graphic', 'sound']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.studio is string
+        && request.resource.data.studio.size() > 0
+        && request.resource.data.likes == 0
+        && request.resource.data.comments == 0;
+
+      // Sahibi sadece başlık/imza/açıklama gibi düzenlenebilir alanları değiştirebilir.
+      // likes/comments sayaçları buradan değil, yalnızca Admin SDK (Cloud Functions) üzerinden güncellenir.
+      // TODO(likes/comments UI): like/comment yazma özelliği eklendiğinde, works/{id}/likes ve
+      // works/{id}/comments alt-koleksiyonlarında onCreate/onDelete tetikleyen bir Cloud Function
+      // yazılıp works.likes / works.comments sayaçlarını FieldValue.increment ile güncellemeli.
+      // O function yazılana kadar bu sayaçlar hep 0'da kalır (bkz. functions/index.js).
+      allow update: if isSignedIn()
+        && resource.data.freelancerId == request.auth.uid
+        && request.resource.data.freelancerId == resource.data.freelancerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'studio', 'description'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.studio is string
+        && request.resource.data.studio.size() > 0;
+
+      allow delete: if isSignedIn() && resource.data.freelancerId == request.auth.uid;
+
+      // Bir kullanıcının bir post'u yalnızca bir kez beğenebilmesi için
+      // like doküman id'si = kullanıcının uid'i (alt koleksiyon zaten postId'ye göre scope'lu).
+      match /likes/{likeId} {
+        allow read: if isSignedIn();
+
+        allow create: if isSignedIn()
+          && likeId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.createdAt is string
+          && request.resource.data.createdAt.size() > 0
+          && request.resource.data.keys().hasOnly(['userId', 'createdAt']);
+
+        allow delete: if isSignedIn() && likeId == request.auth.uid;
+
+        allow update: if false;
+      }
+
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+
+        allow create: if isSignedIn()
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 500
+          && request.resource.data.createdAt is string
+          && request.resource.data.createdAt.size() > 0;
+
+        allow update: if isSignedIn()
+          && resource.data.authorId == request.auth.uid
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text'])
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 500;
+
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      }
+    }
+
+    // Rate limit sayaçları yalnızca Cloud Functions (Admin SDK) tarafından okunup yazılır.
+    // Admin SDK rules'ı bypass eder; bu blok client erişimini açıkça kapatır.
+    match /rate_limits/{docId} {
+      allow read, write: if false;
     }
 
   }

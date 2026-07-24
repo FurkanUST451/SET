@@ -1,4 +1,5 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
@@ -103,5 +104,85 @@ exports.onNewChatMessage = onDocumentCreated(
         logger.error("Bildirim gönderilemedi", err);
       }
     }
+  }
+);
+
+/**
+ * Basit rate limiting — Keşfet spam/maliyet koruması.
+ *
+ * Redis'e gerek yok: bu ölçekte Firestore üzerinde tek dokümanlık bir
+ * sabit-pencere (fixed window) sayaç yeterli. Sayaç rate_limits/{uid}_{action}
+ * dokümanında tutulur; firestore.rules bu koleksiyona client erişimini
+ * tamamen kapatır, yalnızca bu Admin SDK kodu okuyup yazabilir.
+ */
+const RATE_LIMITS = {
+  video_upload: { max: 3, windowMs: 60 * 1000 },
+  // Like + yorum ortak kotayı paylaşır — ikisi de aynı spam riskini taşır.
+  engagement: { max: 20, windowMs: 60 * 1000 },
+};
+
+// TODO(likes/comments sayaçları): works/{id}/likes ve works/{id}/comments
+// alt-koleksiyonları var ama henüz bunları dinleyip works.likes / works.comments
+// alanlarını güncelleyen bir trigger yok (firestore.rules bu alanları client'a
+// kapatıyor). Like/yorum UI'ı yazılırken buraya onDocumentCreated/onDocumentDeleted
+// tetikleyicileri eklenip FieldValue.increment(1) / increment(-1) ile sayaçlar
+// senkronize edilmeli — aksi halde like/yorum sayıları arayüzde hep 0 görünür.
+
+async function enforceRateLimit(uid, action) {
+  const config = RATE_LIMITS[action];
+  const db = getFirestore();
+  const ref = db.collection("rate_limits").doc(`${uid}_${action}`);
+  const now = Date.now();
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.exists ? snap.data() : null;
+
+    if (!data || now - data.windowStart > config.windowMs) {
+      tx.set(ref, { windowStart: now, count: 1 });
+      return;
+    }
+
+    if (data.count >= config.max) {
+      const retryAfterSec = Math.ceil(
+        (config.windowMs - (now - data.windowStart)) / 1000
+      );
+      throw new HttpsError(
+        "resource-exhausted",
+        `Çok fazla istek gönderdiniz. Lütfen ${retryAfterSec} saniye sonra tekrar deneyin.`
+      );
+    }
+
+    tx.update(ref, { count: FieldValue.increment(1) });
+  });
+}
+
+/**
+ * Video/görsel yüklemeden hemen önce client tarafından çağrılır.
+ * Limit aşılırsa 'resource-exhausted' hatası fırlatır ve upload'ı durdurur.
+ */
+exports.checkVideoUploadLimit = onCall(
+  { region: "europe-west1", enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Giriş yapmalısınız.");
+    }
+    await enforceRateLimit(request.auth.uid, "video_upload");
+    return { allowed: true };
+  }
+);
+
+/**
+ * Like/yorum atmadan hemen önce client tarafından çağrılır.
+ * Limit aşılırsa 'resource-exhausted' hatası fırlatır.
+ */
+exports.checkEngagementLimit = onCall(
+  { region: "europe-west1", enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Giriş yapmalısınız.");
+    }
+    await enforceRateLimit(request.auth.uid, "engagement");
+    return { allowed: true };
   }
 );

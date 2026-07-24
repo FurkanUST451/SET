@@ -7,6 +7,7 @@ import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
+import 'work_video_player_view.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB); // arka plan
@@ -412,12 +413,22 @@ class _WorkCard extends StatelessWidget {
           ),
           SizedBox(height: 20 * s),
           // Kapak
-          _CoverPlaceholder(
-            scale: s,
-            type: work.type,
-            coverImage: work.coverImage,
-            mediaUrl: work.mediaUrl,
-            isVideo: work.isVideo,
+          GestureDetector(
+            onTap: work.isVideo && (work.mediaUrl?.isNotEmpty ?? false)
+                ? () => Get.to(() => WorkVideoPlayerView(
+                      videoUrl: work.mediaUrl!,
+                      title: work.title,
+                      thumbnailUrl: work.thumbnailUrl,
+                    ))
+                : null,
+            child: _CoverPlaceholder(
+              scale: s,
+              type: work.type,
+              coverImage: work.coverImage,
+              mediaUrl: work.mediaUrl,
+              thumbnailUrl: work.thumbnailUrl,
+              isVideo: work.isVideo,
+            ),
           ),
           SizedBox(height: 18 * s),
           // Alt bilgi: başlık + süre·format
@@ -494,6 +505,7 @@ class _CoverPlaceholder extends StatelessWidget {
     required this.type,
     required this.coverImage,
     this.mediaUrl,
+    this.thumbnailUrl,
     this.isVideo = false,
   });
 
@@ -501,6 +513,7 @@ class _CoverPlaceholder extends StatelessWidget {
   final WorkType type;
   final String? coverImage;
   final String? mediaUrl;
+  final String? thumbnailUrl;
   final bool isVideo;
 
   @override
@@ -509,7 +522,10 @@ class _CoverPlaceholder extends StatelessWidget {
     final isMotion = isVideo ||
         type == WorkType.video ||
         type == WorkType.cgiVfx;
-    final hasNetworkImage = !isVideo && (mediaUrl?.isNotEmpty ?? false);
+    // Video için üretilen JPEG önizleme (thumbnailUrl), foto işler için ise
+    // mediaUrl'in kendisi kapak görseli olarak kullanılır.
+    final networkImageUrl = isVideo ? thumbnailUrl : mediaUrl;
+    final hasNetworkImage = networkImageUrl?.isNotEmpty ?? false;
     final hasAsset = coverImage != null;
 
     return ClipRRect(
@@ -521,7 +537,7 @@ class _CoverPlaceholder extends StatelessWidget {
           children: [
             if (hasNetworkImage)
               CachedNetworkImage(
-                imageUrl: mediaUrl!,
+                imageUrl: networkImageUrl!,
                 fit: BoxFit.cover,
                 placeholder: (_, _) => _kThumbGradient,
                 errorWidget: (_, _, _) => _kThumbGradient,
