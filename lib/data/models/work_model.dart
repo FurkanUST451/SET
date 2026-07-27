@@ -64,6 +64,12 @@ class WorkModel {
   final bool isVideo;
   final DateTime? createdAt;
 
+  // Firestore'a yüklenmiş gerçek işler için true; DummyData.works içindeki
+  // tanıtım amaçlı statik kartlar için false (bkz. dummy_data.dart —
+  // createdAt hiç set edilmez). Like/yorum gibi backend'e yazan aksiyonlar,
+  // arkasında gerçek bir Firestore dokümanı olmayan dummy kartlarda açılmaz.
+  bool get isLive => createdAt != null;
+
   factory WorkModel.fromJson(Map<String, dynamic> json) {
     return WorkModel(
       id: json['id'] as String,

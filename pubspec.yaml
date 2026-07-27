@@ -49,6 +49,7 @@ dependencies:
   # Animation
   rive: ^0.13.0
   smooth_page_indicator: ^1.2.0+3
+  share_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:

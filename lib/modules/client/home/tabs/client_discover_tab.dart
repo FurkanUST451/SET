@@ -2,11 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/utils/avatar_image.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
+import 'work_comments_sheet.dart';
 import 'work_video_player_view.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
@@ -19,6 +22,11 @@ const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
+
+// Paylaşım linki için markalı izleme sayfası — ham Storage linki yerine bu
+// paylaşılır (bkz. functions/index.js watchPage). Kısa, tokensız ve
+// paylaşıldığında link önizleme kartı (başlık + kapak görseli) gösterir.
+const _kWatchBaseUrl = 'https://sett-451.web.app/w';
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
 TextStyle _serif({
@@ -148,6 +156,7 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
                         timeAgo: _timeAgoFor(work),
                         duration: _durationFor(work),
                         format: _formatFor(work.type),
+                        controller: _worksController,
                       );
                     },
                   ),
@@ -338,6 +347,7 @@ class _WorkCard extends StatelessWidget {
     required this.timeAgo,
     required this.duration,
     required this.format,
+    required this.controller,
   });
 
   final double scale;
@@ -345,6 +355,7 @@ class _WorkCard extends StatelessWidget {
   final String timeAgo;
   final String duration;
   final String format;
+  final WorksController controller;
 
 
   @override
@@ -467,17 +478,11 @@ class _WorkCard extends StatelessWidget {
           // Aksiyonlar
           Row(
             children: [
-              _IconCount(
-                scale: s,
-                icon: Icons.favorite_border_rounded,
-                count: work.likes,
-              ),
+              _LikeAction(scale: s, work: work, controller: controller),
               SizedBox(width: 28 * s),
-              _IconCount(
-                scale: s,
-                icon: Icons.mode_comment_outlined,
-                count: work.comments,
-              ),
+              _CommentAction(scale: s, work: work),
+              SizedBox(width: 28 * s),
+              _ShareAction(scale: s, work: work),
               const Spacer(),
               Icon(Icons.bookmark_border_rounded,
                   size: 16 * s, color: _kTaupe),
@@ -617,18 +622,193 @@ class _IconCount extends StatelessWidget {
         Icon(icon, size: 16 * s, color: _kTaupe),
         SizedBox(width: 7 * s),
         Text(
-          _format(count),
+          Formatters.compactCount(count),
           style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
         ),
       ],
     );
   }
+}
 
-  String _format(int n) {
-    if (n >= 1000) {
-      final k = n / 1000;
-      return k % 1 == 0 ? '${k.toInt()}K' : '${k.toStringAsFixed(1)}K';
+// ─────────────────────────────────────────────────────────────────
+// BEĞENİ — dummy kartlarda salt-görsel; gerçek işlerde dokunulabilir.
+// isLiked durumu Firestore'dan (works/{id}/likes/{uid} doküman varlığı)
+// canlı akar; sayaç ise works.likes alanından gelir ve Cloud Function
+// tetikleyicisi FieldValue.increment ile güncelleyene kadar küçük bir
+// gecikme olabileceğinden, kendi dokunuşumuzun etkisini o an gösterebilmek
+// için tek adımlık bir optimistic delta tutulur (sunucudan gerçek sayaç
+// gelince otomatik bırakılır).
+// ─────────────────────────────────────────────────────────────────
+class _LikeAction extends StatefulWidget {
+  const _LikeAction({
+    required this.scale,
+    required this.work,
+    required this.controller,
+  });
+
+  final double scale;
+  final WorkModel work;
+  final WorksController controller;
+
+  @override
+  State<_LikeAction> createState() => _LikeActionState();
+}
+
+class _LikeActionState extends State<_LikeAction> {
+  bool _isToggling = false;
+  int _optimisticDelta = 0;
+
+  // StreamBuilder yeni bir Stream instance'ı her build'de yeniden abone
+  // olur. Bu ekrandaki herhangi bir işin beğeni/yorum sayacı değiştiğinde
+  // tüm liste (Obx) yeniden build edildiğinden, stream'i work.id sabit
+  // kaldığı sürece burada önbelleğe almazsak her karttaki dinleyici
+  // gereksiz yere kapanıp yeniden açılır.
+  Stream<bool>? _likedStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncLikedStream();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LikeAction oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.work.likes != oldWidget.work.likes) {
+      _optimisticDelta = 0;
     }
-    return n.toString();
+    if (widget.work.id != oldWidget.work.id) {
+      _syncLikedStream();
+    }
+  }
+
+  void _syncLikedStream() {
+    _likedStream = widget.work.isLive
+        ? widget.controller.isLikedStream(widget.work.id)
+        : null;
+  }
+
+  Future<void> _handleTap(bool isLiked) async {
+    if (_isToggling) return;
+    setState(() {
+      _isToggling = true;
+      _optimisticDelta = isLiked ? -1 : 1;
+    });
+    await widget.controller.toggleLike(widget.work.id, isLiked);
+    if (mounted) setState(() => _isToggling = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.scale;
+    final likedStream = _likedStream;
+    if (likedStream == null) {
+      return _IconCount(
+        scale: s,
+        icon: Icons.favorite_border_rounded,
+        count: widget.work.likes,
+      );
+    }
+    return StreamBuilder<bool>(
+      stream: likedStream,
+      builder: (context, snapshot) {
+        final isLiked = snapshot.data ?? false;
+        final count = widget.work.likes + _optimisticDelta;
+        return GestureDetector(
+          onTap: () => _handleTap(isLiked),
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                scale: _isToggling ? 0.82 : 1.0,
+                duration: const Duration(milliseconds: 140),
+                curve: Curves.easeOut,
+                child: Icon(
+                  isLiked
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  size: 16 * s,
+                  color: isLiked ? _kGold : _kTaupe,
+                ),
+              ),
+              SizedBox(width: 7 * s),
+              Text(
+                Formatters.compactCount(count < 0 ? 0 : count),
+                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// YORUM — dummy kartlarda salt-görsel; gerçek işlerde yorum sayfasını açar.
+// ─────────────────────────────────────────────────────────────────
+class _CommentAction extends StatelessWidget {
+  const _CommentAction({required this.scale, required this.work});
+
+  final double scale;
+  final WorkModel work;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _IconCount(
+      scale: scale,
+      icon: Icons.mode_comment_outlined,
+      count: work.comments,
+    );
+    if (!work.isLive) return icon;
+    return GestureDetector(
+      onTap: () => showWorkCommentsSheet(context, work),
+      behavior: HitTestBehavior.opaque,
+      child: icon,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// GÖNDER — dummy kartlarda salt-görsel; gerçek işlerde işletim
+// sisteminin native paylaşım sayfasını açar (WhatsApp, SMS, vb.) ve
+// markalı izleme sayfasının linkini paylaşır — ham Storage linki değil.
+// ─────────────────────────────────────────────────────────────────
+class _ShareAction extends StatelessWidget {
+  const _ShareAction({required this.scale, required this.work});
+
+  final double scale;
+  final WorkModel work;
+
+  bool get _canShare => work.isLive && (work.mediaUrl?.isNotEmpty ?? false);
+
+  Future<void> _share(BuildContext context) async {
+    if (!_canShare) return;
+    final url = '$_kWatchBaseUrl/${work.id}';
+
+    // iPad/macOS'ta paylaşım sayfası bir popover olarak açılır ve nereden
+    // açılacağını bilmesi için tıklanan öğenin ekran konumu gerekir.
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: '${work.studio} — «${work.title}»\n$url',
+        sharePositionOrigin: origin,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final icon = Icon(Icons.share_outlined, size: 16 * s, color: _kTaupe);
+    if (!_canShare) return icon;
+    return GestureDetector(
+      onTap: () => _share(context),
+      behavior: HitTestBehavior.opaque,
+      child: icon,
+    );
   }
 }

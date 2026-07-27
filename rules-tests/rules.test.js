@@ -135,6 +135,148 @@ async function main() {
     }
   );
 
+  console.log("\n=== FIRESTORE: works/{id}/likes ===");
+
+  // Beğeni/yorum testleri için taze bir work dokümanı seed edilir (admin context, rules bypass).
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx
+      .firestore()
+      .collection("works")
+      .doc("work-engage")
+      .set(validWork({ id: "work-engage" }));
+  });
+
+  await check(
+    "1) Kendi like'ını (doküman id = kendi uid) oluşturma -> BAŞARILI olmalı",
+    async () => {
+      await assertSucceeds(
+        ownerDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("likes")
+          .doc(OWNER_UID)
+          .set({ userId: OWNER_UID, createdAt: new Date().toISOString() })
+      );
+    }
+  );
+
+  await check(
+    "2) Başkası adına like oluşturma (doküman id kendi uid'i değil) -> REDDEDİLMELİ",
+    async () => {
+      await assertFails(
+        otherDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("likes")
+          .doc(OWNER_UID)
+          .set({ userId: OTHER_UID, createdAt: new Date().toISOString() })
+      );
+    }
+  );
+
+  await check(
+    "3) userId alanı kendi uid'iyle uyuşmayan like -> REDDEDİLMELİ",
+    async () => {
+      await assertFails(
+        otherDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("likes")
+          .doc(OTHER_UID)
+          .set({ userId: OWNER_UID, createdAt: new Date().toISOString() })
+      );
+    }
+  );
+
+  await check("4) Kendi like'ını silme -> BAŞARILI olmalı", async () => {
+    await assertSucceeds(
+      ownerDb
+        .collection("works")
+        .doc("work-engage")
+        .collection("likes")
+        .doc(OWNER_UID)
+        .delete()
+    );
+  });
+
+  console.log("\n=== FIRESTORE: works/{id}/comments ===");
+
+  await check(
+    "1) Geçerli alanlarla yorum oluşturma -> BAŞARILI olmalı",
+    async () => {
+      await assertSucceeds(
+        ownerDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("comments")
+          .doc("comment-1")
+          .set({
+            authorId: OWNER_UID,
+            text: "Harika olmuş!",
+            createdAt: new Date().toISOString(),
+          })
+      );
+    }
+  );
+
+  await check(
+    "2) authorId'si kendi uid'i olmayan yorum -> REDDEDİLMELİ",
+    async () => {
+      await assertFails(
+        otherDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("comments")
+          .doc("comment-2")
+          .set({
+            authorId: OWNER_UID,
+            text: "Sahte yorum",
+            createdAt: new Date().toISOString(),
+          })
+      );
+    }
+  );
+
+  await check("3) Boş metinli yorum -> REDDEDİLMELİ", async () => {
+    await assertFails(
+      otherDb
+        .collection("works")
+        .doc("work-engage")
+        .collection("comments")
+        .doc("comment-3")
+        .set({
+          authorId: OTHER_UID,
+          text: "",
+          createdAt: new Date().toISOString(),
+        })
+    );
+  });
+
+  await check("4) Başkasının yorumunu silme -> REDDEDİLMELİ", async () => {
+    await assertFails(
+      otherDb
+        .collection("works")
+        .doc("work-engage")
+        .collection("comments")
+        .doc("comment-1")
+        .delete()
+    );
+  });
+
+  await check(
+    "5) Sahibi kendi yorumunu silme -> BAŞARILI olmalı (kontrol testi)",
+    async () => {
+      await assertSucceeds(
+        ownerDb
+          .collection("works")
+          .doc("work-engage")
+          .collection("comments")
+          .doc("comment-1")
+          .delete()
+      );
+    }
+  );
+
   console.log("\n=== STORAGE: work_uploads ===");
 
   const ownerStorage = testEnv.authenticatedContext(OWNER_UID).storage();
