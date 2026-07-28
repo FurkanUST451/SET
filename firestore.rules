@@ -194,5 +194,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // İçerik şikayetleri (ör. Keşfet gönderisi, ileride sohbet mesajı vb.).
+    // Client sadece kendi adına, tek bir şikayet dokümanı oluşturabilir;
+    // moderasyon incelemesi (admin panel) yalnızca Admin SDK üzerinden
+    // yapıldığından read/update/delete client'a tamamen kapalı.
+    match /reports/{reportId} {
+      allow create: if isSignedIn()
+        && request.resource.data.reporter.userId == request.auth.uid
+        && request.resource.data.type is string
+        && request.resource.data.type.size() > 0
+        && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() > 0
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.reason.size() <= 500
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reporter is map
+        && request.resource.data.target is map;
+
+      allow read, update, delete: if false;
+    }
+
   }
 }

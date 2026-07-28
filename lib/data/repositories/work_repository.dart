@@ -17,6 +17,8 @@ class WorkRepository {
 
   Future<void> createWork(WorkModel work) => _works.doc(work.id).set(work.toJson());
 
+  Future<void> deleteWork(String workId) => _works.doc(workId).delete();
+
   Stream<List<WorkModel>> watchAll() {
     return _works.snapshots().map((snapshot) {
       final list =

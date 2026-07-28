@@ -3,28 +3,32 @@ import 'dart:async';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:get/get.dart';
 
-import '../../data/dummy/dummy_data.dart';
 import '../../data/models/comment_model.dart';
+import '../../data/models/report_model.dart';
 import '../../data/models/work_model.dart';
+import '../../data/repositories/report_repository.dart';
 import '../../data/repositories/work_repository.dart';
 import 'user_controller.dart';
 
 /// Keşfet akışını besleyen paylaşılan controller.
-/// Firestore'a yüklenen gerçek işleri, tanıtım amaçlı dummy işlerin
-/// üzerine ekler (en yeni yüklenen en üstte görünür). Beğeni ve yorum
-/// aksiyonları da buradan yönetilir — hem client hem freelancer tarafı
-/// aynı Keşfet ekranını paylaştığı için tek bir yerden akar.
+/// Firestore'a yüklenen gerçek işleri gösterir (en yeni yüklenen en
+/// üstte görünür). Beğeni ve yorum aksiyonları da buradan yönetilir —
+/// hem client hem freelancer tarafı aynı Keşfet ekranını paylaştığı
+/// için tek bir yerden akar.
 class WorksController extends GetxController {
-  WorksController({WorkRepository? repository})
-      : _repo = repository ?? Get.find<WorkRepository>();
+  WorksController({WorkRepository? repository, ReportRepository? reportRepository})
+      : _repo = repository ?? Get.find<WorkRepository>(),
+        _reportRepo = reportRepository ?? Get.find<ReportRepository>();
 
   final WorkRepository _repo;
+  final ReportRepository _reportRepo;
   final RxList<WorkModel> uploadedWorks = <WorkModel>[].obs;
   StreamSubscription<List<WorkModel>>? _sub;
 
-  List<WorkModel> get works => [...uploadedWorks, ...DummyData.works];
+  List<WorkModel> get works => uploadedWorks;
 
   String get _uid => Get.find<UserController>().currentUser?.id ?? '';
+  String get currentUserId => _uid;
 
   @override
   void onInit() {
@@ -95,6 +99,41 @@ class WorksController extends GetxController {
     } catch (_) {
       Get.snackbar('Hata', 'Yorum silinemedi, tekrar dene.',
           snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  // ---- Gönderi sahibi aksiyonları / şikayet ----
+
+  Future<bool> deleteWork(String workId) async {
+    try {
+      await _repo.deleteWork(workId);
+      return true;
+    } catch (_) {
+      Get.snackbar('Hata', 'Gönderi silinemedi, tekrar dene.',
+          snackPosition: SnackPosition.BOTTOM);
+      return false;
+    }
+  }
+
+  Future<bool> reportWork(WorkModel work, {required String reason}) async {
+    final trimmed = reason.trim();
+    if (trimmed.isEmpty) return false;
+    final user = Get.find<UserController>().currentUser;
+    if (user == null) return false;
+
+    try {
+      await _reportRepo.submitReport(
+        type: ReportedContentType.work,
+        targetId: work.id,
+        reason: trimmed,
+        reporter: user.toReporterSnapshot(),
+        target: work.toReportSnapshot(),
+      );
+      return true;
+    } catch (_) {
+      Get.snackbar('Hata', 'Bildirim gönderilemedi, tekrar dene.',
+          snackPosition: SnackPosition.BOTTOM);
+      return false;
     }
   }
 

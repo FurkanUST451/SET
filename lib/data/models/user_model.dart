@@ -35,6 +35,16 @@ class UserModel {
 
   String get fullName => surname != null ? '$name $surname' : name;
 
+  // Bir bildirim (report) oluşturulurken bildiren kullanıcının o anki
+  // hâlinin anlık görüntüsü (bkz. report_model.dart).
+  Map<String, dynamic> toReporterSnapshot() => {
+        'userId': id,
+        'name': fullName,
+        'email': email,
+        'avatarUrl': avatarUrl,
+        'role': role.name,
+      };
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,

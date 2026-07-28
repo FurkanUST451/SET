@@ -2,7 +2,6 @@ import '../../core/constants/app_assets.dart';
 import '../models/freelancer_model.dart';
 import '../models/portfolio_project_model.dart';
 import '../models/user_model.dart';
-import '../models/work_model.dart';
 
 class DummyData {
   DummyData._();
@@ -15,57 +14,6 @@ class DummyData {
     'Fotoğraf',
     'Grafik Tasarım',
     'Sosyal Medya Yönetimi',
-  ];
-
-  static const List<WorkModel> works = [
-    WorkModel(
-      id: 'w1',
-      title: 'Mercedes-Benz "The Chase"',
-      studio: 'FRAMEWORKS',
-      type: WorkType.video,
-      likes: 2400,
-      comments: 120,
-    ),
-    WorkModel(
-      id: 'w2',
-      title: 'Nightfall Aftermovie',
-      studio: 'LENS COLLECTIVE',
-      type: WorkType.video,
-      likes: 1800,
-      comments: 96,
-    ),
-    WorkModel(
-      id: 'w3',
-      title: 'VOGUE 2024 Campaign',
-      studio: 'ATELIER NOIR',
-      type: WorkType.photo,
-      likes: 3200,
-      comments: 210,
-    ),
-    WorkModel(
-      id: 'w4',
-      title: 'Aurora — CGI Short',
-      studio: 'PIXEL FORGE',
-      type: WorkType.cgiVfx,
-      likes: 980,
-      comments: 54,
-    ),
-    WorkModel(
-      id: 'w5',
-      title: 'Spectra VFX Reel',
-      studio: 'NORTH STUDIO',
-      type: WorkType.cgiVfx,
-      likes: 1500,
-      comments: 78,
-    ),
-    WorkModel(
-      id: 'w6',
-      title: 'Liminal — Generative Kimlik',
-      studio: 'SYNTHWAVE LAB',
-      type: WorkType.graphic,
-      likes: 2100,
-      comments: 145,
-    ),
   ];
 
   static final List<PortfolioProjectModel> portfolioProjects = [

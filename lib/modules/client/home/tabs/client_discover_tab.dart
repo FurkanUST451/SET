@@ -6,7 +6,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/utils/avatar_image.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
 import 'work_comments_sheet.dart';
@@ -20,6 +19,7 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
+const _kDanger = Color(0xFFB3402A); // yıkıcı aksiyonlar (sil vb.) — paletle uyumlu toprak kırmızısı
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
 
@@ -59,10 +59,6 @@ TextStyle _mono({
       letterSpacing: spacing,
     );
 
-// ─── UI-only türetilmiş etiketler (dummy veriye ek meta, modele dokunmadan) ────
-const _kTimeAgo = ['2S ÖNCE', '5S ÖNCE', '1G ÖNCE', '3G ÖNCE', '1H ÖNCE', '2H ÖNCE'];
-const _kDurations = ['01:42', '00:58', '02:15', '01:10', '03:04', '01:33'];
-
 String _formatFor(WorkType t) {
   switch (t) {
     case WorkType.video:
@@ -98,21 +94,12 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
 
   String _timeAgoFor(WorkModel work) {
     final createdAt = work.createdAt;
-    if (createdAt != null) {
-      final diff = DateTime.now().difference(createdAt);
-      if (diff.inHours < 1) return '${diff.inMinutes < 1 ? 1 : diff.inMinutes}DK ÖNCE';
-      if (diff.inDays < 1) return '${diff.inHours}S ÖNCE';
-      if (diff.inDays < 7) return '${diff.inDays}G ÖNCE';
-      return '${(diff.inDays / 7).floor()}H ÖNCE';
-    }
-    final idx = DummyData.works.indexWhere((w) => w.id == work.id);
-    return _kTimeAgo[(idx < 0 ? 0 : idx) % _kTimeAgo.length];
-  }
-
-  String _durationFor(WorkModel work) {
-    if (work.createdAt != null) return '';
-    final idx = DummyData.works.indexWhere((w) => w.id == work.id);
-    return _kDurations[(idx < 0 ? 0 : idx) % _kDurations.length];
+    if (createdAt == null) return '';
+    final diff = DateTime.now().difference(createdAt);
+    if (diff.inHours < 1) return '${diff.inMinutes < 1 ? 1 : diff.inMinutes}DK ÖNCE';
+    if (diff.inDays < 1) return '${diff.inHours}S ÖNCE';
+    if (diff.inDays < 7) return '${diff.inDays}G ÖNCE';
+    return '${(diff.inDays / 7).floor()}H ÖNCE';
   }
 
   @override
@@ -142,25 +129,28 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
                     onSelect: (t) => setState(() => _filter = t),
                   ),
                 ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
-                  sliver: SliverList.separated(
-                    itemCount: works.length,
-                    separatorBuilder: (_, _) => const Divider(
-                        height: 1, thickness: 1, color: _kDivider),
-                    itemBuilder: (_, i) {
-                      final work = works[i];
-                      return _WorkCard(
-                        scale: s,
-                        work: work,
-                        timeAgo: _timeAgoFor(work),
-                        duration: _durationFor(work),
-                        format: _formatFor(work.type),
-                        controller: _worksController,
-                      );
-                    },
+                if (works.isEmpty)
+                  SliverToBoxAdapter(child: _EmptyState(scale: s))
+                else
+                  SliverPadding(
+                    padding:
+                        EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
+                    sliver: SliverList.separated(
+                      itemCount: works.length,
+                      separatorBuilder: (_, _) => const Divider(
+                          height: 1, thickness: 1, color: _kDivider),
+                      itemBuilder: (_, i) {
+                        final work = works[i];
+                        return _WorkCard(
+                          scale: s,
+                          work: work,
+                          timeAgo: _timeAgoFor(work),
+                          format: _formatFor(work.type),
+                          controller: _worksController,
+                        );
+                      },
+                    ),
                   ),
-                ),
               ],
             );
           }),
@@ -238,6 +228,37 @@ class _Header extends StatelessWidget {
           Text(
             'SETTEKİLERİN SON İŞLERİ',
             style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BOŞ DURUM — henüz yüklenmiş gerçek iş yokken gösterilir
+// ─────────────────────────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.scale});
+
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 40 * s, 26 * s, 80 * s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'HENÜZ PAYLAŞIM YOK',
+            style: _mono(size: 9 * s, color: _kBlack, spacing: 1.5),
+          ),
+          SizedBox(height: 10 * s),
+          Text(
+            'Setteki ekipler ilk işlerini yüklediğinde burada görünecek.',
+            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
           ),
         ],
       ),
@@ -345,7 +366,6 @@ class _WorkCard extends StatelessWidget {
     required this.scale,
     required this.work,
     required this.timeAgo,
-    required this.duration,
     required this.format,
     required this.controller,
   });
@@ -353,7 +373,6 @@ class _WorkCard extends StatelessWidget {
   final double scale;
   final WorkModel work;
   final String timeAgo;
-  final String duration;
   final String format;
   final WorksController controller;
 
@@ -420,6 +439,8 @@ class _WorkCard extends StatelessWidget {
                 timeAgo,
                 style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
               ),
+              SizedBox(width: 4 * s),
+              _WorkMenuButton(scale: s, work: work, controller: controller),
             ],
           ),
           SizedBox(height: 20 * s),
@@ -460,7 +481,7 @@ class _WorkCard extends StatelessWidget {
               ),
               SizedBox(width: 12 * s),
               Text(
-                duration.isEmpty ? format : '$duration · $format',
+                format,
                 style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
               ),
             ],
@@ -489,6 +510,276 @@ class _WorkCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// GÖNDERİ MENÜSÜ — dikey 3 nokta: herkes bildirebilir, sahibi silebilir.
+// ─────────────────────────────────────────────────────────────────
+enum _WorkMenuAction { report, delete }
+
+class _WorkMenuButton extends StatelessWidget {
+  const _WorkMenuButton({
+    required this.scale,
+    required this.work,
+    required this.controller,
+  });
+
+  final double scale;
+  final WorkModel work;
+  final WorksController controller;
+
+  bool get _isOwner =>
+      work.freelancerId != null &&
+      work.freelancerId == controller.currentUserId;
+
+  Future<void> _handleReport(BuildContext context) async {
+    final reason = await showDialog<String>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (ctx) => const _ReportReasonDialog(),
+    );
+
+    final trimmed = reason?.trim();
+    if (trimmed == null || trimmed.isEmpty) return;
+
+    final ok = await controller.reportWork(work, reason: trimmed);
+    if (ok && context.mounted) {
+      Get.snackbar('Teşekkürler', 'Gönderi bildirildi.',
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  Future<void> _handleDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (ctx) => _EditorialDialog(
+        title: 'GÖNDERİYİ SİL',
+        content: Text(
+          'Bu gönderiyi kalıcı olarak silmek istediğine emin misin? '
+          'Bu işlem geri alınamaz.',
+          style: _mono(size: 9, color: _kTaupe, spacing: 0.2).copyWith(height: 1.5),
+        ),
+        actions: [
+          _EditorialDialogAction(
+            label: 'VAZGEÇ',
+            color: _kTaupe,
+            onTap: () => Navigator.of(ctx).pop(false),
+          ),
+          _EditorialDialogAction(
+            label: 'SİL',
+            color: _kDanger,
+            onTap: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await controller.deleteWork(work.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return PopupMenuButton<_WorkMenuAction>(
+      padding: EdgeInsets.zero,
+      color: _kCream,
+      surfaceTintColor: Colors.transparent,
+      elevation: 3,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+        side: BorderSide(color: _kDivider),
+      ),
+      icon: Icon(Icons.more_vert_rounded, size: 18 * s, color: _kTaupe),
+      onSelected: (action) {
+        switch (action) {
+          case _WorkMenuAction.report:
+            _handleReport(context);
+          case _WorkMenuAction.delete:
+            _handleDelete(context);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _WorkMenuAction.report,
+          height: 40,
+          child: Text(
+            'GÖNDERİYİ BİLDİR',
+            style: _mono(size: 9, weight: FontWeight.w600, color: _kInk, spacing: 1),
+          ),
+        ),
+        if (_isOwner)
+          PopupMenuItem(
+            value: _WorkMenuAction.delete,
+            height: 40,
+            child: Text(
+              'SİL',
+              style: _mono(size: 9, weight: FontWeight.w600, color: _kDanger, spacing: 1),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BİLDİRİM SEBEBİ DİYALOĞU — TextEditingController'ı State içinde tutup
+// dispose'unu widget gerçekten unmount olurken (dialog kapanış animasyonu
+// bittiğinde) yapar. showDialog'un future'ı pop() çağrılır çağrılmaz
+// tamamlandığından, controller'ı doğrudan orada manuel dispose etmek
+// TextField hâlâ ekrandan çıkış animasyonundayken kullanılmasına ve
+// "_dependents.isEmpty" assertion'ına yol açıyordu.
+// ─────────────────────────────────────────────────────────────────
+class _ReportReasonDialog extends StatefulWidget {
+  const _ReportReasonDialog();
+
+  @override
+  State<_ReportReasonDialog> createState() => _ReportReasonDialogState();
+}
+
+class _ReportReasonDialogState extends State<_ReportReasonDialog> {
+  static const _kDefaultReportReason = 'Bu gönderiyi uygunsuz buluyorum';
+
+  late final TextEditingController _textController =
+      TextEditingController(text: _kDefaultReportReason);
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _EditorialDialog(
+      title: 'GÖNDERİYİ BİLDİR',
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Bu içeriği neden bildiriyorsun? Mesajı dilediğin gibi düzenleyebilirsin.',
+            style: _mono(size: 9, color: _kTaupe, spacing: 0.2)
+                .copyWith(height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(border: Border.all(color: _kDivider)),
+            child: TextField(
+              controller: _textController,
+              autofocus: true,
+              minLines: 3,
+              maxLines: 5,
+              maxLength: 500,
+              cursorColor: _kGold,
+              style: _mono(size: 10, color: _kBlack, spacing: 0.2).copyWith(height: 1.5),
+              decoration: InputDecoration(
+                isCollapsed: true,
+                border: InputBorder.none,
+                counterText: '',
+                hintText: 'Bildirme sebebini yaz...',
+                hintStyle: _mono(size: 10, color: _kTaupe, spacing: 0.2),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        _EditorialDialogAction(
+          label: 'VAZGEÇ',
+          color: _kTaupe,
+          onTap: () => Navigator.of(context).pop(),
+        ),
+        _EditorialDialogAction(
+          label: 'GÖNDER',
+          color: _kGold,
+          onTap: () => Navigator.of(context).pop(_textController.text),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// EDİTORYAL DİYALOG KABI — uygulamanın kendi paleti/tipografisiyle
+// (bkz. dosya başındaki _kCream/_kGold/... ve _serif/_mono) çizilen,
+// Material'ın varsayılan AlertDialog'u yerine geçen ortak kabuk.
+// Font yalnızca _mono/_serif üzerinden geldiği için ileride uygulama
+// genelinde font değişirse buradaki diyaloglar da otomatik güncellenir.
+// ─────────────────────────────────────────────────────────────────
+class _EditorialDialogAction {
+  const _EditorialDialogAction({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+}
+
+class _EditorialDialog extends StatelessWidget {
+  const _EditorialDialog({
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  final String title;
+  final Widget content;
+  final List<_EditorialDialogAction> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: _kCream,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 20, 22, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: _mono(size: 9, weight: FontWeight.w700, color: _kBlack, spacing: 1.5)),
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 18),
+              height: 1,
+              color: _kDivider,
+            ),
+            content,
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                for (final action in actions)
+                  GestureDetector(
+                    onTap: action.onTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      child: Text(
+                        action.label,
+                        style: _mono(
+                            size: 9,
+                            weight: FontWeight.w700,
+                            color: action.color,
+                            spacing: 1.2),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -631,8 +922,7 @@ class _IconCount extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// BEĞENİ — dummy kartlarda salt-görsel; gerçek işlerde dokunulabilir.
-// isLiked durumu Firestore'dan (works/{id}/likes/{uid} doküman varlığı)
+// BEĞENİ — isLiked durumu Firestore'dan (works/{id}/likes/{uid} doküman varlığı)
 // canlı akar; sayaç ise works.likes alanından gelir ve Cloud Function
 // tetikleyicisi FieldValue.increment ile güncelleyene kadar küçük bir
 // gecikme olabileceğinden, kendi dokunuşumuzun etkisini o an gösterebilmek
@@ -746,7 +1036,7 @@ class _LikeActionState extends State<_LikeAction> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// YORUM — dummy kartlarda salt-görsel; gerçek işlerde yorum sayfasını açar.
+// YORUM — dokunulduğunda yorum sayfasını açar.
 // ─────────────────────────────────────────────────────────────────
 class _CommentAction extends StatelessWidget {
   const _CommentAction({required this.scale, required this.work});
@@ -771,8 +1061,7 @@ class _CommentAction extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// GÖNDER — dummy kartlarda salt-görsel; gerçek işlerde işletim
-// sisteminin native paylaşım sayfasını açar (WhatsApp, SMS, vb.) ve
+// GÖNDER — işletim sisteminin native paylaşım sayfasını açar (WhatsApp, SMS, vb.) ve
 // markalı izleme sayfasının linkini paylaşır — ham Storage linki değil.
 // ─────────────────────────────────────────────────────────────────
 class _ShareAction extends StatelessWidget {
