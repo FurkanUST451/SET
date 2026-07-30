@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_fonts.dart';
 
-import '../../../../core/constants/app_assets.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../app/auth_controller.dart';
 import '../../../app/user_controller.dart';
@@ -122,7 +121,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                             child: _buildSection(s, 'HESAP', [
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsProfile,
                                 label: 'Profili Düzenle',
                                 sub: 'Fotoğraf, portfolyo ve etkileşimlerin',
                                 onTap: () => Get.to<void>(
@@ -131,7 +129,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsMail,
                                 label: 'E-posta & Telefon',
                                 sub: 'İletişim bilgilerini güncelle',
                                 onTap: () => Get.to<void>(
@@ -140,7 +137,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsPassword,
                                 label: 'Şifre Değiştir',
                                 sub: 'Güvenlik & oturum anahtarları',
                                 onTap: () => Get.to<void>(
@@ -156,7 +152,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                             child: _buildSection(s, 'TERCİHLER', [
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsNotification,
                                 label: 'Bildirimler',
                                 sub: 'Push, e-posta tercihleri',
                                 onTap: () => Get.to<void>(
@@ -165,7 +160,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsLanguage,
                                 label: 'Dil & Bölge',
                                 sub: 'Türkçe',
                                 onTap: () => Get.to<void>(
@@ -181,7 +175,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                             child: _buildSection(s, 'DESTEK', [
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsHelp,
                                 label: 'Yardım Merkezi',
                                 onTap: () => Get.to<void>(
                                   () => const HelpCenterScreen(),
@@ -189,14 +182,12 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsContact,
                                 label: 'Bize Ulaş',
                                 onTap: () =>
                                     Get.to<void>(() => const ContactUsScreen()),
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsTerms,
                                 label: 'Kullanım Koşulları',
                                 onTap: () =>
                                     Get.to<void>(() => const TermsScreen()),
@@ -210,14 +201,12 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                             child: _buildSection(s, 'OTURUM', [
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsRole,
                                 label: 'Rolümü Değiştir',
                                 onTap: () =>
                                     Get.offAllNamed(AppRoutes.roleSelection),
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsExit,
                                 label: 'Çıkış Yap',
                                 danger: true,
                                 onTap: () async {
@@ -227,7 +216,6 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                               ),
                               _SettingsRow(
                                 scale: s,
-                                iconAsset: AppAssets.settingsDelete,
                                 label: 'Hesabı Sil',
                                 danger: true,
                                 onTap: () => Get.to<void>(
@@ -308,23 +296,36 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
             : '?';
         return Row(
           children: [
-            Container(
-              width: 64 * s,
-              height: 64 * s,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.45),
-                border: Border.all(color: _kGold, width: 1.6),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                initial,
-                style: _display(
-                  size: 24 * s,
-                  weight: FontWeight.w500,
-                  color: _kGold,
+            // Köşeleri yuvarlatılmış kare avatar + çentik süslemesi
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 72 * s,
+                  height: 72 * s,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10 * s),
+                    color: Colors.white.withValues(alpha: 0.45),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    initial,
+                    style: _display(
+                      size: 24 * s,
+                      weight: FontWeight.w500,
+                      color: _kGold,
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(top: -5 * s, left: -5 * s, child: _corner(s, 0)),
+                Positioned(top: -5 * s, right: -5 * s, child: _corner(s, 1)),
+                Positioned(bottom: -5 * s, left: -5 * s, child: _corner(s, 2)),
+                Positioned(bottom: -5 * s, right: -5 * s, child: _corner(s, 3)),
+              ],
             ),
             SizedBox(width: 18 * s),
             Expanded(
@@ -384,10 +385,39 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
     );
   }
 
+  // Köşe çentiği: ana hizmet kartlarında kullanılan işaretin aynısı.
+  Widget _corner(double s, int quadrant) {
+    final len = 12 * s;
+    final isLeft = quadrant == 0 || quadrant == 2;
+    final isTop = quadrant == 0 || quadrant == 1;
+    return SizedBox(
+      width: len,
+      height: len,
+      child: Stack(
+        children: [
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: len, height: 1.4, color: _kInk),
+          ),
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: 1.4, height: len, color: _kInk),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ─── Bölüm: altın çizgi + başlık + sağda satır sayısı, sonra düz liste ──────
   Widget _buildSection(double s, String title, List<Widget> rows) {
     return Padding(
-      padding: EdgeInsets.only(top: 58 * s),
+      padding: EdgeInsets.only(top: 30 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -472,7 +502,6 @@ class _StaggeredItem extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.scale,
-    required this.iconAsset,
     required this.label,
     this.sub,
     this.onTap,
@@ -480,7 +509,6 @@ class _SettingsRow extends StatelessWidget {
   });
 
   final double scale;
-  final String iconAsset;
   final String label;
   final String? sub;
   final VoidCallback? onTap;
@@ -490,9 +518,6 @@ class _SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     final titleColor = danger ? const Color(0xFFBE6A5A) : _kInk;
-    final borderColor = danger
-        ? const Color(0xFFBE6A5A).withValues(alpha: 0.4)
-        : Colors.black.withValues(alpha: 0.14);
 
     return InkWell(
       onTap: onTap,
@@ -500,17 +525,6 @@ class _SettingsRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 20 * s),
         child: Row(
           children: [
-            Container(
-              width: 44 * s,
-              height: 44 * s,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor),
-              ),
-              alignment: Alignment.center,
-              child: Image.asset(iconAsset, width: 24 * s, height: 24 * s),
-            ),
-            SizedBox(width: 15 * s),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,8 +533,8 @@ class _SettingsRow extends StatelessWidget {
                   Text(
                     label,
                     style: _display(
-                      size: 14 * s,
-                      weight: FontWeight.w500,
+                      size: 12 * s,
+                      weight: FontWeight.w600,
                       color: titleColor,
                     ),
                   ),

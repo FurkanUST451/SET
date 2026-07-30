@@ -204,8 +204,6 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                               SizedBox(height: 18 * s),
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(16 * s),
                                   border: Border.all(color: _kDivider),
                                 ),
                                 padding: EdgeInsets.symmetric(
@@ -283,8 +281,6 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                         height: 50 * s,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(14 * s),
                                           border: Border.all(
                                               color: _kInk, width: 1.2),
                                         ),
@@ -305,10 +301,8 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                       behavior: HitTestBehavior.opaque,
                                       child: Container(
                                         height: 50 * s,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           color: _kGold,
-                                          borderRadius:
-                                              BorderRadius.circular(14 * s),
                                         ),
                                         alignment: Alignment.center,
                                         child: Text('TEKLİF GÖNDER',
@@ -324,10 +318,7 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                               ),
                               ...[
                                 SizedBox(height: 20 * s),
-                                Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 24 * s),
-                                  child: GestureDetector(
+                                GestureDetector(
                                   onTap: showreel != null
                                       ? () => _openVideo(
                                           showreel!.videoUrl!, showreel.title)
@@ -335,10 +326,8 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                   child: Container(
                                     width: double.infinity,
                                     height: 170 * s,
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.circular(18 * s),
-                                      gradient: const LinearGradient(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [_kThumbTop, _kThumbBot],
@@ -408,10 +397,7 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 6 * s,
                                                 vertical: 3 * s),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      6 * s),
+                                            decoration: const BoxDecoration(
                                               color: Colors.black54,
                                             ),
                                             child: Text(showreelDuration,
@@ -425,7 +411,6 @@ class FreelancerDetailView extends GetView<FreelancerDetailController> {
                                       ],
                                     ),
                                   ),
-                                ),
                                 ),
                               ],
                               SizedBox(height: 20 * s),
@@ -652,9 +637,8 @@ class _IslerTab extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14 * s),
-                        gradient: const LinearGradient(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [_kThumbTop, _kThumbBot],
@@ -681,8 +665,6 @@ class _IslerTab extends StatelessWidget {
                                 width: 26 * s,
                                 height: 26 * s,
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(8 * s),
                                   color: Colors.black.withValues(alpha: 0.45),
                                 ),
                                 child: Icon(Icons.play_arrow_rounded,
@@ -777,7 +759,6 @@ class _HakkindaTab extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 8 * s),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30 * s),
               border: Border.all(color: _kGold),
             ),
             child: Text('TRUST $trustScore%',
@@ -809,7 +790,6 @@ class _HakkindaTab extends StatelessWidget {
                         horizontal: 12 * s, vertical: 7 * s),
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(30 * s),
                         border: Border.all(color: Colors.black12)),
                     child: Text(x,
                         style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2)),
@@ -885,7 +865,6 @@ class _ReviewItem extends StatelessWidget {
       padding: EdgeInsets.all(14 * s),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14 * s),
         border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
       ),
       child: Row(
@@ -894,9 +873,8 @@ class _ReviewItem extends StatelessWidget {
           Container(
             width: 38 * s,
             height: 38 * s,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10 * s),
-              color: const Color(0xFFEADCBB),
+            decoration: const BoxDecoration(
+              color: Color(0xFFEADCBB),
             ),
             alignment: Alignment.center,
             child: Text(initials,

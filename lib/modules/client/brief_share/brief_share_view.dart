@@ -115,14 +115,25 @@ class BriefShareView extends GetView<BriefShareController> {
                                   size: 8 * s, color: _kBlack, spacing: 1.5),
                             ),
                             SizedBox(height: 8 * s),
-                            Text(
-                              controller.isEditMode
-                                  ? "Brief'ini güncelle."
-                                  : "Brief'ini paylaş.",
-                              style: _display(
-                                  size: 40 * s,
-                                  weight: FontWeight.w600,
-                                  color: _kInk),
+                            Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: "Brief'ini ",
+                                  style: _display(
+                                      size: 40 * s,
+                                      weight: FontWeight.w600,
+                                      color: _kInk),
+                                ),
+                                TextSpan(
+                                  text: controller.isEditMode
+                                      ? 'güncelle.'
+                                      : 'paylaş.',
+                                  style: _display(
+                                      size: 40 * s,
+                                      weight: FontWeight.w600,
+                                      color: _kGold),
+                                ),
+                              ]),
                             ),
                             SizedBox(height: 8 * s),
                             Text(

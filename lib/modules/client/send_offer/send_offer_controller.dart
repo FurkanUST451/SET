@@ -33,6 +33,7 @@ class SendOfferController extends GetxController {
   // ─── Lokasyon ─────────────────────────────────────────────────────────────
   final RxBool isLocationExpanded = false.obs;
   final RxString selectedLocation = ''.obs;
+  final TextEditingController locationController = TextEditingController();
 
   final RxBool isSubmitting = false.obs;
 
@@ -50,15 +51,6 @@ class SendOfferController extends GetxController {
     '14 Gün',
     '21 Gün',
     '30 Gün',
-  ];
-
-  static const locationOptions = [
-    'İstanbul / Beşiktaş',
-    'İstanbul / Kadıköy',
-    'İstanbul / Şişli',
-    'Ankara / Çankaya',
-    'İzmir / Alsancak',
-    'Uzaktan',
   ];
 
   // Bu kategorilerde çekim mahal bağımsız olduğu için lokasyon sorulmaz.
@@ -113,12 +105,14 @@ class SendOfferController extends GetxController {
 
       selectedDelivery.value = existing.answers.deliveryTime ?? '';
       selectedLocation.value = existing.answers.location ?? '';
+      locationController.text = selectedLocation.value;
     }
   }
 
   @override
   void onClose() {
     customDeliveryController.dispose();
+    locationController.dispose();
     super.onClose();
   }
 
@@ -238,8 +232,14 @@ class SendOfferController extends GetxController {
     _advanceTo(showLocation ? _Section.location : null);
   }
 
-  void selectLocation(String value) {
+  void setLocationText(String value) {
     selectedLocation.value = value;
+  }
+
+  void submitLocationText() {
+    final trimmed = locationController.text.trim();
+    if (trimmed.isEmpty) return;
+    selectedLocation.value = trimmed;
     _advanceTo(null);
   }
 

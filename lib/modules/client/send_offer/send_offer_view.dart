@@ -125,15 +125,45 @@ class SendOfferView extends GetView<SendOfferController> {
                       SizedBox(height: 8 * s),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                        child: Text(
-                          controller.isEditMode
-                              ? "Brief'ini\ngüncelle."
-                              : "Doğru brief'i\noluşturalım.",
-                          style: _display(
-                              size: 40 * s,
-                              weight: FontWeight.w600,
-                              color: _kInk,
-                              height: 1.05),
+                        child: Text.rich(
+                          TextSpan(children: controller.isEditMode
+                              ? [
+                                  TextSpan(
+                                    text: "Brief'ini\n",
+                                    style: _display(
+                                        size: 40 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kInk,
+                                        height: 1.05),
+                                  ),
+                                  TextSpan(
+                                    text: 'güncelle.',
+                                    style: _display(
+                                        size: 40 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kGold,
+                                        height: 1.05),
+                                  ),
+                                ]
+                              : [
+                                  TextSpan(
+                                    text: "Doğru brief'i\n",
+                                    style: _display(
+                                        size: 40 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kInk,
+                                        height: 1.05),
+                                  ),
+                                  TextSpan(
+                                    text: 'oluşturalım.',
+                                    style: _display(
+                                        size: 40 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kGold,
+                                        height: 1.05),
+                                  ),
+                                ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 8 * s),
@@ -709,17 +739,23 @@ class _LocationCard extends StatelessWidget {
           valueText: controller.selectedLocation.value,
           expanded: controller.isLocationExpanded.value,
           onToggle: controller.toggleLocationExpanded,
-          child: Wrap(
-            spacing: 8 * s,
-            runSpacing: 8 * s,
-            children: SendOfferController.locationOptions
-                .map((o) => _Chip(
-                      scale: s,
-                      label: o,
-                      selected: controller.selectedLocation.value == o,
-                      onTap: () => controller.selectLocation(o),
-                    ))
-                .toList(),
+          child: TextField(
+            controller: controller.locationController,
+            style: _display(size: 15 * s, color: _kInk),
+            onChanged: controller.setLocationText,
+            onSubmitted: (_) => controller.submitLocationText(),
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white,
+              hintText: 'Şehir / ilçe yazın',
+              hintStyle: _ui(size: 9 * s, color: _kMuted),
+              enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: _kCardBorder)),
+              focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: _kGold)),
+            ),
           ),
         ));
   }

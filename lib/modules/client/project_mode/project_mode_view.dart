@@ -142,14 +142,27 @@ class _ProjectModeViewState extends State<ProjectModeView> {
                         style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                       ),
                       SizedBox(height: 6 * s),
-                      Text(
-                        'Nasıl\nilerleyelim?',
-                        style: _display(
-                          size: 36 * s,
-                          weight: FontWeight.w600,
-                          color: _kTextInk,
-                          height: 1.0,
-                        ),
+                      Text.rich(
+                        TextSpan(children: [
+                          TextSpan(
+                            text: 'Nasıl\n',
+                            style: _display(
+                              size: 36 * s,
+                              weight: FontWeight.w600,
+                              color: _kTextInk,
+                              height: 1.0,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'ilerleyelim?',
+                            style: _display(
+                              size: 36 * s,
+                              weight: FontWeight.w600,
+                              color: _kGold,
+                              height: 1.0,
+                            ),
+                          ),
+                        ]),
                       ),
                       SizedBox(height: 28 * s),
                       _ModeCard(

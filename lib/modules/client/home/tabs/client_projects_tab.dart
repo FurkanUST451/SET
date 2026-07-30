@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_fonts.dart';
+import '../../../../core/constants/app_assets.dart';
 
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
@@ -59,18 +60,25 @@ class ClientProjectsTab extends StatefulWidget {
 class _ClientProjectsTabState extends State<ClientProjectsTab> {
   int _filterIndex = 0;
 
-  static const _filterLabels = ['TÜMÜ', 'TEKLİF AŞAMASINDA', 'ANLAŞMA BEKLİYOR'];
-  static const _filterStatus = <String?>[null, 'offer_sent', 'submitted'];
+  static const _filterLabels = [
+    'TÜMÜ',
+    'AKTİF PROJELER',
+    'TEKLİF AŞAMASINDA',
+    'ANLAŞMA BEKLİYOR'
+  ];
+  static const _filterStatus = <String?>[null, null, 'offer_sent', 'submitted'];
+  static const _activeFilterIndex = 1;
 
   List<BriefModel> _apply(List<BriefModel> all) {
+    if (_filterIndex == _activeFilterIndex) return [];
     final st = _filterStatus[_filterIndex];
     if (st == null) return all;
     return all.where((b) => b.status == st).toList();
   }
 
-  // Aktif projeler yalnızca "TÜMÜ" filtresinde, brieflerin üstünde gösterilir.
+  // Aktif projeler "TÜMÜ" ve "AKTİF PROJELER" filtrelerinde gösterilir.
   List<ProjectModel> _activeProjects(ClientProjectsController controller) {
-    if (_filterIndex != 0) return [];
+    if (_filterIndex != 0 && _filterIndex != _activeFilterIndex) return [];
     return controller.projects
         .where((p) => p.status == ProjectStatus.active)
         .toList();
@@ -122,34 +130,16 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                         child: ListView(
                           padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 130 * s),
                           children: [
-                            if (activeProjects.isNotEmpty) ...[
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                                child: _SectionLabel(scale: s, text: 'AKTİF PROJELER'),
-                              ),
-                              SizedBox(height: 12 * s),
-                              for (final p in activeProjects) ...[
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                                  child: _ProjectCard(scale: s, project: p),
-                                ),
+                            for (var i = 0; i < activeProjects.length; i++) ...[
+                              _ProjectCard(scale: s, project: activeProjects[i]),
+                              if (i < activeProjects.length - 1 ||
+                                  briefs.isNotEmpty)
                                 SizedBox(height: 18 * s),
-                              ],
-                              SizedBox(height: 4 * s),
                             ],
-                            if (briefs.isNotEmpty) ...[
-                              if (activeProjects.isNotEmpty) ...[
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                                  child: _SectionLabel(scale: s, text: 'BRIEFLER'),
-                                ),
-                                SizedBox(height: 12 * s),
-                              ],
-                              for (var i = 0; i < briefs.length; i++) ...[
-                                _BriefCard(scale: s, brief: briefs[i]),
-                                if (i < briefs.length - 1)
-                                  SizedBox(height: 18 * s),
-                              ],
+                            for (var i = 0; i < briefs.length; i++) ...[
+                              _BriefCard(scale: s, brief: briefs[i]),
+                              if (i < briefs.length - 1)
+                                SizedBox(height: 18 * s),
                             ],
                           ],
                         ),
@@ -283,9 +273,10 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
           width: 56 * s,
           height: 56 * s,
           alignment: Alignment.center,
+          padding: EdgeInsets.all(12 * s),
           decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.zero,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18 * s),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.22),
@@ -294,51 +285,87 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
               ),
             ],
           ),
-          child: Text(
-            'SET',
-            style: AppFonts.display(
-              fontSize: 13 * s,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 1.5,
-            ),
-          ),
+          child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
         ),
       ),
     );
   }
 }
 
-// ─── Bölüm etiketi ────────────────────────────────────────────────
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.scale, required this.text});
-  final double scale;
-  final String text;
+// ─── Sinyal gibi yanıp sönen durum noktası ─────────────────────────
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot({required this.color, this.size = 8});
+  final Color color;
+  final double size;
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  late final Animation<double> _opacity = Tween<double>(begin: 0.25, end: 1.0)
+      .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final s = scale;
-    return Row(
-      children: [
-        Container(width: 18 * s, height: 2, color: _kGold),
-        SizedBox(width: 10 * s),
-        Text(
-          text,
-          style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.8),
-        ),
-      ],
+    return FadeTransition(
+      opacity: _opacity,
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
 // ACTIVE PROJECT CARD — anlaşılan ve devam eden projeler (ProjectRepository).
+// Görünüm olarak BRIEF CARD ile birebir aynıdır; yalnızca durum
+// etiketi/rengi ve "REVİZE ET" yerine proje detayına yönlendirme değişir.
 // ─────────────────────────────────────────────────────────────────
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({required this.scale, required this.project});
 
   final double scale;
   final ProjectModel project;
+
+  String get _bigTitle {
+    final cat = project.category ?? '';
+    return cat.isNotEmpty ? cat : project.title;
+  }
+
+  String get _subtitle => project.shootingType ?? '';
+
+  String get _categoryAsset {
+    final cat = (project.category ?? '').toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
 
   IconData get _categoryIcon {
     final cat = (project.category ?? '').toLowerCase();
@@ -350,55 +377,213 @@ class _ProjectCard extends StatelessWidget {
       return Icons.music_note_rounded;
     } else if (cat.contains('cgi') || cat.contains('vfx')) {
       return Icons.auto_awesome_rounded;
-    } else if (cat.contains('kurgu')) {
-      return Icons.content_cut_rounded;
-    } else if (cat.contains('grafik')) {
-      return Icons.brush_rounded;
     }
-    return Icons.work_history_outlined;
+    return Icons.work_rounded;
+  }
+
+  String get _compactBudget {
+    final b = project.budget;
+    if (b >= 1000) {
+      final k = b / 1000;
+      final kStr = k == k.roundToDouble()
+          ? k.toStringAsFixed(0)
+          : k.toStringAsFixed(1);
+      return '${kStr}K';
+    }
+    return b.toStringAsFixed(0);
   }
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: _kGold.withValues(alpha: 0.4)),
+        border: Border(
+          top: BorderSide(color: _kCardBorder),
+          bottom: BorderSide(color: _kCardBorder),
+        ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 18 * s, vertical: 16 * s),
-      child: Row(
-        children: [
-          Container(
-            width: 44 * s,
-            height: 44 * s,
-            color: _kGold.withValues(alpha: 0.15),
-            alignment: Alignment.center,
-            child: Icon(_categoryIcon, size: 22 * s, color: _kGold),
-          ),
-          SizedBox(width: 12 * s),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  project.title.isNotEmpty ? project.title : 'Proje',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _display(size: 16 * s, weight: FontWeight.w600, color: _kInk),
-                ),
-                SizedBox(height: 3 * s),
-                Text(
-                  '${project.budget.toStringAsFixed(0)} ₺ · AKTİF',
-                  style: _ui(
-                      size: 9 * s, weight: FontWeight.w700, color: _kGold, spacing: 0.4),
-                ),
-              ],
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Durum satırı
+            Padding(
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
+              child: Row(
+                children: [
+                  _PulsingDot(color: _kGold, size: 8 * s),
+                  SizedBox(width: 8 * s),
+                  Text(
+                    'ONAYLI PROJE',
+                    style: _ui(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kBlack,
+                        spacing: 1.4),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right, size: 18 * s, color: _kMuted),
-        ],
-      ),
+
+            // Kimlik satırı
+            Padding(
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 42 * s, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48 * s,
+                    height: 48 * s,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      _categoryAsset,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                          _categoryIcon,
+                          size: 22 * s,
+                          color: _kGold),
+                    ),
+                  ),
+                  SizedBox(width: 14 * s),
+                  Expanded(
+                    child: SizedBox(
+                      height: 48 * s,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _bigTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _display(
+                                size: 20 * s,
+                                weight: FontWeight.w600,
+                                color: _kInk),
+                          ),
+                          if (_subtitle.isNotEmpty) ...[
+                            SizedBox(height: 3 * s),
+                            Text(
+                              _subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _ui(
+                                  size: 8 * s, color: _kBlack, spacing: 1),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Meta satırı (teslim / bütçe / çekim)
+            if (project.deliveryTime != null || project.dateRange != null) ...[
+              SizedBox(height: 18 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.schedule_rounded,
+                        label: 'TESLİM',
+                        value: project.deliveryTime ?? '—',
+                      ),
+                    ),
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.payments_outlined,
+                        label: 'BÜTÇE',
+                        value: _compactBudget,
+                      ),
+                    ),
+                    Expanded(
+                      child: _MetaCell(
+                        scale: s,
+                        icon: Icons.calendar_today_rounded,
+                        label: 'ÇEKİM',
+                        value: project.dateRange ?? '—',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Konum
+            if (project.location != null && project.location!.isNotEmpty) ...[
+              SizedBox(height: 24 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 13 * s, color: _kTaupe),
+                    SizedBox(width: 5 * s),
+                    Expanded(
+                      child: Text(
+                        project.location!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Açıklama + Detay
+            SizedBox(height: 14 * s),
+            Padding(
+              padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (project.notes != null && project.notes!.isNotEmpty) ...[
+                    Icon(Icons.chat_bubble_outline_rounded,
+                        size: 13 * s, color: _kTaupe),
+                    SizedBox(width: 5 * s),
+                    Expanded(
+                      child: Text(
+                        project.notes!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: _ui(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: _kInk,
+                            spacing: 0.2),
+                      ),
+                    ),
+                    SizedBox(width: 8 * s),
+                  ] else
+                    const Spacer(),
+                  Text(
+                    'DETAY',
+                    style: _ui(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kGold,
+                        spacing: 1.2),
+                  ),
+                  SizedBox(width: 4 * s),
+                  Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
+                ],
+              ),
+            ),
+          ],
+        ),
     );
   }
 }
@@ -427,7 +612,7 @@ class _BriefCard extends StatelessWidget {
     switch (brief.status) {
       case 'offer_sent':
       case 'submitted':
-        return _kGold;
+        return _kBlack;
       default:
         return _kMuted;
     }
@@ -509,14 +694,7 @@ class _BriefCard extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
               child: Row(
                 children: [
-                  Container(
-                    width: 8 * s,
-                    height: 8 * s,
-                    decoration: BoxDecoration(
-                      color: _statusColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  _PulsingDot(color: _statusColor, size: 8 * s),
                   SizedBox(width: 8 * s),
                   Text(
                     _statusLabel,

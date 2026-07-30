@@ -82,4 +82,7 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> sendPasswordResetEmail(String email) =>
+      _repo.sendPasswordResetEmail(email);
 }

@@ -254,6 +254,45 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
   }
 }
 
+// ─── Sinyal gibi yanıp sönen durum noktası ─────────────────────────
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot({required this.color, this.size = 8});
+  final Color color;
+  final double size;
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  late final Animation<double> _opacity = Tween<double>(begin: 0.25, end: 1.0)
+      .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────
 // PROJECT CARD — sektasarım tasarımı, ProjectRepository'den gelen gerçek
 // verilerle (durum, bütçe, hizmet alan adı) beslenir.
@@ -270,6 +309,10 @@ class _ProjectCard extends StatelessWidget {
   final String? clientName;
 
   String get _category => project.category ?? '';
+
+  String get _bigTitle => _category.isNotEmpty ? _category : project.title;
+
+  String get _subtitle => project.shootingType ?? '';
 
   String get _statusLabel {
     switch (project.status) {
@@ -297,6 +340,24 @@ class _ProjectCard extends StatelessWidget {
     }
   }
 
+  String get _categoryAsset {
+    final cat = _category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
   IconData get _categoryIcon {
     final cat = _category.toLowerCase();
     if (cat.contains('video') || cat.contains('film')) {
@@ -311,6 +372,18 @@ class _ProjectCard extends StatelessWidget {
     return Icons.work_rounded;
   }
 
+  String get _compactBudget {
+    final b = project.budget;
+    if (b >= 1000) {
+      final k = b / 1000;
+      final kStr = k == k.roundToDouble()
+          ? k.toStringAsFixed(0)
+          : k.toStringAsFixed(1);
+      return '${kStr}K';
+    }
+    return b.toStringAsFixed(0);
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = scale;
@@ -320,19 +393,22 @@ class _ProjectCard extends StatelessWidget {
         arguments: {'project': project},
       ),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: _kCardBorder),
+          border: Border(
+            top: BorderSide(color: _kCardBorder),
+            bottom: BorderSide(color: _kCardBorder),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Durum satırı
             Padding(
-              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
               child: Row(
                 children: [
-                  Container(width: 8 * s, height: 8 * s, color: _statusColor),
+                  _PulsingDot(color: _statusColor, size: 8 * s),
                   SizedBox(width: 8 * s),
                   Text(
                     _statusLabel,
@@ -349,43 +425,55 @@ class _ProjectCard extends StatelessWidget {
 
             // Kimlik satırı
             Padding(
-              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 18 * s, 0),
+              padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 42 * s, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 48 * s,
                     height: 48 * s,
-                    color: _kGold,
-                    child: Icon(
-                      _categoryIcon,
-                      size: 24 * s,
-                      color: Colors.white,
+                    decoration: const BoxDecoration(color: Colors.white),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      _categoryAsset,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(_categoryIcon, size: 22 * s, color: _kGold),
                     ),
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _category,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _display(
-                            size: 20 * s,
-                            weight: FontWeight.w600,
-                            color: _kInk,
+                    child: SizedBox(
+                      height: 48 * s,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _bigTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _display(
+                              size: 20 * s,
+                              weight: FontWeight.w600,
+                              color: _kInk,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 3 * s),
-                        Text(
-                          '${project.shootingType ?? ''} · «${project.title}»',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
-                        ),
-                      ],
+                          if (_subtitle.isNotEmpty) ...[
+                            SizedBox(height: 3 * s),
+                            Text(
+                              _subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _ui(
+                                size: 8 * s,
+                                color: _kBlack,
+                                spacing: 1,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -395,7 +483,7 @@ class _ProjectCard extends StatelessWidget {
             // Meta satırı (teslim / bütçe / çekim)
             SizedBox(height: 18 * s),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18 * s),
+              padding: EdgeInsets.symmetric(horizontal: 42 * s),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -414,7 +502,7 @@ class _ProjectCard extends StatelessWidget {
                       scale: s,
                       icon: Icons.payments_outlined,
                       label: 'BÜTÇE',
-                      value: '${project.budget.toStringAsFixed(0)} ₺',
+                      value: _compactBudget,
                     ),
                   ),
                   Expanded(
@@ -432,9 +520,9 @@ class _ProjectCard extends StatelessWidget {
             ),
 
             // Konum
-            SizedBox(height: 16 * s),
+            SizedBox(height: 24 * s),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18 * s),
+              padding: EdgeInsets.symmetric(horizontal: 42 * s),
               child: Row(
                 children: [
                   Icon(
@@ -457,34 +545,45 @@ class _ProjectCard extends StatelessWidget {
               ),
             ),
 
-            // Açıklama
+            // Açıklama + hizmet alan / oluşturulma
             SizedBox(height: 14 * s),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18 * s),
-              child: Text(
-                (project.notes ?? project.description),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
-              ),
-            ),
-
-            // Alt bilgi — hizmet alan (varsa) ya da oluşturulma tarihi
-            SizedBox(height: 18 * s),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: _kDivider)),
-              ),
-              padding: EdgeInsets.fromLTRB(18 * s, 12 * s, 14 * s, 14 * s),
+              padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 13 * s,
+                    color: _kTaupe,
+                  ),
+                  SizedBox(width: 5 * s),
+                  Expanded(
+                    child: Text(
+                      (project.notes ?? project.description),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ui(
+                        size: 9 * s,
+                        weight: FontWeight.w700,
+                        color: _kInk,
+                        spacing: 0.2,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8 * s),
                   Text(
                     clientName != null
-                        ? 'HİZMET ALAN · ${clientName!.toUpperCaseTr()}'
-                        : 'OLUŞTURULMA · ${_formatDate(project.createdAt).toUpperCaseTr()}',
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.8),
+                        ? clientName!.toUpperCaseTr()
+                        : _formatDate(project.createdAt).toUpperCaseTr(),
+                    style: _ui(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kGold,
+                      spacing: 1.2,
+                    ),
                   ),
-                  const Spacer(),
+                  SizedBox(width: 4 * s),
                   Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
                 ],
               ),
@@ -533,7 +632,7 @@ class _MetaCell extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: _ui(
             size: 10 * s,
-            weight: FontWeight.w700,
+            weight: FontWeight.w400,
             color: _kBlack,
             spacing: 0.3,
           ),
