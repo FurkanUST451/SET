@@ -19,7 +19,9 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
-const _kDanger = Color(0xFFB3402A); // yıkıcı aksiyonlar (sil vb.) — paletle uyumlu toprak kırmızısı
+const _kDanger = Color(
+  0xFFB3402A,
+); // yıkıcı aksiyonlar (sil vb.) — paletle uyumlu toprak kırmızısı
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
 
@@ -36,43 +38,26 @@ TextStyle _serif({
   double height = 1.05,
   bool italic = false,
   double spacing = 0,
-}) =>
-    GoogleFonts.cormorantGaramond(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-      height: height,
-      letterSpacing: spacing,
-      fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-    );
+}) => GoogleFonts.cormorantGaramond(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+  letterSpacing: spacing,
+  fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+);
 
 TextStyle _mono({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) =>
-    GoogleFonts.spaceMono(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-      letterSpacing: spacing,
-    );
-
-String _formatFor(WorkType t) {
-  switch (t) {
-    case WorkType.video:
-      return 'PRORES';
-    case WorkType.photo:
-      return 'RAW';
-    case WorkType.cgiVfx:
-      return 'EXR';
-    case WorkType.graphic:
-      return 'PSD';
-    case WorkType.sound:
-      return 'WAV';
-  }
-}
+}) => GoogleFonts.spaceMono(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
 
 class ClientDiscoverTab extends StatefulWidget {
   const ClientDiscoverTab({super.key});
@@ -96,7 +81,8 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
     final createdAt = work.createdAt;
     if (createdAt == null) return '';
     final diff = DateTime.now().difference(createdAt);
-    if (diff.inHours < 1) return '${diff.inMinutes < 1 ? 1 : diff.inMinutes}DK ÖNCE';
+    if (diff.inHours < 1)
+      return '${diff.inMinutes < 1 ? 1 : diff.inMinutes}DK ÖNCE';
     if (diff.inDays < 1) return '${diff.inHours}S ÖNCE';
     if (diff.inDays < 7) return '${diff.inDays}G ÖNCE';
     return '${(diff.inDays / 7).floor()}H ÖNCE';
@@ -114,44 +100,52 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
           bottom: false,
           child: Obx(() {
             final works = _filtered(_worksController.works);
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: _buildTopStrip(s),
-                ),
-                SliverToBoxAdapter(
-                  child: _Header(scale: s),
-                ),
-                SliverToBoxAdapter(
-                  child: _FilterBar(
-                    scale: s,
-                    selected: _filter,
-                    onSelect: (t) => setState(() => _filter = t),
-                  ),
-                ),
-                if (works.isEmpty)
-                  SliverToBoxAdapter(child: _EmptyState(scale: s))
-                else
-                  SliverPadding(
-                    padding:
-                        EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
-                    sliver: SliverList.separated(
-                      itemCount: works.length,
-                      separatorBuilder: (_, _) => const Divider(
-                          height: 1, thickness: 1, color: _kDivider),
-                      itemBuilder: (_, i) {
-                        final work = works[i];
-                        return _WorkCard(
-                          scale: s,
-                          work: work,
-                          timeAgo: _timeAgoFor(work),
-                          format: _formatFor(work.type),
-                          controller: _worksController,
-                        );
-                      },
+            return RefreshIndicator(
+              color: _kGold,
+              backgroundColor: _kCream,
+              onRefresh: _worksController.reload,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: _buildTopStrip(s)),
+                  SliverToBoxAdapter(child: _Header(scale: s)),
+                  SliverToBoxAdapter(
+                    child: _FilterBar(
+                      scale: s,
+                      selected: _filter,
+                      onSelect: (t) => setState(() => _filter = t),
                     ),
                   ),
-              ],
+                  if (works.isEmpty)
+                    SliverToBoxAdapter(child: _EmptyState(scale: s))
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        26 * s,
+                        10 * s,
+                        26 * s,
+                        130 * s,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: works.length,
+                        separatorBuilder: (_, _) => const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: _kDivider,
+                        ),
+                        itemBuilder: (_, i) {
+                          final work = works[i];
+                          return _WorkCard(
+                            scale: s,
+                            work: work,
+                            timeAgo: _timeAgoFor(work),
+                            controller: _worksController,
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
             );
           }),
         ),
@@ -197,32 +191,37 @@ class _Header extends StatelessWidget {
           Text(
             'neler',
             style: _serif(
-                size: 27 * s,
-                weight: FontWeight.w500,
-                color: _kMuted,
-                italic: true),
+              size: 27 * s,
+              weight: FontWeight.w500,
+              color: _kMuted,
+              italic: true,
+            ),
           ),
           // "YAPTIK?" — büyük serif, ? altın
           Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: 'YAPTIK',
-                style: _serif(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'YAPTIK',
+                  style: _serif(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
                     height: 0.95,
-                    spacing: 1),
-              ),
-              TextSpan(
-                text: '?',
-                style: _serif(
+                    spacing: 1,
+                  ),
+                ),
+                TextSpan(
+                  text: '?',
+                  style: _serif(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kGold,
-                    height: 0.95),
-              ),
-            ]),
+                    height: 0.95,
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 20 * s),
           Text(
@@ -295,12 +294,14 @@ class _FilterBar extends StatelessWidget {
             selected: selected == null,
             onTap: () => onSelect(null),
           ),
-          ...WorkType.values.map((t) => _FilterTab(
-                scale: s,
-                label: t.label.toUpperCase(),
-                selected: selected == t,
-                onTap: () => onSelect(t),
-              )),
+          ...WorkType.values.map(
+            (t) => _FilterTab(
+              scale: s,
+              label: t.label.toUpperCase(),
+              selected: selected == t,
+              onTap: () => onSelect(t),
+            ),
+          ),
         ],
       ),
     );
@@ -366,16 +367,13 @@ class _WorkCard extends StatelessWidget {
     required this.scale,
     required this.work,
     required this.timeAgo,
-    required this.format,
     required this.controller,
   });
 
   final double scale;
   final WorkModel work;
   final String timeAgo;
-  final String format;
   final WorksController controller;
-
 
   @override
   Widget build(BuildContext context) {
@@ -407,29 +405,22 @@ class _WorkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: _serif(
-                          size: 14 * s,
-                          weight: FontWeight.w600,
-                          color: _kInk),
+                        size: 14 * s,
+                        weight: FontWeight.w600,
+                        color: _kInk,
+                      ),
                     ),
                     SizedBox(height: 3 * s),
-                    Text.rich(
-                      TextSpan(children: [
-                        TextSpan(
-                          text: work.type.label.toUpperCase(),
-                          style: _mono(
-                              size: 8 * s,
-                              weight: FontWeight.w700,
-                              color: _kGold,
-                              spacing: 1),
-                        ),
-                        TextSpan(
-                          text: '  ·  «${work.title.toUpperCase()}»',
-                          style: _mono(
-                              size: 8 * s, color: _kBlack, spacing: 1),
-                        ),
-                      ]),
+                    Text(
+                      work.type.label.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: _mono(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kGold,
+                        spacing: 1,
+                      ),
                     ),
                   ],
                 ),
@@ -443,15 +434,38 @@ class _WorkCard extends StatelessWidget {
               _WorkMenuButton(scale: s, work: work, controller: controller),
             ],
           ),
-          SizedBox(height: 20 * s),
+          SizedBox(height: 16 * s),
+          // Başlık
+          Text(
+            work.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _serif(
+              size: 13 * s,
+              weight: FontWeight.w500,
+              color: _kInk,
+              italic: true,
+            ),
+          ),
+          if (work.description != null && work.description!.isNotEmpty) ...[
+            SizedBox(height: 8 * s),
+            _ExpandableDescription(
+              scale: s,
+              text: work.description!,
+              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+            ),
+          ],
+          SizedBox(height: 16 * s),
           // Kapak
           GestureDetector(
             onTap: work.isVideo && (work.mediaUrl?.isNotEmpty ?? false)
-                ? () => Get.to(() => WorkVideoPlayerView(
+                ? () => Get.to(
+                    () => WorkVideoPlayerView(
                       videoUrl: work.mediaUrl!,
                       title: work.title,
                       thumbnailUrl: work.thumbnailUrl,
-                    ))
+                    ),
+                  )
                 : null,
             child: _CoverPlaceholder(
               scale: s,
@@ -463,39 +477,6 @@ class _WorkCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 18 * s),
-          // Alt bilgi: başlık + süre·format
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text(
-                  work.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _serif(
-                      size: 13 * s,
-                      weight: FontWeight.w500,
-                      color: _kInk,
-                      italic: true),
-                ),
-              ),
-              SizedBox(width: 12 * s),
-              Text(
-                format,
-                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
-              ),
-            ],
-          ),
-          if (work.description != null && work.description!.isNotEmpty) ...[
-            SizedBox(height: 8 * s),
-            Text(
-              work.description!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
-            ),
-          ],
-          SizedBox(height: 18 * s),
           // Aksiyonlar
           Row(
             children: [
@@ -505,12 +486,83 @@ class _WorkCard extends StatelessWidget {
               SizedBox(width: 28 * s),
               _ShareAction(scale: s, work: work),
               const Spacer(),
-              Icon(Icons.bookmark_border_rounded,
-                  size: 16 * s, color: _kTaupe),
+              Icon(Icons.bookmark_border_rounded, size: 16 * s, color: _kTaupe),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AÇIKLAMA — belirli bir satır sayısını aşan metinler kısaltılır ve
+// altına "Devamını oku" eklenir; dokunulunca tüm metin açılır.
+// ─────────────────────────────────────────────────────────────────
+class _ExpandableDescription extends StatefulWidget {
+  const _ExpandableDescription({
+    required this.scale,
+    required this.text,
+    required this.style,
+  });
+
+  final double scale;
+  final String text;
+  final TextStyle style;
+
+  @override
+  State<_ExpandableDescription> createState() => _ExpandableDescriptionState();
+}
+
+class _ExpandableDescriptionState extends State<_ExpandableDescription> {
+  static const _kCollapsedMaxLines = 2;
+
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.scale;
+    if (_expanded) {
+      return Text(widget.text, style: widget.style);
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: widget.text, style: widget.style),
+          maxLines: _kCollapsedMaxLines,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+
+        if (!painter.didExceedMaxLines) {
+          return Text(widget.text, style: widget.style);
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.text,
+              maxLines: _kCollapsedMaxLines,
+              overflow: TextOverflow.ellipsis,
+              style: widget.style,
+            ),
+            SizedBox(height: 4 * s),
+            GestureDetector(
+              onTap: () => setState(() => _expanded = true),
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                'DEVAMINI OKU',
+                style: _mono(
+                  size: 8 * s,
+                  weight: FontWeight.w700,
+                  color: _kGold,
+                  spacing: 1,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -547,8 +599,11 @@ class _WorkMenuButton extends StatelessWidget {
 
     final ok = await controller.reportWork(work, reason: trimmed);
     if (ok && context.mounted) {
-      Get.snackbar('Teşekkürler', 'Gönderi bildirildi.',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Teşekkürler',
+        'Gönderi bildirildi.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -561,7 +616,11 @@ class _WorkMenuButton extends StatelessWidget {
         content: Text(
           'Bu gönderiyi kalıcı olarak silmek istediğine emin misin? '
           'Bu işlem geri alınamaz.',
-          style: _mono(size: 9, color: _kTaupe, spacing: 0.2).copyWith(height: 1.5),
+          style: _mono(
+            size: 9,
+            color: _kTaupe,
+            spacing: 0.2,
+          ).copyWith(height: 1.5),
         ),
         actions: [
           _EditorialDialogAction(
@@ -608,7 +667,12 @@ class _WorkMenuButton extends StatelessWidget {
           height: 40,
           child: Text(
             'GÖNDERİYİ BİLDİR',
-            style: _mono(size: 9, weight: FontWeight.w600, color: _kInk, spacing: 1),
+            style: _mono(
+              size: 9,
+              weight: FontWeight.w600,
+              color: _kInk,
+              spacing: 1,
+            ),
           ),
         ),
         if (_isOwner)
@@ -617,7 +681,12 @@ class _WorkMenuButton extends StatelessWidget {
             height: 40,
             child: Text(
               'SİL',
-              style: _mono(size: 9, weight: FontWeight.w600, color: _kDanger, spacing: 1),
+              style: _mono(
+                size: 9,
+                weight: FontWeight.w600,
+                color: _kDanger,
+                spacing: 1,
+              ),
             ),
           ),
       ],
@@ -643,8 +712,9 @@ class _ReportReasonDialog extends StatefulWidget {
 class _ReportReasonDialogState extends State<_ReportReasonDialog> {
   static const _kDefaultReportReason = 'Bu gönderiyi uygunsuz buluyorum';
 
-  late final TextEditingController _textController =
-      TextEditingController(text: _kDefaultReportReason);
+  late final TextEditingController _textController = TextEditingController(
+    text: _kDefaultReportReason,
+  );
 
   @override
   void dispose() {
@@ -662,8 +732,11 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
         children: [
           Text(
             'Bu içeriği neden bildiriyorsun? Mesajı dilediğin gibi düzenleyebilirsin.',
-            style: _mono(size: 9, color: _kTaupe, spacing: 0.2)
-                .copyWith(height: 1.5),
+            style: _mono(
+              size: 9,
+              color: _kTaupe,
+              spacing: 0.2,
+            ).copyWith(height: 1.5),
           ),
           const SizedBox(height: 16),
           Container(
@@ -672,14 +745,26 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
             child: TextField(
               controller: _textController,
               autofocus: true,
+              textAlignVertical: TextAlignVertical.top,
               minLines: 3,
               maxLines: 5,
               maxLength: 500,
               cursorColor: _kGold,
-              style: _mono(size: 10, color: _kBlack, spacing: 0.2).copyWith(height: 1.5),
+              style: _mono(
+                size: 10,
+                color: _kBlack,
+                spacing: 0.2,
+              ).copyWith(height: 1.5),
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                filled: false,
+                fillColor: Colors.transparent,
                 counterText: '',
                 hintText: 'Bildirme sebebini yaz...',
                 hintStyle: _mono(size: 10, color: _kTaupe, spacing: 0.2),
@@ -749,7 +834,15 @@ class _EditorialDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: _mono(size: 9, weight: FontWeight.w700, color: _kBlack, spacing: 1.5)),
+            Text(
+              title,
+              style: _mono(
+                size: 9,
+                weight: FontWeight.w700,
+                color: _kBlack,
+                spacing: 1.5,
+              ),
+            ),
             Container(
               margin: const EdgeInsets.only(top: 12, bottom: 18),
               height: 1,
@@ -765,14 +858,18 @@ class _EditorialDialog extends StatelessWidget {
                     onTap: action.onTap,
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
                       child: Text(
                         action.label,
                         style: _mono(
-                            size: 9,
-                            weight: FontWeight.w700,
-                            color: action.color,
-                            spacing: 1.2),
+                          size: 9,
+                          weight: FontWeight.w700,
+                          color: action.color,
+                          spacing: 1.2,
+                        ),
                       ),
                     ),
                   ),
@@ -815,9 +912,8 @@ class _CoverPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    final isMotion = isVideo ||
-        type == WorkType.video ||
-        type == WorkType.cgiVfx;
+    final isMotion =
+        isVideo || type == WorkType.video || type == WorkType.cgiVfx;
     // Video için üretilen JPEG önizleme (thumbnailUrl), foto işler için ise
     // mediaUrl'in kendisi kapak görseli olarak kullanılır.
     final networkImageUrl = isVideo ? thumbnailUrl : mediaUrl;
@@ -847,16 +943,19 @@ class _CoverPlaceholder extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.crop_original_rounded,
-                        size: 28 * s,
-                        color: Colors.white.withValues(alpha: 0.16)),
+                    Icon(
+                      Icons.crop_original_rounded,
+                      size: 28 * s,
+                      color: Colors.white.withValues(alpha: 0.16),
+                    ),
                     SizedBox(height: 6 * s),
                     Text(
                       'ÖNİZLEME YOK',
                       style: _mono(
-                          size: 7 * s,
-                          color: Colors.white.withValues(alpha: 0.22),
-                          spacing: 2),
+                        size: 7 * s,
+                        color: Colors.white.withValues(alpha: 0.22),
+                        spacing: 2,
+                      ),
                     ),
                   ],
                 ),
@@ -887,8 +986,7 @@ class _PlayButton extends StatelessWidget {
           width: 1.2,
         ),
       ),
-      child: Icon(Icons.play_arrow_rounded,
-          color: Colors.white, size: 28 * s),
+      child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28 * s),
     );
   }
 }
@@ -1079,7 +1177,9 @@ class _ShareAction extends StatelessWidget {
     // iPad/macOS'ta paylaşım sayfası bir popover olarak açılır ve nereden
     // açılacağını bilmesi için tıklanan öğenin ekran konumu gerekir.
     final box = context.findRenderObject() as RenderBox?;
-    final origin = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+    final origin = box != null
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : null;
 
     await SharePlus.instance.share(
       ShareParams(

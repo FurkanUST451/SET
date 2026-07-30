@@ -64,35 +64,47 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
                       child: CircularProgressIndicator(color: _kGold),
                     );
                   }
-                  if (controller.offers.isEmpty) {
-                    return _EmptyState(scale: s);
-                  }
                   return RefreshIndicator(
                     color: _kGold,
-                    onRefresh: controller.loadOffers,
-                    child: ListView.separated(
-                      padding:
-                          EdgeInsets.fromLTRB(24 * s, 6 * s, 24 * s, 130 * s),
-                      itemCount: controller.offers.length,
-                      separatorBuilder: (_, _) => SizedBox(height: 18 * s),
-                      itemBuilder: (_, i) {
-                        final brief = controller.offers[i];
-                        final project =
-                            controller.acceptedProjectsByBriefId[brief.id];
-                        if (project != null) {
-                          return _AcceptedCard(
-                            scale: s,
-                            brief: brief,
-                            project: project,
-                          );
-                        }
-                        return _OfferCard(
-                          scale: s,
-                          brief: brief,
-                          onReload: controller.loadOffers,
-                        );
-                      },
-                    ),
+                    onRefresh: controller.reload,
+                    child: controller.offers.isEmpty
+                        ? LayoutBuilder(
+                            builder: (context, constraints) => ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                      minHeight: constraints.maxHeight),
+                                  child: Center(child: _EmptyState(scale: s)),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: EdgeInsets.fromLTRB(
+                                24 * s, 6 * s, 24 * s, 130 * s),
+                            itemCount: controller.offers.length,
+                            separatorBuilder: (_, _) =>
+                                SizedBox(height: 18 * s),
+                            itemBuilder: (_, i) {
+                              final brief = controller.offers[i];
+                              final project = controller
+                                  .acceptedProjectsByBriefId[brief.id];
+                              if (project != null) {
+                                return _AcceptedCard(
+                                  scale: s,
+                                  brief: brief,
+                                  project: project,
+                                );
+                              }
+                              return _OfferCard(
+                                scale: s,
+                                brief: brief,
+                                onReload: controller.reload,
+                              );
+                            },
+                          ),
                   );
                 }),
               ),

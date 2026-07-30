@@ -64,4 +64,16 @@ class ProjectRepository {
     list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
+
+  // Freelancer'ın kabul edilmiş projelerini canlı akıtır (bkz.
+  // freelancer_job_offers_controller.dart — teklif kabul edilir edilmez
+  // "Kabul Edildi" kartına anında dönüşsün diye).
+  Stream<List<ProjectModel>> watchByFreelancer(String freelancerId) {
+    return _projects
+        .where('freelancerId', isEqualTo: freelancerId)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((d) => ProjectModel.fromJson(d.data())).toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
+  }
 }

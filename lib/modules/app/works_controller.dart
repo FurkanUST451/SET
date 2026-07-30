@@ -42,6 +42,17 @@ class WorksController extends GetxController {
     super.onClose();
   }
 
+  // Pull-to-refresh: veri zaten canlı stream ile akıyor, bu yüzden yeni bir
+  // şey "çekmiyoruz" — ama bağlantı bir şekilde takılıp kaldıysa stream'i
+  // yeniden abone ederek kurtarma imkânı sağlıyor.
+  // (GetxController'ın kendi refresh() metoduyla çakışmasın diye reload
+  // adını kullanıyoruz.)
+  Future<void> reload() async {
+    await _sub?.cancel();
+    _sub = _repo.watchAll().listen((list) => uploadedWorks.assignAll(list));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+  }
+
   // ---- Beğeniler ----
 
   Stream<bool> isLikedStream(String workId) => _repo.watchIsLiked(workId, _uid);
