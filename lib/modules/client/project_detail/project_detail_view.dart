@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/theme/app_fonts.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/avatar_image.dart';
 
 // ---------------------------------------------------------------------------
 // Dummy project data (used only for the legacy project detail demo)
@@ -280,17 +282,21 @@ class ProjectDetailView extends StatelessWidget {
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFE8D5C0),
-                                    ),
-                                    child: const Icon(
-                                      Icons.person,
-                                      size: 30,
-                                      color: Color(0xFF8D6E63),
+                                  ClipOval(
+                                    child: buildAvatarImage(
+                                      placeholderAvatarFor(
+                                          'kadin', 'selin-a-pm'),
+                                      size: 52,
+                                      placeholder: Container(
+                                        width: 52,
+                                        height: 52,
+                                        color: const Color(0xFFE8D5C0),
+                                        child: const Icon(
+                                          Icons.person,
+                                          size: 30,
+                                          color: Color(0xFF8D6E63),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   Positioned(
@@ -434,7 +440,7 @@ class ProjectDetailView extends StatelessWidget {
                               ),
                               _Divider(),
                               _StatItem(
-                                icon: Icons.calendar_today_outlined,
+                                icon: Icons.hourglass_empty_rounded,
                                 label: 'Teslim',
                                 value: '7 Gün',
                               ),
@@ -521,18 +527,17 @@ class ProjectDetailView extends StatelessWidget {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: EdgeInsets.zero,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 18, vertical: 14),
+                      horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A1200),
-                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 20,
-                        offset: const Offset(0, 6),
+                        offset: const Offset(0, -4),
                       ),
                     ],
                   ),
@@ -623,12 +628,11 @@ class _TopBar extends StatelessWidget {
           ),
           const Spacer(),
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
                   text: 'SE',
-                  style: TextStyle(
-                    fontFamily: 'SpaceGrotesk',
+                  style: AppFonts.display(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
@@ -637,11 +641,10 @@ class _TopBar extends StatelessWidget {
                 ),
                 TextSpan(
                   text: 'T',
-                  style: TextStyle(
-                    fontFamily: 'SpaceGrotesk',
+                  style: AppFonts.display(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFE8B84B),
+                    color: const Color(0xFFE8B84B),
                     letterSpacing: 1,
                   ),
                 ),
@@ -866,14 +869,18 @@ class _TeamStatusItem extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFE8D5C0),
+            ClipOval(
+              child: buildAvatarImage(
+                placeholderAvatarFor(null, role),
+                size: 54,
+                placeholder: Container(
+                  width: 54,
+                  height: 54,
+                  color: const Color(0xFFE8D5C0),
+                  child: const Icon(Icons.person,
+                      size: 28, color: Color(0xFF8D6E63)),
+                ),
               ),
-              child: const Icon(Icons.person, size: 28, color: Color(0xFF8D6E63)),
             ),
             Positioned(
               bottom: 0,

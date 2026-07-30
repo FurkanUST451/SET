@@ -33,7 +33,8 @@ dependencies:
   flutter_svg: ^2.0.16
   image_picker: ^1.1.2
 
-  # Typography
+  # Typography — Bricolage Grotesque (display) + Inter (gövde/UI).
+  # Tek kullanım noktası: lib/core/theme/app_fonts.dart
   google_fonts: ^6.2.1
 
   # Utilities
@@ -66,4 +67,5 @@ flutter:
     - assets/images/page_images/
     - assets/images/profile_photos/
     - assets/images/placeholder/
+    - assets/images/brief_images/
     - assets/animations/

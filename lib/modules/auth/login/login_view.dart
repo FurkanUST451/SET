@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import 'login_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDanger = Color(0xFFBE6A5A);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -68,7 +69,7 @@ class LoginView extends GetView<LoginController> {
                       children: [
                         TextSpan(
                           text: 'SE',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: AppFonts.display(
                             fontSize: 20 * s,
                             fontWeight: FontWeight.w700,
                             color: _kInk,
@@ -77,7 +78,7 @@ class LoginView extends GetView<LoginController> {
                         ),
                         TextSpan(
                           text: 'T',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: AppFonts.display(
                             fontSize: 20 * s,
                             fontWeight: FontWeight.w800,
                             color: _kGold,
@@ -90,12 +91,12 @@ class LoginView extends GetView<LoginController> {
                   SizedBox(height: 44 * s),
                   Text(
                     'WELCOME BACK',
-                    style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
                   ),
                   SizedBox(height: 8 * s),
                   Text(
                     'Tekrar hoş geldin',
-                    style: _serif(
+                    style: _display(
                       size: 38 * s,
                       weight: FontWeight.w600,
                       color: _kInk,
@@ -104,7 +105,7 @@ class LoginView extends GetView<LoginController> {
                   SizedBox(height: 8 * s),
                   Text(
                     'Hesabına giriş yap, üretmeye devam et.',
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                   ),
                   SizedBox(height: 36 * s),
                   Form(
@@ -114,7 +115,7 @@ class LoginView extends GetView<LoginController> {
                       children: [
                         Text(
                           'E-POSTA',
-                          style: _mono(
+                          style: _ui(
                             size: 8 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
@@ -128,7 +129,7 @@ class LoginView extends GetView<LoginController> {
                           textInputAction: TextInputAction.next,
                           validator: Validators.email,
                           cursorColor: _kGold,
-                          style: _mono(
+                          style: _ui(
                             size: 11 * s,
                             color: _kBlack,
                             spacing: 0.2,
@@ -138,7 +139,7 @@ class LoginView extends GetView<LoginController> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: 'ornek@set.app',
-                            hintStyle: _mono(
+                            hintStyle: _ui(
                               size: 11 * s,
                               color: _kBlack,
                               spacing: 0.2,
@@ -161,7 +162,7 @@ class LoginView extends GetView<LoginController> {
                         SizedBox(height: 20 * s),
                         Text(
                           'ŞİFRE',
-                          style: _mono(
+                          style: _ui(
                             size: 8 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
@@ -176,7 +177,7 @@ class LoginView extends GetView<LoginController> {
                             textInputAction: TextInputAction.done,
                             validator: Validators.password,
                             cursorColor: _kGold,
-                            style: _mono(
+                            style: _ui(
                               size: 11 * s,
                               color: _kBlack,
                               spacing: 0.2,
@@ -187,7 +188,7 @@ class LoginView extends GetView<LoginController> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: '••••••',
-                              hintStyle: _mono(
+                              hintStyle: _ui(
                                 size: 11 * s,
                                 color: _kBlack,
                                 spacing: 0.2,
@@ -225,7 +226,7 @@ class LoginView extends GetView<LoginController> {
                             padding: EdgeInsets.only(top: 10 * s),
                             child: Text(
                               err,
-                              style: _mono(
+                              style: _ui(
                                 size: 9 * s,
                                 color: _kDanger,
                                 spacing: 0.2,
@@ -257,8 +258,8 @@ class LoginView extends GetView<LoginController> {
                                       ),
                                     )
                                   : Text(
-                                      AppStrings.login.toUpperCase(),
-                                      style: _mono(
+                                      AppStrings.login.toUpperCaseTr(),
+                                      style: _ui(
                                         size: 11 * s,
                                         weight: FontWeight.w700,
                                         color: Colors.white,
@@ -277,7 +278,7 @@ class LoginView extends GetView<LoginController> {
                     children: [
                       Text(
                         AppStrings.dontHaveAccount,
-                        style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                        style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                       ),
                       GestureDetector(
                         onTap: controller.goToRegister,
@@ -286,7 +287,7 @@ class LoginView extends GetView<LoginController> {
                           padding: EdgeInsets.symmetric(horizontal: 6 * s),
                           child: Text(
                             AppStrings.register,
-                            style: _mono(
+                            style: _ui(
                               size: 9 * s,
                               weight: FontWeight.w700,
                               color: _kGold,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../routes/app_routes.dart';
@@ -8,26 +8,26 @@ import '../../../routes/app_routes.dart';
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kInk = Color(0xFF35333F);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -56,7 +56,7 @@ class ChooseAuthView extends StatelessWidget {
                 Text(
                   'Tüm kreatif süreçler.\nTek yerde.',
                   textAlign: TextAlign.center,
-                  style: _serif(
+                  style: _display(
                     size: 26 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -67,6 +67,7 @@ class ChooseAuthView extends StatelessWidget {
                   scale: s,
                   label: 'Google ile devam et',
                   icon: AppAssets.loginGoogle,
+                  iconSize: 28 * s,
                   onTap: () {},
                   dark: false,
                 ),
@@ -75,6 +76,7 @@ class ChooseAuthView extends StatelessWidget {
                   scale: s,
                   label: 'Apple ile devam et',
                   icon: AppAssets.loginApple,
+                  iconSize: 28 * s,
                   onTap: () {},
                   dark: true,
                 ),
@@ -92,7 +94,7 @@ class ChooseAuthView extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   child: Text(
                     'MİSAFİR OLARAK DEVAM ET',
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: FontWeight.w600,
                       color: _kBlack,
@@ -117,13 +119,15 @@ class _AuthButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     required this.dark,
-  });
+    double? iconSize,
+  }) : iconSize = iconSize ?? 20 * scale;
 
   final double scale;
   final String label;
   final String icon;
   final VoidCallback onTap;
   final bool dark;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -142,11 +146,11 @@ class _AuthButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(icon, height: 20 * s, width: 20 * s),
+            Image.asset(icon, height: iconSize, width: iconSize),
             SizedBox(width: 12 * s),
             Text(
               label,
-              style: _mono(
+              style: _ui(
                 size: 10.5 * s,
                 weight: FontWeight.w700,
                 color: dark ? Colors.white : _kBlack,

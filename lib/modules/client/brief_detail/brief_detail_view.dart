@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
 import 'brief_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -12,29 +13,29 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -69,7 +70,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
 
   String get _projectId {
     final b = controller.brief;
-    return '#PRJ-${b.createdAt.year}-${b.id.substring(0, 8).toUpperCase()}';
+    return '#PRJ-${b.createdAt.year}-${b.id.substring(0, 8).toUpperCaseTr()}';
   }
 
   String get _statusLabel {
@@ -194,7 +195,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                       child: Text(
                         'Proje Detayı',
                         textAlign: TextAlign.center,
-                        style: _serif(
+                        style: _display(
                           size: 22 * s,
                           weight: FontWeight.w600,
                           color: _kInk,
@@ -250,7 +251,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                             padding: EdgeInsets.only(top: 12 * s),
                             child: Text(
                               a.notes!,
-                              style: _mono(
+                              style: _ui(
                                 size: 10 * s,
                                 color: _kBlack,
                                 spacing: 0.2,
@@ -371,7 +372,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
               children: [
                 Text(
                   _statusLabel,
-                  style: _mono(
+                  style: _ui(
                     size: 8 * s,
                     weight: FontWeight.w700,
                     color: _statusColor,
@@ -383,7 +384,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                   brief.title.isNotEmpty ? brief.title : brief.category,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(
+                  style: _display(
                     size: 24 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -392,7 +393,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                 SizedBox(height: 2 * s),
                 Text(
                   brief.category,
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -518,7 +519,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                           children: [
                             Text(
                               'TÜMÜNÜ GÖR',
-                              style: _mono(
+                              style: _ui(
                                 size: 8 * s,
                                 weight: FontWeight.w700,
                                 color: _kGold,
@@ -572,7 +573,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                     SizedBox(width: 7 * s),
                     Text(
                       'DÜZENLE',
-                      style: _mono(
+                      style: _ui(
                         size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
@@ -600,7 +601,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                     SizedBox(width: 8 * s),
                     Text(
                       "YENİ FREELANCER'A GÖNDER",
-                      style: _mono(
+                      style: _ui(
                         size: 9 * s,
                         weight: FontWeight.w700,
                         color: Colors.white,
@@ -655,7 +656,7 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: _mono(
+                  style: _ui(
                     size: 8 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
@@ -703,10 +704,10 @@ class _GridCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label.toUpperCase(),
+                item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -719,7 +720,7 @@ class _GridCell extends StatelessWidget {
             child: Text(
               item.value,
               maxLines: 1,
-              style: _mono(
+              style: _ui(
                 size: 10 * s,
                 weight: FontWeight.w400,
                 color: _kBlack,
@@ -732,7 +733,7 @@ class _GridCell extends StatelessWidget {
             item.value,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: _mono(
+            style: _ui(
               size: 10 * s,
               weight: FontWeight.w400,
               color: _kBlack,
@@ -764,13 +765,13 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
         Text(
           value,
-          style: _mono(
+          style: _ui(
             size: 9 * s,
             weight: FontWeight.w700,
             color: _kBlack,
@@ -819,7 +820,7 @@ class _FreelancerRow extends StatelessWidget {
                   freelancer.fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(
+                  style: _display(
                     size: 15 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -827,10 +828,10 @@ class _FreelancerRow extends StatelessWidget {
                 ),
                 if (freelancer.categories.isNotEmpty)
                   Text(
-                    freelancer.categories.first.toUpperCase(),
+                    freelancer.categories.first.toUpperCaseTr(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 7 * s, color: _kBlack, spacing: 1),
+                    style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
                   ),
               ],
             ),
@@ -841,7 +842,7 @@ class _FreelancerRow extends StatelessWidget {
             color: _kGold.withValues(alpha: 0.12),
             child: Text(
               'TEKLİF BEKLENİYOR',
-              style: _mono(
+              style: _ui(
                 size: 7 * s,
                 weight: FontWeight.w700,
                 color: _kGold,
@@ -896,7 +897,7 @@ class _MilestoneRow extends StatelessWidget {
                     '${milestone.title} · ${milestone.timeLabel}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w400,
                       color: _kBlack,
@@ -908,7 +909,7 @@ class _MilestoneRow extends StatelessWidget {
                     milestone.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: FontWeight.w400,
                       color: _kGold,
@@ -960,7 +961,7 @@ void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
                 Expanded(
                   child: Text(
                     m.title,
-                    style: _serif(
+                    style: _display(
                       size: 22 * s,
                       weight: FontWeight.w600,
                       color: _kInk,
@@ -971,8 +972,8 @@ void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
             ),
             SizedBox(height: 14 * s),
             Text(
-              m.timeLabel.toUpperCase(),
-              style: _mono(
+              m.timeLabel.toUpperCaseTr(),
+              style: _ui(
                 size: 8 * s,
                 weight: FontWeight.w700,
                 color: _kGold,
@@ -982,7 +983,7 @@ void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
             SizedBox(height: 16 * s),
             Text(
               m.subtitle,
-              style: _mono(
+              style: _ui(
                 size: 11 * s,
                 color: _kBlack,
                 spacing: 0.2,

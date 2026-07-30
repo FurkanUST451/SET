@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_projects_controller.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -12,29 +13,29 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x0F000000);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -157,7 +158,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · ÜRETİM',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -178,7 +179,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
               children: [
                 Text(
                   'Projelerim',
-                  style: _serif(
+                  style: _display(
                     size: 40 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -187,7 +188,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                 SizedBox(height: 6 * s),
                 Text(
                   '$count proje görüntüleniyor',
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -236,7 +237,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                   ],
                   Text(
                     _filterLabels[i],
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: _kBlack,
@@ -335,7 +336,7 @@ class _ProjectCard extends StatelessWidget {
                   SizedBox(width: 8 * s),
                   Text(
                     _statusLabel,
-                    style: _mono(
+                    style: _ui(
                       size: 8 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
@@ -371,7 +372,7 @@ class _ProjectCard extends StatelessWidget {
                           _category,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: _serif(
+                          style: _display(
                             size: 20 * s,
                             weight: FontWeight.w600,
                             color: _kInk,
@@ -382,7 +383,7 @@ class _ProjectCard extends StatelessWidget {
                           '${project.shootingType ?? ''} · «${project.title}»',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                          style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
                         ),
                       ],
                     ),
@@ -449,7 +450,7 @@ class _ProjectCard extends StatelessWidget {
                           : '—',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+                      style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
                     ),
                   ),
                 ],
@@ -464,7 +465,7 @@ class _ProjectCard extends StatelessWidget {
                 (project.notes ?? project.description),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
               ),
             ),
 
@@ -479,9 +480,9 @@ class _ProjectCard extends StatelessWidget {
                 children: [
                   Text(
                     clientName != null
-                        ? 'HİZMET ALAN · ${clientName!.toUpperCase()}'
-                        : 'OLUŞTURULMA · ${_formatDate(project.createdAt).toUpperCase()}',
-                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.8),
+                        ? 'HİZMET ALAN · ${clientName!.toUpperCaseTr()}'
+                        : 'OLUŞTURULMA · ${_formatDate(project.createdAt).toUpperCaseTr()}',
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.8),
                   ),
                   const Spacer(),
                   Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
@@ -521,7 +522,7 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _mono(size: 7 * s, color: _kBlack, spacing: 1),
+              style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
             ),
           ],
         ),
@@ -530,7 +531,7 @@ class _MetaCell extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: _mono(
+          style: _ui(
             size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
@@ -613,12 +614,12 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             'Kabul ettiğin işler burada görünecek.',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

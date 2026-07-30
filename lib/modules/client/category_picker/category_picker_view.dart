@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'category_picker_controller.dart';
@@ -32,14 +32,14 @@ const Map<String, String> _kCategoryTags = {
   'Sosyal Medya Yönetimi': 'İÇERİK · STRATEJİ · YÖNETİM',
 };
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -48,13 +48,13 @@ TextStyle _serif({
       decoration: TextDecoration.none,
     );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -66,7 +66,7 @@ Widget _wordmark(double s) => RichText(
       text: TextSpan(children: [
         TextSpan(
           text: 'SE',
-          style: GoogleFonts.spaceGrotesk(
+          style: AppFonts.display(
               fontSize: 18 * s,
               fontWeight: FontWeight.w700,
               color: _kInk,
@@ -74,7 +74,7 @@ Widget _wordmark(double s) => RichText(
         ),
         TextSpan(
           text: 'T',
-          style: GoogleFonts.spaceGrotesk(
+          style: AppFonts.display(
               fontSize: 18 * s,
               fontWeight: FontWeight.w800,
               color: _kGold,
@@ -128,7 +128,7 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                   children: [
                     Text(
                       'dilediğin hizmeti seç',
-                      style: _serif(
+                      style: _display(
                           size: 17 * s,
                           weight: FontWeight.w500,
                           color: _kInk,
@@ -139,14 +139,14 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                       TextSpan(children: [
                         TextSpan(
                           text: 'Biz ',
-                          style: _serif(
+                          style: _display(
                               size: 40 * s,
                               weight: FontWeight.w700,
                               color: _kInk),
                         ),
                         TextSpan(
                           text: 'üretelim!',
-                          style: _serif(
+                          style: _display(
                               size: 40 * s,
                               weight: FontWeight.w700,
                               color: _kGold),
@@ -268,7 +268,7 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
               children: [
                 Text(
                   'DEVAM ET',
-                  style: _mono(
+                  style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: Colors.white,
@@ -281,7 +281,19 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
             ),
           ),
         ),
-        SizedBox(height: 24 * s),
+        SizedBox(height: 10 * s),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
+            SizedBox(width: 5 * s),
+            Text(
+              'Seçimin gizli tutulur ve güvenle saklanır.',
+              style: _ui(size: 8 * s, color: _kMuted, spacing: 0.2),
+            ),
+          ],
+        ),
+        SizedBox(height: 18 * s),
       ],
     );
   }
@@ -326,13 +338,15 @@ class _CategoryCard extends StatelessWidget {
         children: [
           Text(
             'HİZMET · ${(index + 1).toString().padLeft(2, '0')}',
-            style: _mono(
+            style: _ui(
                 size: 9 * s,
                 weight: FontWeight.w700,
                 color: _kMuted,
                 spacing: 1.6),
           ),
+          SizedBox(height: 30 * s),
           Expanded(
+            flex: 3,
             child: Center(
               child: Image.asset(
                 _kCategoryIcons[label] ?? '',
@@ -341,23 +355,24 @@ class _CategoryCard extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(height: 10 * s),
           Text.rich(
             TextSpan(children: [
               TextSpan(
                 text: firstWord,
-                style: _serif(size: 28 * s, weight: FontWeight.w600, color: _kInk),
+                style: _display(size: 32 * s, weight: FontWeight.w600, color: _kInk),
               ),
               TextSpan(
                 text: restWord,
                 style:
-                    _serif(size: 28 * s, weight: FontWeight.w600, color: _kGold),
+                    _display(size: 32 * s, weight: FontWeight.w600, color: _kGold),
               ),
             ]),
           ),
-          SizedBox(height: 6 * s),
+          SizedBox(height: 36 * s),
           Text(
             _kCategoryTags[label] ?? '',
-            style: _mono(
+            style: _ui(
                 size: 10.5 * s,
                 weight: FontWeight.w700,
                 color: _kInk,
@@ -366,12 +381,13 @@ class _CategoryCard extends StatelessWidget {
           SizedBox(height: 4 * s),
           Text(
             've daha fazlası...',
-            style: _serif(
+            style: _display(
                 size: 15 * s,
                 weight: FontWeight.w500,
                 color: _kInk,
                 italic: true),
           ),
+          const Expanded(flex: 1, child: SizedBox()),
         ],
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
@@ -13,19 +13,19 @@ const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x0F000000);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -33,13 +33,13 @@ TextStyle _serif({
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
     );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -175,7 +175,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROJELERİM',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -196,7 +196,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
               children: [
                 Text(
                   'Projelerim',
-                  style: _serif(
+                  style: _display(
                       size: 40 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 SizedBox(height: 6 * s),
@@ -205,7 +205,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                       _activeProjects(controller).length;
                   return Text(
                     '$count proje görüntüleniyor',
-                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
                   );
                 }),
               ],
@@ -254,7 +254,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                   ],
                   Text(
                     _filterLabels[i],
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: _kBlack,
@@ -296,7 +296,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
           ),
           child: Text(
             'SET',
-            style: GoogleFonts.spaceGrotesk(
+            style: AppFonts.display(
               fontSize: 13 * s,
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -324,7 +324,7 @@ class _SectionLabel extends StatelessWidget {
         SizedBox(width: 10 * s),
         Text(
           text,
-          style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.8),
+          style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.8),
         ),
       ],
     );
@@ -339,6 +339,24 @@ class _ProjectCard extends StatelessWidget {
 
   final double scale;
   final ProjectModel project;
+
+  IconData get _categoryIcon {
+    final cat = (project.category ?? '').toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
+    } else if (cat.contains('kurgu')) {
+      return Icons.content_cut_rounded;
+    } else if (cat.contains('grafik')) {
+      return Icons.brush_rounded;
+    }
+    return Icons.work_history_outlined;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +374,7 @@ class _ProjectCard extends StatelessWidget {
             height: 44 * s,
             color: _kGold.withValues(alpha: 0.15),
             alignment: Alignment.center,
-            child: Icon(Icons.work_history_outlined, size: 22 * s, color: _kGold),
+            child: Icon(_categoryIcon, size: 22 * s, color: _kGold),
           ),
           SizedBox(width: 12 * s),
           Expanded(
@@ -367,12 +385,12 @@ class _ProjectCard extends StatelessWidget {
                   project.title.isNotEmpty ? project.title : 'Proje',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(size: 16 * s, weight: FontWeight.w600, color: _kInk),
+                  style: _display(size: 16 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 SizedBox(height: 3 * s),
                 Text(
                   '${project.budget.toStringAsFixed(0)} ₺ · AKTİF',
-                  style: _mono(
+                  style: _ui(
                       size: 9 * s, weight: FontWeight.w700, color: _kGold, spacing: 0.4),
                 ),
               ],
@@ -502,7 +520,7 @@ class _BriefCard extends StatelessWidget {
                   SizedBox(width: 8 * s),
                   Text(
                     _statusLabel,
-                    style: _mono(
+                    style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
@@ -546,7 +564,7 @@ class _BriefCard extends StatelessWidget {
                             _bigTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _serif(
+                            style: _display(
                                 size: 20 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
@@ -557,7 +575,7 @@ class _BriefCard extends StatelessWidget {
                               _subtitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: _mono(
+                              style: _ui(
                                   size: 8 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
@@ -569,7 +587,7 @@ class _BriefCard extends StatelessWidget {
                     SizedBox(width: 10 * s),
                     Text(
                       '${brief.sentToIds.length}',
-                      style: _serif(
+                      style: _display(
                           size: 25 * s,
                           weight: FontWeight.w700,
                           color: _kGold),
@@ -636,7 +654,7 @@ class _BriefCard extends StatelessWidget {
                         brief.answers.location!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+                        style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
                       ),
                     ),
                   ],
@@ -667,7 +685,7 @@ class _BriefCard extends StatelessWidget {
                           brief.answers.notes!,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: _mono(
+                          style: _ui(
                               size: 9 * s,
                               weight: FontWeight.w700,
                               color: _kInk,
@@ -677,7 +695,7 @@ class _BriefCard extends StatelessWidget {
                       SizedBox(width: 8 * s),
                       Text(
                         'REVİZE ET',
-                        style: _mono(
+                        style: _ui(
                             size: 8 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
@@ -706,7 +724,7 @@ class _BriefCard extends StatelessWidget {
                     children: [
                       Text(
                         'REVİZE ET',
-                        style: _mono(
+                        style: _ui(
                             size: 8 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
@@ -753,7 +771,7 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _mono(size: 7 * s, color: _kBlack, spacing: 1),
+              style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
             ),
           ],
         ),
@@ -762,7 +780,7 @@ class _MetaCell extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: _mono(
+          style: _ui(
               size: 10 * s, weight: FontWeight.w400, color: _kBlack, spacing: 0.3),
         ),
       ],
@@ -845,12 +863,12 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             'Brief gönderdikten sonra buraya düşer.',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),
@@ -873,7 +891,7 @@ class _ErrorView extends StatelessWidget {
         children: [
           Text(
             'Projeler yüklenemedi',
-            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 12 * s),
           GestureDetector(
@@ -886,7 +904,7 @@ class _ErrorView extends StatelessWidget {
               ),
               child: Text(
                 'TEKRAR DENE',
-                style: _mono(
+                style: _ui(
                     size: 9 * s,
                     weight: FontWeight.w700,
                     color: Colors.white,

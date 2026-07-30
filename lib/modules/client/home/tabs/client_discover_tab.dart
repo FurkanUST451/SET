@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB); // arka plan
@@ -14,21 +15,21 @@ const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
-  double spacing = 0,
+  double? spacing,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -37,13 +38,13 @@ TextStyle _serif({
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
     );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -116,44 +117,51 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
       child: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: Obx(() {
-            final works = _filtered(_worksController.works);
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: _buildTopStrip(s),
-                ),
-                SliverToBoxAdapter(
-                  child: _Header(scale: s),
-                ),
-                SliverToBoxAdapter(
-                  child: _FilterBar(
-                    scale: s,
-                    selected: _filter,
-                    onSelect: (t) => setState(() => _filter = t),
-                  ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
-                  sliver: SliverList.separated(
-                    itemCount: works.length,
-                    separatorBuilder: (_, _) => const Divider(
-                        height: 1, thickness: 1, color: _kDivider),
-                    itemBuilder: (_, i) {
-                      final work = works[i];
-                      return _WorkCard(
-                        scale: s,
-                        work: work,
-                        timeAgo: _timeAgoFor(work),
-                        duration: _durationFor(work),
-                        format: _formatFor(work.type),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          }),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopStrip(s),
+              Expanded(
+                child: Obx(() {
+                  final works = _filtered(_worksController.works);
+                  return CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: _Header(scale: s),
+                      ),
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _FilterBarHeaderDelegate(
+                          scale: s,
+                          selected: _filter,
+                          onSelect: (t) => setState(() => _filter = t),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding:
+                            EdgeInsets.fromLTRB(26 * s, 10 * s, 26 * s, 130 * s),
+                        sliver: SliverList.separated(
+                          itemCount: works.length,
+                          separatorBuilder: (_, _) => const Divider(
+                              height: 1, thickness: 1, color: _kDivider),
+                          itemBuilder: (_, i) {
+                            final work = works[i];
+                            return _WorkCard(
+                              scale: s,
+                              work: work,
+                              timeAgo: _timeAgoFor(work),
+                              duration: _durationFor(work),
+                              format: _formatFor(work.type),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -168,7 +176,7 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · KEŞFET',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -193,21 +201,21 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // "neler" — serif italic, muted
+          // "neler" — display italic, muted
           Text(
             'neler',
-            style: _serif(
+            style: _display(
                 size: 27 * s,
                 weight: FontWeight.w500,
                 color: _kMuted,
                 italic: true),
           ),
-          // "YAPTIK?" — büyük serif, ? altın
+          // "YAPTIK?" — büyük display, ? altın
           Text.rich(
             TextSpan(children: [
               TextSpan(
                 text: 'YAPTIK',
-                style: _serif(
+                style: _display(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -216,7 +224,7 @@ class _Header extends StatelessWidget {
               ),
               TextSpan(
                 text: '?',
-                style: _serif(
+                style: _display(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kGold,
@@ -227,11 +235,50 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20 * s),
           Text(
             'SETTEKİLERİN SON İŞLERİ',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ],
       ),
     );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FILTER BAR — sabit üst şeridin hemen altına sabitlenen (pinned) sliver başlık
+// ─────────────────────────────────────────────────────────────────
+class _FilterBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _FilterBarHeaderDelegate({
+    required this.scale,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  final double scale;
+  final WorkType? selected;
+  final ValueChanged<WorkType?> onSelect;
+
+  double get _height => 46 * scale;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return ColoredBox(
+      color: _kCream,
+      child: _FilterBar(scale: scale, selected: selected, onSelect: onSelect),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _FilterBarHeaderDelegate oldDelegate) {
+    return oldDelegate.scale != scale ||
+        oldDelegate.selected != selected ||
+        oldDelegate.onSelect != onSelect;
   }
 }
 
@@ -266,7 +313,7 @@ class _FilterBar extends StatelessWidget {
           ),
           ...WorkType.values.map((t) => _FilterTab(
                 scale: s,
-                label: t.label.toUpperCase(),
+                label: t.label.toUpperCaseTr(),
                 selected: selected == t,
                 onTap: () => onSelect(t),
               )),
@@ -313,7 +360,7 @@ class _FilterTab extends StatelessWidget {
             ],
             Text(
               label,
-              style: _mono(
+              style: _ui(
                 size: 9 * s,
                 weight: selected ? FontWeight.w700 : FontWeight.w400,
                 color: _kBlack,
@@ -375,7 +422,7 @@ class _WorkCard extends StatelessWidget {
                       work.studio,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _serif(
+                      style: _display(
                           size: 14 * s,
                           weight: FontWeight.w600,
                           color: _kInk),
@@ -384,16 +431,16 @@ class _WorkCard extends StatelessWidget {
                     Text.rich(
                       TextSpan(children: [
                         TextSpan(
-                          text: work.type.label.toUpperCase(),
-                          style: _mono(
+                          text: work.type.label.toUpperCaseTr(),
+                          style: _ui(
                               size: 8 * s,
                               weight: FontWeight.w700,
                               color: _kGold,
                               spacing: 1),
                         ),
                         TextSpan(
-                          text: '  ·  «${work.title.toUpperCase()}»',
-                          style: _mono(
+                          text: '  ·  «${work.title.toUpperCaseTr()}»',
+                          style: _ui(
                               size: 8 * s, color: _kBlack, spacing: 1),
                         ),
                       ]),
@@ -406,7 +453,7 @@ class _WorkCard extends StatelessWidget {
               SizedBox(width: 12 * s),
               Text(
                 timeAgo,
-                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
               ),
             ],
           ),
@@ -429,7 +476,7 @@ class _WorkCard extends StatelessWidget {
                   work.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(
+                  style: _display(
                       size: 13 * s,
                       weight: FontWeight.w500,
                       color: _kInk,
@@ -439,7 +486,7 @@ class _WorkCard extends StatelessWidget {
               SizedBox(width: 12 * s),
               Text(
                 duration.isEmpty ? format : '$duration · $format',
-                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
               ),
             ],
           ),
@@ -449,7 +496,7 @@ class _WorkCard extends StatelessWidget {
               work.description!,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+              style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
             ),
           ],
           SizedBox(height: 18 * s),
@@ -541,7 +588,7 @@ class _CoverPlaceholder extends StatelessWidget {
                     SizedBox(height: 6 * s),
                     Text(
                       'ÖNİZLEME YOK',
-                      style: _mono(
+                      style: _ui(
                           size: 7 * s,
                           color: Colors.white.withValues(alpha: 0.22),
                           spacing: 2),
@@ -602,7 +649,7 @@ class _IconCount extends StatelessWidget {
         SizedBox(width: 7 * s),
         Text(
           _format(count),
-          style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+          style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
         ),
       ],
     );
