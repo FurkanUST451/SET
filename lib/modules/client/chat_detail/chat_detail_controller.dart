@@ -92,6 +92,13 @@ class ChatDetailController extends GetxController {
   }
 
   void goBack() {
+    // Normal durumda (ör. proje detayı, freelancer profili üzerinden açılmışsa)
+    // geldiği ekrana dön. Sadece bildirim/derin bağlantı gibi yığında önceki
+    // ekran yoksa ana sekmeye düş.
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back<void>();
+      return;
+    }
     if (_returnRoute == AppRoutes.freelancerHome) {
       Get.offAllNamed(AppRoutes.freelancerHome, arguments: {'tab': 1});
     } else {

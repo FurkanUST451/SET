@@ -19,7 +19,6 @@ class FreelancerUploadWorkController extends GetxController {
   final WorkRepository _repo;
 
   final titleController = TextEditingController();
-  final studioController = TextEditingController();
   final descriptionController = TextEditingController();
 
   final Rx<WorkType> selectedType = WorkType.video.obs;
@@ -54,10 +53,9 @@ class FreelancerUploadWorkController extends GetxController {
 
   Future<bool> submit() async {
     final title = titleController.text.trim();
-    final studio = studioController.text.trim();
 
-    if (title.isEmpty || studio.isEmpty) {
-      Get.snackbar('Eksik bilgi', 'Proje ismi ve imza alanlarını doldur',
+    if (title.isEmpty) {
+      Get.snackbar('Eksik bilgi', 'Proje ismini doldur',
           snackPosition: SnackPosition.BOTTOM);
       return false;
     }
@@ -69,6 +67,7 @@ class FreelancerUploadWorkController extends GetxController {
     }
     final user = Get.find<UserController>().currentUser;
     if (user == null) return false;
+    final studio = user.fullName;
 
     isSubmitting.value = true;
     try {
@@ -173,7 +172,6 @@ class FreelancerUploadWorkController extends GetxController {
   @override
   void onClose() {
     titleController.dispose();
-    studioController.dispose();
     descriptionController.dispose();
     super.onClose();
   }

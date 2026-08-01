@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/portfolio_project_model.dart';
 import '../../../routes/app_routes.dart';
 import 'portfolio_project_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -18,13 +19,13 @@ const _kCardBorder = Color(0x14000000);
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -32,13 +33,13 @@ TextStyle _serif({
   fontStyle: italic ? FontStyle.italic : FontStyle.normal,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -134,7 +135,7 @@ class _TopBar extends StatelessWidget {
             child: Text(
               'PROJE DETAYI',
               textAlign: TextAlign.center,
-              style: _mono(
+              style: _ui(
                 size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
@@ -267,7 +268,7 @@ class _HeroCard extends StatelessWidget {
                     SizedBox(width: 6 * s),
                     Text(
                       'ÖNE ÇIKAN PROJE',
-                      style: _mono(
+                      style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
@@ -291,7 +292,7 @@ class _HeroCard extends StatelessWidget {
                     project.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _serif(
+                    style: _display(
                       size: 26 * s,
                       weight: FontWeight.w600,
                       color: Colors.white,
@@ -303,7 +304,7 @@ class _HeroCard extends StatelessWidget {
                     project.subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       color: Colors.white.withValues(alpha: 0.75),
                       spacing: 0.3,
@@ -323,7 +324,7 @@ class _HeroCard extends StatelessWidget {
                     ),
                     child: Text(
                       project.tagLabel,
-                      style: _mono(
+                      style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: Colors.white,
@@ -384,7 +385,7 @@ class _HeroMeta extends StatelessWidget {
       children: [
         Text(
           label,
-          style: _mono(
+          style: _ui(
             size: 7 * s,
             color: Colors.white.withValues(alpha: 0.55),
             spacing: 1,
@@ -396,7 +397,7 @@ class _HeroMeta extends StatelessWidget {
           children: [
             Text(
               value,
-              style: _mono(
+              style: _ui(
                 size: 9 * s,
                 weight: FontWeight.w700,
                 color: Colors.white,
@@ -469,7 +470,7 @@ class _TabBar extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: selected ? _kGold : _kTaupe,
@@ -508,12 +509,12 @@ class _OverviewTab extends StatelessWidget {
       children: [
         Text(
           'Proje Hakkında',
-          style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
         ),
         SizedBox(height: 10 * s),
         Text(
           project.description,
-          style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.7),
+          style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.7),
         ),
         SizedBox(height: 18 * s),
         // Sayfa geneli 20*s yatay boşlukla kaydırılıyor; ilk (Kategori) ve
@@ -636,14 +637,14 @@ class _InfoChip extends StatelessWidget {
           SizedBox(height: 5 * s),
           Text(
             label,
-            style: _mono(size: 6.5 * s, color: _kTaupe, spacing: 0.8),
+            style: _ui(size: 6.5 * s, color: _kTaupe, spacing: 0.8),
           ),
           SizedBox(height: 2 * s),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _mono(
+            style: _ui(
               size: 8.5 * s,
               weight: FontWeight.w700,
               color: _kBlack,
@@ -676,7 +677,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk),
           ),
         ),
         GestureDetector(
@@ -687,7 +688,7 @@ class _SectionHeader extends StatelessWidget {
             children: [
               Text(
                 actionLabel,
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kGold,
@@ -761,7 +762,7 @@ class _TeamRow extends StatelessWidget {
     if (project.team.isEmpty) {
       return Text(
         'Ekip bilgisi henüz eklenmedi.',
-        style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+        style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
       );
     }
     return SizedBox(
@@ -784,9 +785,9 @@ class _TeamAvatar extends StatelessWidget {
   String get _initials {
     final parts = member.name.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCaseTr();
     }
-    return member.name.isNotEmpty ? member.name[0].toUpperCase() : '?';
+    return member.name.isNotEmpty ? member.name[0].toUpperCaseTr() : '?';
   }
 
   @override
@@ -815,7 +816,7 @@ class _TeamAvatar extends StatelessWidget {
             child: member.avatarUrl == null
                 ? Text(
                     _initials,
-                    style: _mono(
+                    style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
@@ -829,7 +830,7 @@ class _TeamAvatar extends StatelessWidget {
             member.name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _mono(
+            style: _ui(
               size: 8 * s,
               weight: FontWeight.w700,
               color: _kBlack,
@@ -841,7 +842,7 @@ class _TeamAvatar extends StatelessWidget {
             member.role,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _mono(size: 6.5 * s, color: _kGold, spacing: 0.5),
+            style: _ui(size: 6.5 * s, color: _kGold, spacing: 0.5),
           ),
         ],
       ),
@@ -871,7 +872,7 @@ class _TeamTab extends StatelessWidget {
       children: [
         Text(
           'Kimler Çalıştı?',
-          style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
         ),
         SizedBox(height: 16 * s),
         // Sayfa geneli 20*s yatay boşlukla kaydırılıyor; kartların ekranın
@@ -912,7 +913,7 @@ class _TeamTab extends StatelessWidget {
                               member.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: _serif(
+                              style: _display(
                                 size: 14 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk,
@@ -923,7 +924,7 @@ class _TeamTab extends StatelessWidget {
                               member.role,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: _mono(
+                              style: _ui(
                                 size: 8 * s,
                                 color: _kGold,
                                 spacing: 0.8,
@@ -955,7 +956,7 @@ class _TeamTab extends StatelessWidget {
                             children: [
                               Text(
                                 'Profili Gör',
-                                style: _mono(
+                                style: _ui(
                                   size: 7.5 * s,
                                   weight: FontWeight.w700,
                                   color: _kGold,
@@ -993,9 +994,9 @@ class _TeamAvatarSmall extends StatelessWidget {
   String get _initials {
     final parts = member.name.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCaseTr();
     }
-    return member.name.isNotEmpty ? member.name[0].toUpperCase() : '?';
+    return member.name.isNotEmpty ? member.name[0].toUpperCaseTr() : '?';
   }
 
   @override
@@ -1019,7 +1020,7 @@ class _TeamAvatarSmall extends StatelessWidget {
       child: member.avatarUrl == null
           ? Text(
               _initials,
-              style: _mono(
+              style: _ui(
                 size: 11 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
@@ -1073,7 +1074,7 @@ class _ProcessTab extends StatelessWidget {
       children: [
         Text(
           'Süreç Aşamaları',
-          style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
         ),
         SizedBox(height: 18 * s),
         for (var i = 0; i < stages.length; i++) ...[
@@ -1088,7 +1089,7 @@ class _ProcessTab extends StatelessWidget {
                       ? Icon(Icons.check_rounded, size: 20 * s, color: _kGold)
                       : Text(
                           '${i + 1}'.padLeft(2, '0'),
-                          style: _mono(
+                          style: _ui(
                             size: 9 * s,
                             weight: FontWeight.w700,
                             color: _kMuted,
@@ -1103,7 +1104,7 @@ class _ProcessTab extends StatelessWidget {
                   children: [
                     Text(
                       stages[i].label,
-                      style: _mono(
+                      style: _ui(
                         size: 11 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
@@ -1113,7 +1114,7 @@ class _ProcessTab extends StatelessWidget {
                     SizedBox(height: 4 * s),
                     Text(
                       _stageCaption(stages[i].label),
-                      style: _mono(
+                      style: _ui(
                         size: 9 * s,
                         weight: FontWeight.w400,
                         color: _kBlack,
@@ -1165,7 +1166,7 @@ class _EmptyTab extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               text,
-              style: _mono(size: 9, color: _kTaupe, spacing: 0.2),
+              style: _ui(size: 9, color: _kTaupe, spacing: 0.2),
             ),
           ],
         ),

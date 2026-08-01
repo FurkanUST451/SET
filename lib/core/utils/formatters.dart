@@ -25,4 +25,13 @@ class Formatters {
     if (diff.inDays < 7) return '${diff.inDays} g';
     return shortDate(date);
   }
+
+  // Beğeni/yorum gibi sayaçlar için: 1000+ değerleri "1.2K" şeklinde kısaltır.
+  static String compactCount(int n) {
+    if (n >= 1000) {
+      final k = n / 1000;
+      return k % 1 == 0 ? '${k.toInt()}K' : '${k.toStringAsFixed(1)}K';
+    }
+    return n.toString();
+  }
 }

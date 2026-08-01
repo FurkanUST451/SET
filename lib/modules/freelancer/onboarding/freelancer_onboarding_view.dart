@@ -1,40 +1,41 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/freelancer_model.dart';
 import 'freelancer_onboarding_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 
 double _scaleOf(BuildContext c) =>
     (MediaQuery.sizeOf(c).width / 390).clamp(0.85, 1.15).toDouble();
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -79,7 +80,7 @@ class FreelancerOnboardingView extends GetView<FreelancerOnboardingController> {
                     SizedBox(width: 8 * s),
                     Text(
                       'Freelancer Profili',
-                      style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                   ],
                 ),
@@ -156,8 +157,8 @@ class _PrimaryButton extends StatelessWidget {
         color: _kGold,
         alignment: Alignment.center,
         child: Text(
-          label.toUpperCase(),
-          style: _mono(size: 11 * s, weight: FontWeight.w700, color: Colors.white, spacing: 1.5),
+          label.toUpperCaseTr(),
+          style: _ui(size: 11 * s, weight: FontWeight.w700, color: Colors.white, spacing: 1.5),
         ),
       ),
     );
@@ -181,8 +182,8 @@ class _OutlineButton extends StatelessWidget {
         decoration: BoxDecoration(border: Border.all(color: _kGold)),
         alignment: Alignment.center,
         child: Text(
-          label.toUpperCase(),
-          style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kGold, spacing: 1.5),
+          label.toUpperCaseTr(),
+          style: _ui(size: 11 * s, weight: FontWeight.w700, color: _kGold, spacing: 1.5),
         ),
       ),
     );
@@ -224,8 +225,8 @@ class _LabeledField extends StatelessWidget {
       children: [
         if (label.isNotEmpty) ...[
           Text(
-            label.toUpperCase(),
-            style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
+            label.toUpperCaseTr(),
+            style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
           ),
           SizedBox(height: 7 * s),
         ],
@@ -236,13 +237,13 @@ class _LabeledField extends StatelessWidget {
           onTap: onTap,
           textInputAction: textInputAction,
           cursorColor: _kGold,
-          style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2, height: 1.3),
+          style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2, height: 1.3),
           decoration: InputDecoration(
             isDense: true,
             filled: true,
             fillColor: Colors.white,
             hintText: hint,
-            hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+            hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
             suffixIcon: suffixIcon,
             contentPadding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 12 * s),
             border: border(Colors.black.withValues(alpha: 0.12)),
@@ -296,7 +297,7 @@ class _PersonalInfoStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Kişisel Bilgiler',
-              style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 20 * s),
 
           // Profil Fotoğrafı
@@ -439,7 +440,7 @@ class _PersonalInfoStep extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text('Şehir Seçin',
-                    style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
+                    style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
               ),
             ),
             Padding(
@@ -448,10 +449,10 @@ class _PersonalInfoStep extends StatelessWidget {
                 controller: searchCtrl,
                 autofocus: true,
                 cursorColor: _kGold,
-                style: _mono(size: 11 * s, color: _kBlack),
+                style: _ui(size: 11 * s, color: _kBlack),
                 decoration: InputDecoration(
                   hintText: 'Şehir ara...',
-                  hintStyle: _mono(size: 11 * s, color: _kBlack),
+                  hintStyle: _ui(size: 11 * s, color: _kBlack),
                   prefixIcon: Icon(Icons.search, size: 18 * s, color: _kTaupe),
                   filled: true,
                   fillColor: Colors.white,
@@ -489,7 +490,7 @@ class _PersonalInfoStep extends StatelessWidget {
                   itemBuilder: (_, i) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(cities[i],
-                        style: _serif(size: 15 * s, weight: FontWeight.w500, color: _kInk)),
+                        style: _display(size: 15 * s, weight: FontWeight.w500, color: _kInk)),
                     onTap: () {
                       c.selectedCity.value = cities[i];
                       Navigator.of(context).pop();
@@ -519,7 +520,7 @@ class _PersonalInfoStep extends StatelessWidget {
             _bottomSheetHandle(s),
             SizedBox(height: 6 * s),
             Text('Deneyim Yılı',
-                style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
             Expanded(
               child: CupertinoPicker(
                 itemExtent: 42 * s,
@@ -531,7 +532,7 @@ class _PersonalInfoStep extends StatelessWidget {
                   (i) => Center(
                     child: Text(
                       i == 0 ? '0 yıl' : '$i yıl',
-                      style: _mono(size: 13 * s, color: _kBlack, spacing: 0.2),
+                      style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ),
                 ),
@@ -568,10 +569,10 @@ class _CategoryStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kategoriler', style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+          Text('Kategoriler', style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 4 * s),
           Text('Birden fazla seçebilirsin',
-              style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
+              style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2)),
           SizedBox(height: 20 * s),
           Expanded(
             child: SingleChildScrollView(
@@ -593,7 +594,7 @@ class _CategoryStep extends StatelessWidget {
                           ),
                           child: Text(
                             cat,
-                            style: _mono(
+                            style: _ui(
                               size: 10 * s,
                               weight: selected ? FontWeight.w700 : FontWeight.w400,
                               color: selected ? _kGold : _kBlack,
@@ -634,7 +635,7 @@ class _BioStep extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Kendini kısaca tanıt:',
-                style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 20 * s),
             _LabeledField(
               label: '',
@@ -664,16 +665,16 @@ class _PortfolioStep extends StatelessWidget {
         padding: EdgeInsets.all(24 * s),
         children: [
           Text('Bize projelerinden bahset',
-              style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 4 * s),
           Text(
             'Bize daha önce yaptığın projelerden bahseder misin?',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
           ),
           SizedBox(height: 4 * s),
           Text(
             '(Profil kısmından projelerini eklemeye devam edebilirsin)',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
           ),
           SizedBox(height: 20 * s),
 
@@ -705,7 +706,7 @@ class _PortfolioStep extends StatelessWidget {
                   Icon(Icons.add, size: 18 * s, color: _kGold),
                   SizedBox(width: 8 * s),
                   Text('Proje Ekle',
-                      style: _mono(
+                      style: _ui(
                           size: 10 * s, weight: FontWeight.w600, color: _kGold, spacing: 0.4)),
                 ],
               ),
@@ -753,11 +754,11 @@ class _ProjectCard extends StatelessWidget {
               children: [
                 if (project.title.isNotEmpty)
                   Text(project.title,
-                      style: _serif(size: 15 * s, weight: FontWeight.w600, color: _kInk)),
+                      style: _display(size: 15 * s, weight: FontWeight.w600, color: _kInk)),
                 if (project.jobType.isNotEmpty) ...[
                   SizedBox(height: 2 * s),
                   Text(project.jobType,
-                      style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
+                      style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
                 ],
                 if (project.description.isNotEmpty) ...[
                   SizedBox(height: 6 * s),
@@ -765,7 +766,7 @@ class _ProjectCard extends StatelessWidget {
                     project.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ],
                 if (project.videoUrl != null && project.videoUrl!.isNotEmpty) ...[
@@ -777,7 +778,7 @@ class _ProjectCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           project.videoUrl!,
-                          style: _mono(size: 8 * s, color: _kGold, spacing: 0.2),
+                          style: _ui(size: 8 * s, color: _kGold, spacing: 0.2),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -852,7 +853,7 @@ class _AddProjectSheetState extends State<_AddProjectSheet> {
           children: [
             Center(child: _bottomSheetHandle(s)),
             SizedBox(height: 14 * s),
-            Text('Proje Ekle', style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+            Text('Proje Ekle', style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 16 * s),
             _LabeledField(label: 'Proje Başlığı', controller: _titleCtrl, hint: 'Migros'),
             SizedBox(height: 14 * s),

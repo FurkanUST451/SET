@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/work_model.dart';
 import 'freelancer_upload_work_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -13,22 +14,22 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kDivider = Color(0x12000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
 
 class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
@@ -68,14 +69,6 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
                         hint: 'ör. "Mercedes-Benz The Chase"',
                       ),
                       SizedBox(height: 20 * s),
-                      _sectionLabel(s, 'İMZA'),
-                      SizedBox(height: 10 * s),
-                      _TextInput(
-                        scale: s,
-                        controller: controller.studioController,
-                        hint: 'Stüdyo veya isim (ör. FRAMEWORKS)',
-                      ),
-                      SizedBox(height: 20 * s),
                       _sectionLabel(s, 'AÇIKLAMA'),
                       SizedBox(height: 10 * s),
                       _TextInput(
@@ -99,7 +92,7 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
 
   Widget _sectionLabel(double s, String text) => Text(
         text,
-        style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.6),
+        style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.6),
       );
 
   Widget _buildTopBar(double s) {
@@ -123,7 +116,7 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
             ),
             SizedBox(width: 4 * s),
             Text('Proje Yükle',
-                style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
           ],
         ),
       ),
@@ -155,8 +148,8 @@ class _CategoryChips extends StatelessWidget {
                   border: Border.all(color: selected ? _kInk : Colors.black.withValues(alpha: 0.12)),
                 ),
                 child: Text(
-                  t.label.toUpperCase(),
-                  style: _mono(
+                  t.label.toUpperCaseTr(),
+                  style: _ui(
                     size: 9 * s,
                     weight: FontWeight.w700,
                     color: selected ? _kGold : _kTaupe,
@@ -204,7 +197,7 @@ class _MediaPicker extends StatelessWidget {
                                 size: 30 * s, color: Colors.white.withValues(alpha: 0.3)),
                             SizedBox(height: 8 * s),
                             Text('HENÜZ MEDYA SEÇİLMEDİ',
-                                style: _mono(
+                                style: _ui(
                                     size: 7.5 * s,
                                     color: Colors.white.withValues(alpha: 0.3),
                                     spacing: 1.5)),
@@ -225,7 +218,7 @@ class _MediaPicker extends StatelessWidget {
                                       size: 30 * s, color: Colors.white.withValues(alpha: 0.85)),
                                   SizedBox(height: 8 * s),
                                   Text('VİDEO SEÇİLDİ',
-                                      style: _mono(
+                                      style: _ui(
                                           size: 7.5 * s,
                                           color: Colors.white.withValues(alpha: 0.85),
                                           spacing: 1.5)),
@@ -312,7 +305,7 @@ class _MediaPickButton extends StatelessWidget {
           children: [
             Icon(icon, size: 16 * s, color: _kInk),
             SizedBox(width: 8 * s),
-            Text(label, style: _mono(size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.4)),
+            Text(label, style: _ui(size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.4)),
           ],
         ),
       ),
@@ -348,13 +341,13 @@ class _TextInput extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         cursorColor: _kGold,
-        style: _mono(size: 10 * s, color: _kInk, spacing: 0.2),
+        style: _ui(size: 10 * s, color: _kInk, spacing: 0.2),
         decoration: InputDecoration(
           isCollapsed: true,
           filled: false,
           border: InputBorder.none,
           hintText: hint,
-          hintStyle: _mono(size: 10 * s, color: _kMuted, spacing: 0.2),
+          hintStyle: _ui(size: 10 * s, color: _kMuted, spacing: 0.2),
         ),
       ),
     );
@@ -389,7 +382,7 @@ class _SubmitButton extends StatelessWidget {
                     child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : Text('Projeyi Yükle',
-                    style: _mono(size: 10 * s, weight: FontWeight.w700, color: Colors.white, spacing: 0.8)),
+                    style: _ui(size: 10 * s, weight: FontWeight.w700, color: Colors.white, spacing: 0.8)),
           ),
         ));
   }

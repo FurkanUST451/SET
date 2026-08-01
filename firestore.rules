@@ -133,11 +133,9 @@ service cloud.firestore {
         && request.resource.data.comments == 0;
 
       // Sahibi sadece başlık/imza/açıklama gibi düzenlenebilir alanları değiştirebilir.
-      // likes/comments sayaçları buradan değil, yalnızca Admin SDK (Cloud Functions) üzerinden güncellenir.
-      // TODO(likes/comments UI): like/comment yazma özelliği eklendiğinde, works/{id}/likes ve
-      // works/{id}/comments alt-koleksiyonlarında onCreate/onDelete tetikleyen bir Cloud Function
-      // yazılıp works.likes / works.comments sayaçlarını FieldValue.increment ile güncellemeli.
-      // O function yazılana kadar bu sayaçlar hep 0'da kalır (bkz. functions/index.js).
+      // likes/comments sayaçları buradan değil, yalnızca Admin SDK (Cloud Functions,
+      // bkz. functions/index.js — onWorkLikeCreated/Deleted, onWorkCommentCreated/Deleted)
+      // üzerinden güncellenir.
       allow update: if isSignedIn()
         && resource.data.freelancerId == request.auth.uid
         && request.resource.data.freelancerId == resource.data.freelancerId
@@ -194,6 +192,27 @@ service cloud.firestore {
     // Admin SDK rules'ı bypass eder; bu blok client erişimini açıkça kapatır.
     match /rate_limits/{docId} {
       allow read, write: if false;
+    }
+
+    // İçerik şikayetleri (ör. Keşfet gönderisi, ileride sohbet mesajı vb.).
+    // Client sadece kendi adına, tek bir şikayet dokümanı oluşturabilir;
+    // moderasyon incelemesi (admin panel) yalnızca Admin SDK üzerinden
+    // yapıldığından read/update/delete client'a tamamen kapalı.
+    match /reports/{reportId} {
+      allow create: if isSignedIn()
+        && request.resource.data.reporter.userId == request.auth.uid
+        && request.resource.data.type is string
+        && request.resource.data.type.size() > 0
+        && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() > 0
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.reason.size() <= 500
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reporter is map
+        && request.resource.data.target is map;
+
+      allow read, update, delete: if false;
     }
 
   }

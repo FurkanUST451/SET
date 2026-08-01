@@ -1,3 +1,5 @@
+import '../../core/utils/turkish_case.dart';
+
 enum PortfolioStatus {
   completed,
   ongoing,
@@ -83,7 +85,7 @@ class PortfolioProjectModel {
       id: id,
       title: title,
       subtitle: 'Detaylar yakında eklenecek.',
-      tagLabel: category.toUpperCase(),
+      tagLabel: category.toUpperCaseTr(),
       year: DateTime.now().year.toString(),
       durationLabel: '—',
       status: PortfolioStatus.completed,

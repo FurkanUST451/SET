@@ -42,6 +42,22 @@ class BriefRepository {
     return list;
   }
 
+  // Freelancer'a gönderilen teklifleri canlı akıtır — yeni bir teklif
+  // geldiğinde ekranın yeniden giriş yapmaya gerek kalmadan güncellenmesi
+  // için kullanılır (bkz. freelancer_job_offers_controller.dart).
+  Stream<List<BriefModel>> watchByFreelancer(String freelancerId) {
+    return _briefs
+        .where('sentToIds', arrayContains: freelancerId)
+        .snapshots()
+        .map((snapshot) {
+      final list = snapshot.docs
+          .map((d) => BriefModel.fromJson(d.data()))
+          .toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
+  }
+
   Future<void> updateSentToIds(String briefId, List<String> ids) async {
     await _briefs.doc(briefId).update({
       'sentToIds': ids,

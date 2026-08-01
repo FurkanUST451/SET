@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+const _kGold = Color(0xFFD9A84E);
+
 /// Keşfet kartındaki videoya dokunulduğunda açılan tam ekran oynatıcı.
 class WorkVideoPlayerView extends StatefulWidget {
   const WorkVideoPlayerView({
@@ -26,7 +28,6 @@ class WorkVideoPlayerView extends StatefulWidget {
 class _WorkVideoPlayerViewState extends State<WorkVideoPlayerView> {
   late final VideoPlayerController _controller;
   bool _hasError = false;
-  bool _isMuted = false;
 
   @override
   void initState() {
@@ -51,19 +52,6 @@ class _WorkVideoPlayerViewState extends State<WorkVideoPlayerView> {
     setState(() {
       _controller.value.isPlaying ? _controller.pause() : _controller.play();
     });
-  }
-
-  void _toggleMute() {
-    setState(() {
-      _isMuted = !_isMuted;
-      _controller.setVolume(_isMuted ? 0 : 1);
-    });
-  }
-
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
   }
 
   @override
@@ -92,46 +80,44 @@ class _WorkVideoPlayerViewState extends State<WorkVideoPlayerView> {
               ),
             )
           : _controller.value.isInitialized
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              ? Stack(
                   children: [
-                    Expanded(
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: _togglePlayback,
-                          child: AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                VideoPlayer(_controller),
-                                if (!_controller.value.isPlaying)
-                                  Container(
-                                    width: 64,
-                                    height: 64,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          Colors.black.withValues(alpha: 0.35),
-                                    ),
-                                    child: const Icon(
-                                      Icons.play_arrow_rounded,
-                                      color: Colors.white,
-                                      size: 36,
-                                    ),
+                    Center(
+                      child: GestureDetector(
+                        onTap: _togglePlayback,
+                        child: AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              VideoPlayer(_controller),
+                              if (!_controller.value.isPlaying)
+                                Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black.withValues(alpha: 0.35),
                                   ),
-                              ],
-                            ),
+                                  child: const Icon(
+                                    Icons.play_arrow_rounded,
+                                    color: Colors.white,
+                                    size: 36,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    _VideoControlsBar(
-                      controller: _controller,
-                      isMuted: _isMuted,
-                      onTogglePlayback: _togglePlayback,
-                      onToggleMute: _toggleMute,
-                      formatDuration: _formatDuration,
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: _VideoControlsBar(
+                        controller: _controller,
+                        onTogglePlay: _togglePlayback,
+                      ),
                     ),
                   ],
                 )
@@ -153,130 +139,106 @@ class _WorkVideoPlayerViewState extends State<WorkVideoPlayerView> {
   }
 }
 
-// Video altındaki sabit kontrol çubuğu: oynat/duraklat, ilerleme çubuğu
-// (görünür top/thumb'lı, sürüklenebilir), süre ve sessize alma.
-//
-// Sürükleme sırasında controller.seekTo() HER hareket için değil, sadece
-// parmak kalktığında (onChangeEnd) çağrılıyor — aksi halde her piksel
-// hareketinde bir network seek isteği tetiklenip (video faststart/HLS
-// olmadığından) istekler kuyruğa yığılıyor ve pozisyon "çok sonra" yerine
-// oturuyordu. Sürüklerken slider'ın kendi değeri (_dragValue) anlık ve akıcı
-// güncellenir; gerçek video pozisyonuyla senkron değil, sadece görsel.
-class _VideoControlsBar extends StatefulWidget {
+// ─── Alt kontrol çubuğu: oynat/durdur, 10sn geri/ileri sarma, ilerleme
+// çubuğu (sürüklenebilir) ve süre göstergesi. controller'ı doğrudan
+// dinlediği için (ValueListenableBuilder) üst widget'ın setState'ine
+// bağımlı değil — sürükleyerek sarma anında yansır.
+class _VideoControlsBar extends StatelessWidget {
   const _VideoControlsBar({
     required this.controller,
-    required this.isMuted,
-    required this.onTogglePlayback,
-    required this.onToggleMute,
-    required this.formatDuration,
+    required this.onTogglePlay,
   });
 
   final VideoPlayerController controller;
-  final bool isMuted;
-  final VoidCallback onTogglePlayback;
-  final VoidCallback onToggleMute;
-  final String Function(Duration) formatDuration;
+  final VoidCallback onTogglePlay;
 
-  @override
-  State<_VideoControlsBar> createState() => _VideoControlsBarState();
-}
-
-class _VideoControlsBarState extends State<_VideoControlsBar> {
-  double? _dragValueMs;
-  bool _wasPlayingBeforeDrag = false;
-
-  void _onChangeStart(double value) {
-    _wasPlayingBeforeDrag = widget.controller.value.isPlaying;
-    widget.controller.pause();
-    setState(() => _dragValueMs = value);
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
   }
 
-  void _onChanged(double value) {
-    setState(() => _dragValueMs = value);
-  }
-
-  Future<void> _onChangeEnd(double value) async {
-    await widget.controller
-        .seekTo(Duration(milliseconds: value.round()));
-    if (_wasPlayingBeforeDrag) widget.controller.play();
-    if (mounted) setState(() => _dragValueMs = null);
+  void _seekBy(Duration offset) {
+    final target = controller.value.position + offset;
+    final duration = controller.value.duration;
+    final clamped = target < Duration.zero
+        ? Duration.zero
+        : (target > duration ? duration : target);
+    controller.seekTo(clamped);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 16, 0),
-        child: ValueListenableBuilder<VideoPlayerValue>(
-          valueListenable: widget.controller,
-          builder: (_, value, _) {
-            final durationMs = value.duration.inMilliseconds > 0
-                ? value.duration.inMilliseconds.toDouble()
-                : 1.0;
-            final positionMs =
-                _dragValueMs ?? value.position.inMilliseconds.toDouble();
-            final clampedPositionMs =
-                positionMs.clamp(0.0, durationMs).toDouble();
-
-            return Row(
+    return ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black87],
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: Icon(
-                    value.isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                    color: Colors.white,
+                VideoProgressIndicator(
+                  controller,
+                  allowScrubbing: true,
+                  padding: EdgeInsets.zero,
+                  colors: const VideoProgressColors(
+                    playedColor: _kGold,
+                    bufferedColor: Colors.white30,
+                    backgroundColor: Colors.white12,
                   ),
-                  onPressed: widget.onTogglePlayback,
                 ),
-                Text(
-                  widget.formatDuration(
-                    Duration(milliseconds: clampedPositionMs.round()),
-                  ),
-                  style: const TextStyle(color: Colors.white70, fontSize: 11),
-                ),
-                Expanded(
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 2.5,
-                      activeTrackColor: const Color(0xFFD9A84E),
-                      inactiveTrackColor: Colors.white24,
-                      thumbColor: const Color(0xFFD9A84E),
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 6,
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.replay_10, color: Colors.white),
+                      onPressed: () => _seekBy(const Duration(seconds: -10)),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        value.isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: Colors.white,
                       ),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 14),
+                      onPressed: onTogglePlay,
                     ),
-                    child: Slider(
-                      min: 0,
-                      max: durationMs,
-                      value: clampedPositionMs,
-                      onChangeStart: _onChangeStart,
-                      onChanged: _onChanged,
-                      onChangeEnd: _onChangeEnd,
+                    IconButton(
+                      icon: const Icon(Icons.forward_10, color: Colors.white),
+                      onPressed: () => _seekBy(const Duration(seconds: 10)),
                     ),
-                  ),
-                ),
-                Text(
-                  widget.formatDuration(value.duration),
-                  style: const TextStyle(color: Colors.white70, fontSize: 11),
-                ),
-                IconButton(
-                  icon: Icon(
-                    widget.isMuted
-                        ? Icons.volume_off_rounded
-                        : Icons.volume_up_rounded,
-                    color: Colors.white,
-                  ),
-                  onPressed: widget.onToggleMute,
+                    const SizedBox(width: 4),
+                    Text(
+                      '${_formatDuration(value.position)} / ${_formatDuration(value.duration)}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(
+                        value.volume == 0
+                            ? Icons.volume_off_rounded
+                            : Icons.volume_up_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () =>
+                          controller.setVolume(value.volume == 0 ? 1.0 : 0.0),
+                    ),
+                  ],
                 ),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

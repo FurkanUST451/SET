@@ -64,6 +64,23 @@ class WorkModel {
   final bool isVideo;
   final DateTime? createdAt;
 
+  // Firestore'a yüklenmiş gerçek işler için true (createdAt set edilir).
+  bool get isLive => createdAt != null;
+
+  // Bir bildirim (report) oluşturulurken içeriğin o anki hâlinin
+  // anlık görüntüsü (bkz. report_model.dart) — gönderi sonradan
+  // silinse/değişse bile admin panelinde bildirim anındaki bilgiler kalır.
+  Map<String, dynamic> toReportSnapshot() => {
+        'workId': id,
+        'title': title,
+        'studio': studio,
+        'type': type.name,
+        'freelancerId': freelancerId,
+        'mediaUrl': mediaUrl,
+        'thumbnailUrl': thumbnailUrl,
+        'description': description,
+      };
+
   factory WorkModel.fromJson(Map<String, dynamic> json) {
     return WorkModel(
       id: json['id'] as String,
