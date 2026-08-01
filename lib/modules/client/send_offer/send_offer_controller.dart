@@ -11,15 +11,30 @@ class SendOfferController extends GetxController {
 
   bool get isEditMode => _briefId != null;
 
+  // ─── Çekim türü ───────────────────────────────────────────────────────────
   final RxString selectedShootingType = ''.obs;
   final RxBool isShootingTypeExpanded = false.obs;
 
-  final RxBool hasFixedDate = false.obs;
+  // ─── Çekim tarihi ─────────────────────────────────────────────────────────
+  final RxBool isDateExpanded = false.obs;
+  // null = henüz seçilmedi, true = "Tarih belli", false = "Esnek"
+  final Rx<bool?> isDateFixed = Rx<bool?>(null);
   final RxString dateRangeLabel = ''.obs;
+  final Rx<DateTime?> rangeStart = Rx<DateTime?>(null);
+  final Rx<DateTime?> rangeEnd = Rx<DateTime?>(null);
 
+  // ─── Teslim süresi ────────────────────────────────────────────────────────
+  final RxBool isDeliveryExpanded = false.obs;
   final RxString selectedDelivery = ''.obs;
-  final RxString selectedBudget = ''.obs;
+  final RxBool isCustomDelivery = false.obs;
+  final TextEditingController customDeliveryController =
+      TextEditingController();
+
+  // ─── Lokasyon ─────────────────────────────────────────────────────────────
+  final RxBool isLocationExpanded = false.obs;
   final RxString selectedLocation = ''.obs;
+  final TextEditingController locationController = TextEditingController();
+
   final RxBool isSubmitting = false.obs;
 
   static const shootingTypes = [
@@ -32,28 +47,10 @@ class SendOfferController extends GetxController {
   ];
 
   static const deliveryOptions = [
-    '3 Gün',
     '7 Gün',
     '14 Gün',
-    '1 Ay',
-    '2+ Ay',
-  ];
-
-  static const budgetOptions = [
-    '10.000₺ - 30.000₺',
-    '30.000₺ - 50.000₺',
-    '50.000₺ - 120.000₺',
-    '120.000₺ - 300.000₺',
-    '300.000₺+',
-  ];
-
-  static const locationOptions = [
-    'İstanbul / Beşiktaş',
-    'İstanbul / Kadıköy',
-    'İstanbul / Şişli',
-    'Ankara / Çankaya',
-    'İzmir / Alsancak',
-    'Uzaktan',
+    '21 Gün',
+    '30 Gün',
   ];
 
   // Bu kategorilerde çekim mahal bağımsız olduğu için lokasyon sorulmaz.
@@ -65,6 +62,17 @@ class SendOfferController extends GetxController {
   };
 
   bool get showLocation => !_noLocationCategories.contains(category);
+
+  int get totalSteps => showLocation ? 4 : 3;
+
+  int get completedSteps {
+    var n = 0;
+    if (selectedShootingType.value.isNotEmpty) n++;
+    if (isDateFixed.value != null && dateRangeLabel.value.isNotEmpty) n++;
+    if (selectedDelivery.value.isNotEmpty) n++;
+    if (showLocation && selectedLocation.value.isNotEmpty) n++;
+    return n;
+  }
 
   static const _monthNames = [
     'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
@@ -82,49 +90,157 @@ class SendOfferController extends GetxController {
       // Edit mode — pre-populate from existing brief
       _briefId = existing.id;
       _existingNotes = existing.answers.notes;
-      selectedShootingType.value =
-          existing.answers.shootingType ?? 'Reklam Filmi Yatay';
+      selectedShootingType.value = existing.answers.shootingType ?? '';
 
       final existingDateRange = existing.answers.dateRange;
       if (existingDateRange != null &&
           existingDateRange.isNotEmpty &&
           existingDateRange != 'Tarih Belirsiz') {
-        hasFixedDate.value = true;
+        isDateFixed.value = true;
         dateRangeLabel.value = existingDateRange;
+      } else if (existingDateRange == 'Tarih Belirsiz') {
+        isDateFixed.value = false;
+        dateRangeLabel.value = 'Esnek';
       }
 
-      selectedDelivery.value = existing.answers.deliveryTime ?? '7 Gün';
-      selectedBudget.value = existing.answers.budget ?? '50.000₺ - 120.000₺';
-      selectedLocation.value =
-          existing.answers.location ?? 'İstanbul / Beşiktaş';
-    } else {
-      // New brief — defaults
-      selectedShootingType.value = 'Reklam Filmi Yatay';
-      selectedDelivery.value = '7 Gün';
-      selectedBudget.value = '50.000₺ - 120.000₺';
-      selectedLocation.value = 'İstanbul / Beşiktaş';
+      selectedDelivery.value = existing.answers.deliveryTime ?? '';
+      selectedLocation.value = existing.answers.location ?? '';
+      locationController.text = selectedLocation.value;
     }
   }
 
-  void toggleShootingTypeExpanded() =>
-      isShootingTypeExpanded.value = !isShootingTypeExpanded.value;
+  @override
+  void onClose() {
+    customDeliveryController.dispose();
+    locationController.dispose();
+    super.onClose();
+  }
+
+  void toggleShootingTypeExpanded() {
+    isShootingTypeExpanded.value = !isShootingTypeExpanded.value;
+    if (isShootingTypeExpanded.value) _collapseOthers(_Section.shootingType);
+  }
+
+  void toggleDateExpanded() {
+    isDateExpanded.value = !isDateExpanded.value;
+    if (isDateExpanded.value) _collapseOthers(_Section.date);
+  }
+
+  void toggleDeliveryExpanded() {
+    isDeliveryExpanded.value = !isDeliveryExpanded.value;
+    if (isDeliveryExpanded.value) _collapseOthers(_Section.delivery);
+  }
+
+  void toggleLocationExpanded() {
+    isLocationExpanded.value = !isLocationExpanded.value;
+    if (isLocationExpanded.value) _collapseOthers(_Section.location);
+  }
+
+  void _collapseOthers(_Section keep) {
+    if (keep != _Section.shootingType) isShootingTypeExpanded.value = false;
+    if (keep != _Section.date) isDateExpanded.value = false;
+    if (keep != _Section.delivery) isDeliveryExpanded.value = false;
+    if (keep != _Section.location) isLocationExpanded.value = false;
+  }
+
+  void _advanceTo(_Section? next) {
+    isShootingTypeExpanded.value = false;
+    isDateExpanded.value = false;
+    isDeliveryExpanded.value = false;
+    isLocationExpanded.value = false;
+    switch (next) {
+      case _Section.shootingType:
+        isShootingTypeExpanded.value = true;
+      case _Section.date:
+        isDateExpanded.value = true;
+      case _Section.delivery:
+        isDeliveryExpanded.value = true;
+      case _Section.location:
+        isLocationExpanded.value = true;
+      case null:
+        break;
+    }
+  }
 
   void selectShootingType(String type) {
     selectedShootingType.value = type;
-    isShootingTypeExpanded.value = false;
+    _advanceTo(_Section.date);
   }
 
-  void setHasFixedDate(bool value) {
-    hasFixedDate.value = value;
-    if (!value) dateRangeLabel.value = '';
+  void setDateMode(bool fixed) {
+    isDateFixed.value = fixed;
+    if (!fixed) {
+      dateRangeLabel.value = 'Esnek';
+      rangeStart.value = null;
+      rangeEnd.value = null;
+      _advanceTo(_Section.delivery);
+    } else if (dateRangeLabel.value == 'Esnek') {
+      dateRangeLabel.value = '';
+    }
   }
 
-  void setPickedDateRange(DateTimeRange range) {
-    final start = range.start;
-    final end = range.end;
-    dateRangeLabel.value = start.month == end.month
-        ? '${start.day} - ${end.day} ${_monthNames[start.month - 1]}'
-        : '${start.day} ${_monthNames[start.month - 1]} - ${end.day} ${_monthNames[end.month - 1]}';
+  void pickStripDay(DateTime day) {
+    if (rangeStart.value == null || rangeEnd.value != null) {
+      rangeStart.value = day;
+      rangeEnd.value = null;
+    } else if (day.isBefore(rangeStart.value!)) {
+      rangeStart.value = day;
+    } else {
+      rangeEnd.value = day;
+    }
+    _syncDateLabel();
+    // İlk (başlangıç) seçiminde kart açık kalır; ikinci (bitiş) seçiminde kapanıp
+    // bir sonraki karta geçilir.
+    if (rangeEnd.value != null) _advanceTo(_Section.delivery);
+  }
+
+  void _syncDateLabel() {
+    final start = rangeStart.value;
+    final end = rangeEnd.value;
+    if (start == null) {
+      dateRangeLabel.value = '';
+    } else if (end == null) {
+      dateRangeLabel.value = '${start.day} ${_monthNames[start.month - 1]}';
+    } else {
+      dateRangeLabel.value = start.month == end.month
+          ? '${start.day} - ${end.day} ${_monthNames[start.month - 1]}'
+          : '${start.day} ${_monthNames[start.month - 1]} - ${end.day} ${_monthNames[end.month - 1]}';
+    }
+  }
+
+  void selectDelivery(String value) {
+    isCustomDelivery.value = false;
+    selectedDelivery.value = value;
+    _advanceTo(showLocation ? _Section.location : null);
+  }
+
+  void selectCustomDelivery() {
+    isCustomDelivery.value = true;
+    final days = customDeliveryController.text.trim();
+    selectedDelivery.value = days.isEmpty ? '' : '$days Gün';
+  }
+
+  void setCustomDeliveryDays(String days) {
+    final trimmed = days.trim();
+    if (trimmed.isNotEmpty) selectedDelivery.value = '$trimmed Gün';
+  }
+
+  void submitCustomDelivery() {
+    final trimmed = customDeliveryController.text.trim();
+    if (trimmed.isEmpty) return;
+    selectedDelivery.value = '$trimmed Gün';
+    _advanceTo(showLocation ? _Section.location : null);
+  }
+
+  void setLocationText(String value) {
+    selectedLocation.value = value;
+  }
+
+  void submitLocationText() {
+    final trimmed = locationController.text.trim();
+    if (trimmed.isEmpty) return;
+    selectedLocation.value = trimmed;
+    _advanceTo(null);
   }
 
   Future<void> submit() async {
@@ -138,13 +254,17 @@ class SendOfferController extends GetxController {
         'briefId': _briefId,
         'existingNotes': _existingNotes,
         'shootingType': selectedShootingType.value,
-        'dateRange': hasFixedDate.value && dateRangeLabel.value.isNotEmpty
-            ? dateRangeLabel.value
-            : 'Tarih Belirsiz',
+        'dateRange': isDateFixed.value == false
+            ? 'Tarih Belirsiz'
+            : (dateRangeLabel.value.isEmpty
+                ? 'Tarih Belirsiz'
+                : dateRangeLabel.value),
         'deliveryTime': selectedDelivery.value,
-        'budget': selectedBudget.value,
+        'budget': null,
         'location': showLocation ? selectedLocation.value : null,
       },
     );
   }
 }
+
+enum _Section { shootingType, date, delivery, location }

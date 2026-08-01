@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import 'brief_share_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
-const _kFieldBg = Color(0xFFF3EEE2);
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -40,7 +40,7 @@ Widget _wordmark(double s) => RichText(
       text: TextSpan(children: [
         TextSpan(
           text: 'SE',
-          style: GoogleFonts.spaceGrotesk(
+          style: AppFonts.display(
               fontSize: 18 * s,
               fontWeight: FontWeight.w700,
               color: _kInk,
@@ -48,7 +48,7 @@ Widget _wordmark(double s) => RichText(
         ),
         TextSpan(
           text: 'T',
-          style: GoogleFonts.spaceGrotesk(
+          style: AppFonts.display(
               fontSize: 18 * s,
               fontWeight: FontWeight.w800,
               color: _kGold,
@@ -97,82 +97,111 @@ class BriefShareView extends GetView<BriefShareController> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding:
-                      EdgeInsets.fromLTRB(24 * s, 12 * s, 24 * s, bottomInset + 16),
+                  padding: EdgeInsets.fromLTRB(0, 12 * s, 0, bottomInset + 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        (controller.category.isNotEmpty
-                                ? controller.category
-                                : 'Video Çekim')
-                            .toUpperCase(),
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text(
-                        controller.isEditMode
-                            ? "Brief'ini güncelle."
-                            : "Brief'ini paylaş.",
-                        style: _serif(
-                            size: 40 * s, weight: FontWeight.w600, color: _kInk),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text(
-                        controller.isEditMode
-                            ? 'Projenin güncel detaylarını düzenleyebilirsin.'
-                            : 'Fikrini, referanslarını ve tüm detayları bizimle paylaş ki en doğru ekibi bulalım.',
-                        style: _mono(
-                            size: 9 * s,
-                            color: _kBlack,
-                            spacing: 0.2,
-                            height: 1.5),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              (controller.category.isNotEmpty
+                                      ? controller.category
+                                      : 'Video Çekim')
+                                  .toUpperCaseTr(),
+                              style: _ui(
+                                  size: 8 * s, color: _kBlack, spacing: 1.5),
+                            ),
+                            SizedBox(height: 8 * s),
+                            Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: "Brief'ini ",
+                                  style: _display(
+                                      size: 40 * s,
+                                      weight: FontWeight.w600,
+                                      color: _kInk),
+                                ),
+                                TextSpan(
+                                  text: controller.isEditMode
+                                      ? 'güncelle.'
+                                      : 'paylaş.',
+                                  style: _display(
+                                      size: 40 * s,
+                                      weight: FontWeight.w600,
+                                      color: _kGold),
+                                ),
+                              ]),
+                            ),
+                            SizedBox(height: 8 * s),
+                            Text(
+                              controller.isEditMode
+                                  ? 'Projenin güncel detaylarını düzenleyebilirsin.'
+                                  : 'Fikrini, referanslarını ve tüm detayları bizimle paylaş ki en doğru ekibi bulalım.',
+                              style: _ui(
+                                  size: 9 * s,
+                                  color: _kBlack,
+                                  spacing: 0.2,
+                                  height: 1.5),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 24 * s),
-                      _SectionCard(
-                        scale: s,
-                        icon: Icons.edit_outlined,
-                        title: "Kendi Brief'ini Yaz",
-                        subtitle:
-                            'Projenin detaylarını, hedefini, istediğin tarzı ve özel notlarını yaz.',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            SizedBox(height: 12 * s),
-                            Container(
-                              color: _kFieldBg,
-                              child: TextField(
-                                controller: controller.briefText,
-                                maxLines: 7,
-                                maxLength: 2000,
-                                cursorColor: _kGold,
-                                style: _mono(
-                                    size: 10 * s,
-                                    color: _kBlack,
-                                    spacing: 0.2,
-                                    height: 1.5),
-                                decoration: InputDecoration(
-                                  hintText: "Brief'ini buraya yaz...",
-                                  hintStyle: _mono(
-                                      size: 10 * s,
-                                      color: _kBlack,
-                                      spacing: 0.2),
-                                  filled: true,
-                                  fillColor: _kFieldBg,
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  counterText: '',
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.all(12 * s),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 720),
+                          child: _SectionCard(
+                            scale: s,
+                            icon: Icons.edit_outlined,
+                            title: "Kendi Brief'ini Yaz",
+                            subtitle:
+                                'Projenin detaylarını, hedefini, istediğin tarzı ve özel notlarını yaz.',
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                SizedBox(height: 12 * s),
+                                Container(
+                                  color: _kCream,
+                                  child: TextField(
+                                    controller: controller.briefText,
+                                    maxLines: 7,
+                                    maxLength: 2000,
+                                    cursorColor: _kGold,
+                                    style: _ui(
+                                        size: 10 * s,
+                                        color: _kBlack,
+                                        spacing: 0.2,
+                                        height: 1.5),
+                                    decoration: InputDecoration(
+                                      hintText: "Brief'ini buraya yaz...",
+                                      hintStyle: _ui(
+                                          size: 10 * s,
+                                          color: _kBlack,
+                                          spacing: 0.2),
+                                      filled: true,
+                                      fillColor: _kCream,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      counterText: '',
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(12 * s),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(height: 6 * s),
+                                Obx(() => Text(
+                                    '${controller.charCount.value} / 2000',
+                                    style: _ui(
+                                        size: 8 * s,
+                                        color: _kBlack,
+                                        spacing: 0.5))),
+                              ],
                             ),
-                            SizedBox(height: 6 * s),
-                            Obx(() => Text('${controller.charCount.value} / 2000',
-                                style: _mono(
-                                    size: 8 * s, color: _kBlack, spacing: 0.5))),
-                          ],
+                          ),
                         ),
                       ),
                     ],
@@ -181,7 +210,7 @@ class BriefShareView extends GetView<BriefShareController> {
               ),
               // Alt sabit bölüm
               Padding(
-                padding: EdgeInsets.fromLTRB(24 * s, 12 * s, 24 * s, 8 * s),
+                padding: EdgeInsets.fromLTRB(0, 12 * s, 0, 8 * s),
                 child: Column(
                   children: [
                     Obx(() => GestureDetector(
@@ -205,7 +234,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                     controller.isEditMode
                                         ? "BRIEF'İ GÜNCELLE  →"
                                         : "BRIEF'İ GÖNDER  →",
-                                    style: _mono(
+                                    style: _ui(
                                         size: 11 * s,
                                         weight: FontWeight.w700,
                                         color: Colors.white,
@@ -213,19 +242,22 @@ class BriefShareView extends GetView<BriefShareController> {
                           ),
                         )),
                     SizedBox(height: 10 * s),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
-                        SizedBox(width: 5 * s),
-                        Flexible(
-                          child: Text(
-                            'Tüm dosyalar gizlidir ve sadece seçilen ekiplerle paylaşılır.',
-                            style: _mono(
-                                size: 8 * s, color: _kBlack, spacing: 0.2),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
+                          SizedBox(width: 5 * s),
+                          Flexible(
+                            child: Text(
+                              'Tüm dosyalar gizlidir ve sadece seçilen ekiplerle paylaşılır.',
+                              style: _ui(
+                                  size: 8 * s, color: _kBlack, spacing: 0.2),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     SizedBox(height: 8 * s),
                   ],
@@ -284,13 +316,13 @@ class _SectionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: _serif(
+                        style: _display(
                             size: 17 * s,
                             weight: FontWeight.w600,
                             color: _kInk)),
                     SizedBox(height: 3 * s),
                     Text(subtitle,
-                        style: _mono(
+                        style: _ui(
                             size: 8 * s,
                             color: _kBlack,
                             spacing: 0.2,

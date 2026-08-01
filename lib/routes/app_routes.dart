@@ -6,7 +6,6 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
 
   // Auth
-  static const String chooseAuth = '/choose-auth';
   static const String login = '/login';
   static const String register = '/register';
 

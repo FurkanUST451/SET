@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
 import '../../../../routes/app_routes.dart';
@@ -9,7 +9,7 @@ import '../../../../routes/app_routes.dart';
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kDivider = Color(0x12000000);
@@ -22,13 +22,13 @@ final _kNearbyCreatives = [
   AppAssets.profilePhotosMale[3],
 ];
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -37,12 +37,12 @@ TextStyle _serif({
   decoration: TextDecoration.none,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -146,38 +146,49 @@ class ClientHomeTab extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
+          child: SizedBox(
+            width: double.infinity,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.centerLeft,
+              children: [
+                Text(
                   'SET · ANA SAYFA',
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
                 ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                behavior: HitTestBehavior.opaque,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(Icons.notifications_none_rounded,
-                        size: 18 * s, color: _kInk),
-                    Positioned(
-                      top: -1 * s,
-                      right: -1 * s,
-                      child: Container(
-                        width: 5 * s,
-                        height: 5 * s,
-                        decoration: const BoxDecoration(
-                          color: _kGold,
-                          shape: BoxShape.circle,
-                        ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(Icons.notifications_none_rounded,
+                              size: 18 * s, color: _kInk),
+                          Positioned(
+                            top: -1 * s,
+                            right: -1 * s,
+                            child: Container(
+                              width: 5 * s,
+                              height: 5 * s,
+                              decoration: const BoxDecoration(
+                                color: _kGold,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -206,7 +217,7 @@ class ClientHomeTab extends StatelessWidget {
                     TextSpan(children: [
                       TextSpan(
                         text: 'Doğru ekip,\ndoğru ',
-                        style: _serif(
+                        style: _display(
                             size: 27 * s,
                             weight: FontWeight.w600,
                             color: _kInk,
@@ -214,7 +225,7 @@ class ClientHomeTab extends StatelessWidget {
                       ),
                       TextSpan(
                         text: 'fikirle',
-                        style: _serif(
+                        style: _display(
                             size: 27 * s,
                             weight: FontWeight.w600,
                             color: _kGold,
@@ -222,7 +233,7 @@ class ClientHomeTab extends StatelessWidget {
                       ),
                       TextSpan(
                         text: '\ngerçek olur.',
-                        style: _serif(
+                        style: _display(
                             size: 27 * s,
                             weight: FontWeight.w600,
                             color: _kInk,
@@ -235,12 +246,12 @@ class ClientHomeTab extends StatelessWidget {
                   SizedBox(height: 16 * s),
                   Text(
                     'GÜNÜN OBJESİ',
-                    style: _mono(size: 8 * s, color: _kTaupe, spacing: 1.8),
+                    style: _ui(size: 8 * s, color: _kTaupe, spacing: 1.8),
                   ),
                   SizedBox(height: 6 * s),
                   Text(
                     'ANAHTAR',
-                    style: _mono(
+                    style: _ui(
                         size: 13 * s,
                         weight: FontWeight.w700,
                         color: _kInk,
@@ -249,7 +260,7 @@ class ClientHomeTab extends StatelessWidget {
                   SizedBox(height: 5 * s),
                   Text(
                     'Doğru insan her kapıyı açar.',
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                   ),
                 ],
               ),
@@ -291,7 +302,7 @@ class ClientHomeTab extends StatelessWidget {
               SizedBox(width: 8 * s),
               Text(
                 'PROJENİ BAŞLAT',
-                style: _mono(
+                style: _ui(
                     size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kGold,
@@ -311,7 +322,7 @@ class ClientHomeTab extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(
+            style: _ui(
                 size: 8 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
@@ -325,7 +336,7 @@ class ClientHomeTab extends StatelessWidget {
             children: [
               Text(
                 'TÜMÜNÜ GÖR',
-                style: _mono(
+                style: _ui(
                     size: 8 * s,
                     weight: FontWeight.w700,
                     color: _kGold,
@@ -368,7 +379,7 @@ class ClientHomeTab extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 26 * s),
           child: Text(
             'İLHAM',
-            style: _mono(
+            style: _ui(
                 size: 8 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
@@ -406,7 +417,7 @@ class ClientHomeTab extends StatelessWidget {
                       children: [
                         Text(
                           'Apple',
-                          style: _serif(
+                          style: _display(
                               size: 20 * s,
                               weight: FontWeight.w600,
                               color: _kInk),
@@ -414,7 +425,7 @@ class ClientHomeTab extends StatelessWidget {
                         SizedBox(height: 2 * s),
                         Text(
                           'Think Different.',
-                          style: _serif(
+                          style: _display(
                               size: 13 * s,
                               weight: FontWeight.w600,
                               color: _kGold,
@@ -425,7 +436,7 @@ class ClientHomeTab extends StatelessWidget {
                   ),
                   Text(
                     '”',
-                    style: _serif(
+                    style: _display(
                         size: 44 * s, weight: FontWeight.w600, color: _kMuted),
                   ),
                 ],
@@ -447,7 +458,7 @@ class ClientHomeTab extends StatelessWidget {
           SizedBox(height: 16 * s),
           Text(
             'Doğru kişiyi bul,\nprojen büyüsün.',
-            style: _serif(
+            style: _display(
                 size: 19 * s,
                 weight: FontWeight.w500,
                 color: _kInk,
@@ -527,7 +538,7 @@ class _FeaturedProjectRow extends StatelessWidget {
           children: [
             Text(
               project.index,
-              style: _mono(size: 10 * s, color: _kTaupe, spacing: 0.5),
+              style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.5),
             ),
             SizedBox(width: 16 * s),
             Expanded(
@@ -536,7 +547,7 @@ class _FeaturedProjectRow extends StatelessWidget {
                 children: [
                   Text(
                     project.tag,
-                    style: _mono(
+                    style: _ui(
                         size: 7 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
@@ -547,7 +558,7 @@ class _FeaturedProjectRow extends StatelessWidget {
                     project.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _serif(
+                    style: _display(
                         size: 16 * s, weight: FontWeight.w600, color: _kInk),
                   ),
                 ],
@@ -556,7 +567,7 @@ class _FeaturedProjectRow extends StatelessWidget {
             SizedBox(width: 8 * s),
             Text(
               '${project.people} · ${project.city}',
-              style: _mono(size: 8 * s, color: _kTaupe, spacing: 0.3),
+              style: _ui(size: 8 * s, color: _kTaupe, spacing: 0.3),
             ),
             SizedBox(width: 6 * s),
             Icon(Icons.chevron_right, size: 16 * s, color: _kMuted),
@@ -592,7 +603,7 @@ class _InspirationModal extends StatelessWidget {
               children: [
                 Text(
                   '“',
-                  style: _serif(size: 46 * s, weight: FontWeight.w600, color: _kMuted),
+                  style: _display(size: 46 * s, weight: FontWeight.w600, color: _kMuted),
                 ),
                 const Spacer(),
                 GestureDetector(
@@ -614,18 +625,18 @@ class _InspirationModal extends StatelessWidget {
                     TextSpan(children: [
                       TextSpan(
                         text: 'Fark yaratmak,\nfarklı ',
-                        style: _serif(
-                            size: 24 * s, weight: FontWeight.w600, color: _kInk, height: 1.18),
+                        style: _display(
+                            size: 26 * s, weight: FontWeight.w600, color: _kInk, height: 1.18),
                       ),
                       TextSpan(
                         text: 'düşünmekle',
-                        style: _serif(
-                            size: 24 * s, weight: FontWeight.w600, color: _kGold, height: 1.18),
+                        style: _display(
+                            size: 26 * s, weight: FontWeight.w600, color: _kGold, height: 1.18),
                       ),
                       TextSpan(
                         text: '\nbaşlar.',
-                        style: _serif(
-                            size: 24 * s, weight: FontWeight.w600, color: _kInk, height: 1.18),
+                        style: _display(
+                            size: 26 * s, weight: FontWeight.w600, color: _kInk, height: 1.18),
                       ),
                     ]),
                   ),
@@ -644,7 +655,7 @@ class _InspirationModal extends StatelessWidget {
             SizedBox(height: 22 * s),
             Text(
               'Vizyondan gerçeğe uzanan her projede, fikirler değişir; dünya dönüşür.',
-              style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
+              style: _ui(size: 12 * s, color: _kBlack, spacing: 0.2),
             ),
             SizedBox(height: 20 * s),
             Divider(height: 1, thickness: 1, color: _kDivider),
@@ -669,12 +680,12 @@ class _InspirationModal extends StatelessWidget {
                   children: [
                     Text(
                       'Apple',
-                      style: _serif(size: 17 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 19 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                     Text(
                       'Think Different.',
-                      style: _serif(
-                          size: 11 * s, weight: FontWeight.w600, color: _kGold, italic: true),
+                      style: _display(
+                          size: 13 * s, weight: FontWeight.w600, color: _kGold, italic: true),
                     ),
                   ],
                 ),

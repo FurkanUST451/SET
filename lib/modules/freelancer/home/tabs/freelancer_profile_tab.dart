@@ -1,37 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../routes/app_routes.dart';
 import '../../../app/auth_controller.dart';
 import '../../../app/user_controller.dart';
 import '../../../client/home/tabs/profile_screens.dart';
 import '../freelancer_home_controller.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) =>
-    GoogleFonts.cormorantGaramond(
-        fontSize: size, fontWeight: weight, color: color, height: height);
+}) => AppFonts.display(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) =>
-    GoogleFonts.spaceMono(
-        fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
+}) => AppFonts.ui(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
 
 class FreelancerProfileTab extends StatefulWidget {
   const FreelancerProfileTab({super.key});
@@ -88,126 +95,139 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _StaggeredItem(
-                  controller: _staggerController,
-                  index: 0,
-                  count: _staggerCount,
-                  child: _buildHeader(user, s),
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(26 * s, 0, 26 * s, 130 * s),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 1,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'HESAP', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.person_outline_rounded,
-                          label: 'Profili Düzenle',
-                          sub: 'Fotoğraf, portfolyo ve etkileşimlerin',
-                          onTap: () => Get.to<void>(() => const FreelancerOwnProfileScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.mail_outline_rounded,
-                          label: 'E-posta & Telefon',
-                          sub: 'İletişim bilgilerini güncelle',
-                          onTap: () => Get.to<void>(() => const ContactInfoScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.lock_outline_rounded,
-                          label: 'Şifre Değiştir',
-                          sub: 'Güvenlik & oturum anahtarları',
-                          onTap: () => Get.to<void>(() => const PasswordChangeScreen()),
-                        ),
-                      ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopStrip(s),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _StaggeredItem(
+                        controller: _staggerController,
+                        index: 0,
+                        count: _staggerCount,
+                        child: _buildAvatarSection(user, s),
+                      ),
                     ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 2,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'TERCİHLER', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.notifications_none_rounded,
-                          label: 'Bildirimler',
-                          sub: 'Push, e-posta tercihleri',
-                          onTap: () =>
-                              Get.to<void>(() => const NotificationSettingsScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.language_outlined,
-                          label: 'Dil & Bölge',
-                          sub: 'Türkçe',
-                          onTap: () => Get.to<void>(() => const LanguageRegionScreen()),
-                        ),
-                      ]),
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(26 * s, 0, 26 * s, 130 * s),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 1,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'HESAP', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Profili Düzenle',
+                                sub: 'Fotoğraf, portfolyo ve etkileşimlerin',
+                                onTap: () => Get.to<void>(
+                                  () => const FreelancerOwnProfileScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'E-posta & Telefon',
+                                sub: 'İletişim bilgilerini güncelle',
+                                onTap: () => Get.to<void>(
+                                  () => const ContactInfoScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Şifre Değiştir',
+                                sub: 'Güvenlik & oturum anahtarları',
+                                onTap: () => Get.to<void>(
+                                  () => const PasswordChangeScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 2,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'TERCİHLER', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Bildirimler',
+                                sub: 'Push, e-posta tercihleri',
+                                onTap: () => Get.to<void>(
+                                  () => const NotificationSettingsScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Dil & Bölge',
+                                sub: 'Türkçe',
+                                onTap: () => Get.to<void>(
+                                  () => const LanguageRegionScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 3,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'DESTEK', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Yardım Merkezi',
+                                onTap: () => Get.to<void>(
+                                  () => const HelpCenterScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Bize Ulaş',
+                                onTap: () =>
+                                    Get.to<void>(() => const ContactUsScreen()),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Kullanım Koşulları',
+                                onTap: () =>
+                                    Get.to<void>(() => const TermsScreen()),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 4,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'OTURUM', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Rolümü Değiştir',
+                                onTap: () =>
+                                    Get.offAllNamed(AppRoutes.roleSelection),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Çıkış Yap',
+                                danger: true,
+                                onTap: () async {
+                                  await auth.logout();
+                                  Get.offAllNamed(AppRoutes.login);
+                                },
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Hesabı Sil',
+                                danger: true,
+                                onTap: () => Get.to<void>(
+                                  () => const DeleteAccountScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ]),
+                      ),
                     ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 3,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'DESTEK', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.help_outline_rounded,
-                          label: 'Yardım Merkezi',
-                          onTap: () => Get.to<void>(() => const HelpCenterScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.chat_bubble_outline_rounded,
-                          label: 'Bize Ulaş',
-                          onTap: () => Get.to<void>(() => const ContactUsScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.description_outlined,
-                          label: 'Kullanım Koşulları',
-                          onTap: () => Get.to<void>(() => const TermsScreen()),
-                        ),
-                      ]),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 4,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'OTURUM', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.swap_horiz_rounded,
-                          label: 'Rolümü Değiştir',
-                          onTap: () => Get.offAllNamed(AppRoutes.roleSelection),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.logout_rounded,
-                          label: 'Çıkış Yap',
-                          danger: true,
-                          onTap: () async {
-                            await auth.logout();
-                            Get.offAllNamed(AppRoutes.login);
-                          },
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.delete_outline_rounded,
-                          label: 'Hesabı Sil',
-                          danger: true,
-                          onTap: () => Get.to<void>(() => const DeleteAccountScreen()),
-                        ),
-                      ]),
-                    ),
-                  ]),
+                  ],
                 ),
               ),
             ],
@@ -217,8 +237,8 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
     );
   }
 
-  // ─── Üst başlık: SET / HESABIM + kimlik ─────────────────────────────────────
-  Widget _buildHeader(UserController user, double s) {
+  // ─── Üst başlık: SET / HESABIM (sabit, kaymaz) ──────────────────────────────
+  Widget _buildTopStrip(double s) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -228,112 +248,176 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RichText(
-                text: TextSpan(children: [
-                  TextSpan(
-                    text: 'SE',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 13 * s,
-                      fontWeight: FontWeight.w700,
-                      color: _kInk,
-                      letterSpacing: 2.5,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'SE',
+                      style: AppFonts.display(
+                        fontSize: 13 * s,
+                        fontWeight: FontWeight.w700,
+                        color: _kInk,
+                        letterSpacing: 2.5,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: 'T',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 13 * s,
-                      fontWeight: FontWeight.w800,
-                      color: _kGold,
-                      letterSpacing: 2.5,
+                    TextSpan(
+                      text: 'T',
+                      style: AppFonts.display(
+                        fontSize: 13 * s,
+                        fontWeight: FontWeight.w800,
+                        color: _kGold,
+                        letterSpacing: 2.5,
+                      ),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
               ),
-              Text('HESABIM', style: _mono(size: 8 * s, color: _kBlack, spacing: 2)),
+              Text(
+                'HESABIM',
+                style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+              ),
             ],
           ),
         ),
         Container(height: 1, color: _kDivider),
-        Padding(
-          padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
-          child: Obx(() {
-            final u = user.currentUser;
-            final name = u?.name ?? 'Freelancer';
-            final email = u?.email ?? '';
-            final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
-            return Row(
+      ],
+    );
+  }
+
+  // ─── Avatar + kimlik bilgisi ─────────────────────────────────────────────
+  Widget _buildAvatarSection(UserController user, double s) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
+      child: Obx(() {
+        final u = user.currentUser;
+        final name = u?.name ?? 'Freelancer';
+        final email = u?.email ?? '';
+        final initial = name.trim().isNotEmpty
+            ? name.trim()[0].toUpperCaseTr()
+            : '?';
+        return Row(
+          children: [
+            // Köşeleri yuvarlatılmış kare avatar + çentik süslemesi
+            Stack(
+              clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 64 * s,
-                  height: 64 * s,
+                  width: 72 * s,
+                  height: 72 * s,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(10 * s),
                     color: Colors.white.withValues(alpha: 0.45),
-                    border: Border.all(color: _kGold, width: 1.6),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     initial,
-                    style: _serif(size: 24 * s, weight: FontWeight.w500, color: _kGold),
+                    style: _display(
+                      size: 24 * s,
+                      weight: FontWeight.w500,
+                      color: _kGold,
+                    ),
                   ),
                 ),
-                SizedBox(width: 18 * s),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 9 * s, vertical: 3.5 * s),
-                        decoration: BoxDecoration(
-                          color: _kGold.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: _kGold.withValues(alpha: 0.45)),
-                        ),
-                        child: Text(
-                          'FREELANCER',
-                          style: _mono(
-                              size: 8 * s,
-                              weight: FontWeight.w700,
-                              color: _kGold,
-                              spacing: 1.2),
-                        ),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _serif(size: 24 * s, weight: FontWeight.w600, color: _kInk),
-                      ),
-                      SizedBox(height: 3 * s),
-                      Text(
-                        email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
-                      ),
-                      SizedBox(height: 10 * s),
-                      Text(
-                        '12 PROJE · 4.9 PUAN · 3Y DENEYİM',
-                        style: _mono(size: 7.5 * s, color: _kBlack, spacing: 1),
-                      ),
-                    ],
-                  ),
-                ),
+                Positioned(top: -5 * s, left: -5 * s, child: _corner(s, 0)),
+                Positioned(top: -5 * s, right: -5 * s, child: _corner(s, 1)),
+                Positioned(bottom: -5 * s, left: -5 * s, child: _corner(s, 2)),
+                Positioned(bottom: -5 * s, right: -5 * s, child: _corner(s, 3)),
               ],
-            );
-          }),
-        ),
-      ],
+            ),
+            SizedBox(width: 18 * s),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 9 * s,
+                      vertical: 3.5 * s,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _kGold.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: _kGold.withValues(alpha: 0.45)),
+                    ),
+                    child: Text(
+                      'FREELANCER',
+                      style: _ui(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kGold,
+                        spacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8 * s),
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _display(
+                      size: 24 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                    ),
+                  ),
+                  SizedBox(height: 3 * s),
+                  Text(
+                    email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                  ),
+                  SizedBox(height: 10 * s),
+                  Text(
+                    '12 PROJE · 4.9 PUAN · 3Y DENEYİM',
+                    style: _ui(size: 7.5 * s, color: _kBlack, spacing: 1),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  // Köşe çentiği: ana hizmet kartlarında kullanılan işaretin aynısı.
+  Widget _corner(double s, int quadrant) {
+    final len = 12 * s;
+    final isLeft = quadrant == 0 || quadrant == 2;
+    final isTop = quadrant == 0 || quadrant == 1;
+    return SizedBox(
+      width: len,
+      height: len,
+      child: Stack(
+        children: [
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: len, height: 1.4, color: _kInk),
+          ),
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: 1.4, height: len, color: _kInk),
+          ),
+        ],
+      ),
     );
   }
 
   // ─── Bölüm: altın çizgi + başlık + sağda satır sayısı, sonra düz liste ──────
   Widget _buildSection(double s, String title, List<Widget> rows) {
     return Padding(
-      padding: EdgeInsets.only(top: 58 * s),
+      padding: EdgeInsets.only(top: 30 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -345,13 +429,17 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                 SizedBox(width: 10 * s),
                 Text(
                   title,
-                  style:
-                      _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.8),
+                  style: _ui(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kBlack,
+                    spacing: 1.8,
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   rows.length.toString().padLeft(2, '0'),
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
                 ),
               ],
             ),
@@ -414,7 +502,6 @@ class _StaggeredItem extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.scale,
-    required this.icon,
     required this.label,
     this.sub,
     this.onTap,
@@ -422,7 +509,6 @@ class _SettingsRow extends StatelessWidget {
   });
 
   final double scale;
-  final IconData icon;
   final String label;
   final String? sub;
   final VoidCallback? onTap;
@@ -432,9 +518,6 @@ class _SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     final titleColor = danger ? const Color(0xFFBE6A5A) : _kInk;
-    final iconColor = danger ? const Color(0xFFBE6A5A) : _kInk;
-    final borderColor =
-        danger ? const Color(0xFFBE6A5A).withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.14);
 
     return InkWell(
       onTap: onTap,
@@ -442,17 +525,6 @@ class _SettingsRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 20 * s),
         child: Row(
           children: [
-            Container(
-              width: 38 * s,
-              height: 38 * s,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor),
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, size: 16 * s, color: iconColor),
-            ),
-            SizedBox(width: 15 * s),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,17 +532,28 @@ class _SettingsRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: _serif(size: 14 * s, weight: FontWeight.w500, color: titleColor),
+                    style: _display(
+                      size: 12 * s,
+                      weight: FontWeight.w600,
+                      color: titleColor,
+                    ),
                   ),
                   if (sub != null) ...[
                     SizedBox(height: 3 * s),
-                    Text(sub!, style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2)),
+                    Text(
+                      sub!,
+                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                    ),
                   ],
                 ],
               ),
             ),
             if (onTap != null && !danger)
-              Icon(Icons.chevron_right, size: 16 * s, color: Colors.black.withValues(alpha: 0.22)),
+              Icon(
+                Icons.chevron_right,
+                size: 16 * s,
+                color: Colors.black.withValues(alpha: 0.22),
+              ),
           ],
         ),
       ),
