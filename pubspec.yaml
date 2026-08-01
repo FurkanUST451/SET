@@ -37,7 +37,8 @@ dependencies:
   video_compress: ^3.1.4
   video_player: ^2.13.0
 
-  # Typography
+  # Typography — Bricolage Grotesque (display) + Inter (gövde/UI).
+  # Tek kullanım noktası: lib/core/theme/app_fonts.dart
   google_fonts: ^6.2.1
 
   # Utilities
@@ -71,4 +72,4 @@ flutter:
     - assets/images/page_images/
     - assets/images/profile_photos/
     - assets/images/placeholder/
-    - assets/animations/
+    - assets/images/brief_images/

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
@@ -13,28 +13,28 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kCardBorder = Color(0x0F000000);
 const _kDivider = Color(0x12000000);
 const _kAccepted = Color(0xFF6B8F71);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
 
 class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
@@ -123,7 +123,7 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · GELEN İŞLER',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -139,12 +139,12 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
         children: [
           Text(
             'Teklifler',
-            style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 40 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             '$count teklif görüntüleniyor',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
           ),
         ],
       ),
@@ -177,6 +177,24 @@ class _AcceptedCard extends StatelessWidget {
     return brief.category;
   }
 
+  IconData get _categoryIcon {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
+    } else if (cat.contains('kurgu')) {
+      return Icons.content_cut_rounded;
+    } else if (cat.contains('grafik')) {
+      return Icons.brush_rounded;
+    }
+    return Icons.check_circle_outline;
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = scale;
@@ -193,7 +211,7 @@ class _AcceptedCard extends StatelessWidget {
             height: 36 * s,
             color: _kAccepted.withValues(alpha: 0.12),
             alignment: Alignment.center,
-            child: Icon(Icons.check_circle_outline, size: 18 * s, color: _kAccepted),
+            child: Icon(_categoryIcon, size: 18 * s, color: _kAccepted),
           ),
           SizedBox(width: 12 * s),
           Expanded(
@@ -202,7 +220,7 @@ class _AcceptedCard extends StatelessWidget {
               children: [
                 Text(
                   _displayTitle,
-                  style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
+                  style: _ui(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -210,7 +228,7 @@ class _AcceptedCard extends StatelessWidget {
                   SizedBox(height: 3 * s),
                   Text(
                     _displaySubtitle,
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -224,7 +242,7 @@ class _AcceptedCard extends StatelessWidget {
             children: [
               Text(
                 '${project.budget.toStringAsFixed(0)} ₺',
-                style: _mono(size: 12 * s, weight: FontWeight.w700, color: _kAccepted),
+                style: _ui(size: 12 * s, weight: FontWeight.w700, color: _kAccepted),
               ),
               SizedBox(height: 4 * s),
               Container(
@@ -232,7 +250,7 @@ class _AcceptedCard extends StatelessWidget {
                 color: _kAccepted.withValues(alpha: 0.12),
                 child: Text(
                   'KABUL EDİLDİ',
-                  style: _mono(
+                  style: _ui(
                       size: 7 * s,
                       weight: FontWeight.w700,
                       color: _kAccepted,
@@ -300,7 +318,7 @@ class _OfferCard extends StatelessWidget {
                   SizedBox(width: 8 * s),
                   Text(
                     'YENİ TEKLİF',
-                    style: _mono(
+                    style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
@@ -331,7 +349,7 @@ class _OfferCard extends StatelessWidget {
                           _displayTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: _serif(
+                          style: _display(
                               size: 20 * s, weight: FontWeight.w600, color: _kInk),
                         ),
                         if (brief.category.isNotEmpty) ...[
@@ -340,7 +358,7 @@ class _OfferCard extends StatelessWidget {
                             brief.category,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                            style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
                           ),
                         ],
                       ],
@@ -402,7 +420,7 @@ class _OfferCard extends StatelessWidget {
                   brief.answers.notes!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                  style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                 ),
               ),
             ],
@@ -419,7 +437,7 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   Text(
                     'İNCELE',
-                    style: _mono(
+                    style: _ui(
                         size: 10 * s,
                         weight: FontWeight.w700,
                         color: Colors.white,
@@ -473,7 +491,7 @@ class _MetaCell extends StatelessWidget {
             children: [
               Icon(icon, size: 11 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _mono(size: 7 * s, color: _kBlack, spacing: 1)),
+              Text(label, style: _ui(size: 7 * s, color: _kBlack, spacing: 1)),
             ],
           ),
           SizedBox(height: 5 * s),
@@ -481,7 +499,7 @@ class _MetaCell extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _mono(
+            style: _ui(
                 size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
           ),
         ],
@@ -513,12 +531,12 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz teklif yok',
-            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             'Müşteriler teklif gönderince burada görünür.',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

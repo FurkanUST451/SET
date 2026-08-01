@@ -35,7 +35,7 @@ class SplashController extends GetxController {
     if (firebaseUser == null) {
       StorageService.remove(StorageService.userId);
       StorageService.remove(StorageService.userRole);
-      Get.offAllNamed(AppRoutes.chooseAuth);
+      Get.offAllNamed(AppRoutes.login);
       return;
     }
 

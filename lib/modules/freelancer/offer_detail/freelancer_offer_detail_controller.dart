@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/brief_model.dart';
 import '../../../data/repositories/brief_repository.dart';
@@ -81,7 +81,7 @@ class FreelancerOfferDetailController extends GetxController {
         ),
         title: Text(
           'Teklifi Reddet',
-          style: GoogleFonts.cormorantGaramond(
+          style: AppFonts.display(
             fontSize: 22,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF35333F),
@@ -89,7 +89,7 @@ class FreelancerOfferDetailController extends GetxController {
         ),
         content: Text(
           'Bu teklifi reddetmek istediğinize emin misiniz?',
-          style: GoogleFonts.spaceMono(
+          style: AppFonts.ui(
             fontSize: 12,
             color: const Color(0xFF000000),
             height: 1.4,
@@ -100,7 +100,7 @@ class FreelancerOfferDetailController extends GetxController {
             onPressed: () => Get.back(result: false),
             child: Text(
               'VAZGEÇ',
-              style: GoogleFonts.spaceMono(
+              style: AppFonts.ui(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF000000),
@@ -112,7 +112,7 @@ class FreelancerOfferDetailController extends GetxController {
             onPressed: () => Get.back(result: true),
             child: Text(
               'REDDET',
-              style: GoogleFonts.spaceMono(
+              style: AppFonts.ui(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFFBE6A5A),

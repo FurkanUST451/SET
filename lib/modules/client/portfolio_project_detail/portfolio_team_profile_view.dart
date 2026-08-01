@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/portfolio_project_model.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -12,25 +13,25 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kBlack = Color(0xFF000000);
 const _kCardBorder = Color(0x14000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -78,7 +79,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                       child: Text(
                         'PROFİL',
                         textAlign: TextAlign.center,
-                        style: _mono(
+                        style: _ui(
                           size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
@@ -95,7 +96,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                   child: Center(
                     child: Text(
                       'Profil bulunamadı.',
-                      style: _mono(size: 10 * s, color: _kTaupe),
+                      style: _ui(size: 10 * s, color: _kTaupe),
                     ),
                   ),
                 )
@@ -129,9 +130,9 @@ class PortfolioTeamProfileView extends StatelessWidget {
                                 child: member.avatarUrl == null
                                     ? Text(
                                         member.name.isNotEmpty
-                                            ? member.name[0].toUpperCase()
+                                            ? member.name[0].toUpperCaseTr()
                                             : '?',
-                                        style: _mono(
+                                        style: _ui(
                                           size: 24 * s,
                                           weight: FontWeight.w700,
                                           color: _kBlack,
@@ -142,7 +143,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                               SizedBox(height: 16 * s),
                               Text(
                                 member.name,
-                                style: _serif(
+                                style: _display(
                                   size: 26 * s,
                                   weight: FontWeight.w600,
                                   color: _kInk,
@@ -151,7 +152,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                               SizedBox(height: 4 * s),
                               Text(
                                 member.role,
-                                style: _mono(
+                                style: _ui(
                                   size: 9 * s,
                                   weight: FontWeight.w700,
                                   color: _kGold,
@@ -174,7 +175,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                             'Bu ekip üyesi için detaylı profil bilgisi '
                             'henüz eklenmedi. Deneyim, geçmiş projeler ve '
                             'iletişim bilgileri yakında burada yer alacak.',
-                            style: _mono(
+                            style: _ui(
                               size: 10 * s,
                               color: _kBlack,
                               spacing: 0.2,

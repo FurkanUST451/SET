@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/theme/app_fonts.dart';
 import '../../../../core/utils/avatar_image.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/turkish_case.dart';
 import '../../../../data/models/work_model.dart';
 import '../../../app/works_controller.dart';
 import 'work_comments_sheet.dart';
@@ -17,7 +18,7 @@ const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kDanger = Color(
   0xFFB3402A,
@@ -31,14 +32,14 @@ const _kThumbBot = Color(0xFF141219);
 const _kWatchBaseUrl = 'https://sett-451.web.app/w';
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
-  double spacing = 0,
-}) => GoogleFonts.cormorantGaramond(
+  double? spacing,
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -47,12 +48,12 @@ TextStyle _serif({
   fontStyle: italic ? FontStyle.italic : FontStyle.normal,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -98,56 +99,64 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
       child: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: Obx(() {
-            final works = _filtered(_worksController.works);
-            return RefreshIndicator(
-              color: _kGold,
-              backgroundColor: _kCream,
-              onRefresh: _worksController.reload,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(child: _buildTopStrip(s)),
-                  SliverToBoxAdapter(child: _Header(scale: s)),
-                  SliverToBoxAdapter(
-                    child: _FilterBar(
-                      scale: s,
-                      selected: _filter,
-                      onSelect: (t) => setState(() => _filter = t),
-                    ),
-                  ),
-                  if (works.isEmpty)
-                    SliverToBoxAdapter(child: _EmptyState(scale: s))
-                  else
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        26 * s,
-                        10 * s,
-                        26 * s,
-                        130 * s,
-                      ),
-                      sliver: SliverList.separated(
-                        itemCount: works.length,
-                        separatorBuilder: (_, _) => const Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: _kDivider,
-                        ),
-                        itemBuilder: (_, i) {
-                          final work = works[i];
-                          return _WorkCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopStrip(s),
+              Expanded(
+                child: Obx(() {
+                  final works = _filtered(_worksController.works);
+                  return RefreshIndicator(
+                    color: _kGold,
+                    backgroundColor: _kCream,
+                    onRefresh: _worksController.reload,
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverToBoxAdapter(child: _Header(scale: s)),
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _FilterBarHeaderDelegate(
                             scale: s,
-                            work: work,
-                            timeAgo: _timeAgoFor(work),
-                            controller: _worksController,
-                          );
-                        },
-                      ),
+                            selected: _filter,
+                            onSelect: (t) => setState(() => _filter = t),
+                          ),
+                        ),
+                        if (works.isEmpty)
+                          SliverToBoxAdapter(child: _EmptyState(scale: s))
+                        else
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(
+                              26 * s,
+                              10 * s,
+                              26 * s,
+                              130 * s,
+                            ),
+                            sliver: SliverList.separated(
+                              itemCount: works.length,
+                              separatorBuilder: (_, _) => const Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: _kDivider,
+                              ),
+                              itemBuilder: (_, i) {
+                                final work = works[i];
+                                return _WorkCard(
+                                  scale: s,
+                                  work: work,
+                                  timeAgo: _timeAgoFor(work),
+                                  controller: _worksController,
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
-                ],
+                  );
+                }),
               ),
-            );
-          }),
+            ],
+          ),
         ),
       ),
     );
@@ -162,7 +171,7 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · KEŞFET',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -187,23 +196,23 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // "neler" — serif italic, muted
+          // "neler" — display italic, muted
           Text(
             'neler',
-            style: _serif(
+            style: _display(
               size: 27 * s,
               weight: FontWeight.w500,
               color: _kMuted,
               italic: true,
             ),
           ),
-          // "YAPTIK?" — büyük serif, ? altın
+          // "YAPTIK?" — büyük display, ? altın
           Text.rich(
             TextSpan(
               children: [
                 TextSpan(
                   text: 'YAPTIK',
-                  style: _serif(
+                  style: _display(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
@@ -213,7 +222,7 @@ class _Header extends StatelessWidget {
                 ),
                 TextSpan(
                   text: '?',
-                  style: _serif(
+                  style: _display(
                     size: 52 * s,
                     weight: FontWeight.w600,
                     color: _kGold,
@@ -226,7 +235,7 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20 * s),
           Text(
             'SETTEKİLERİN SON İŞLERİ',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ],
       ),
@@ -252,16 +261,58 @@ class _EmptyState extends StatelessWidget {
         children: [
           Text(
             'HENÜZ PAYLAŞIM YOK',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 1.5),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 1.5),
           ),
           SizedBox(height: 10 * s),
           Text(
             'Setteki ekipler ilk işlerini yüklediğinde burada görünecek.',
-            style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+            style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
           ),
         ],
       ),
     );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FILTER BAR — sabit üst şeridin hemen altına sabitlenen (pinned) sliver başlık
+// ─────────────────────────────────────────────────────────────────
+class _FilterBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _FilterBarHeaderDelegate({
+    required this.scale,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  final double scale;
+  final WorkType? selected;
+  final ValueChanged<WorkType?> onSelect;
+
+  double get _height => 46 * scale;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return ColoredBox(
+      color: _kCream,
+      child: _FilterBar(scale: scale, selected: selected, onSelect: onSelect),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _FilterBarHeaderDelegate oldDelegate) {
+    return oldDelegate.scale != scale ||
+        oldDelegate.selected != selected ||
+        oldDelegate.onSelect != onSelect;
   }
 }
 
@@ -297,7 +348,7 @@ class _FilterBar extends StatelessWidget {
           ...WorkType.values.map(
             (t) => _FilterTab(
               scale: s,
-              label: t.label.toUpperCase(),
+              label: t.label.toUpperCaseTr(),
               selected: selected == t,
               onTap: () => onSelect(t),
             ),
@@ -345,7 +396,7 @@ class _FilterTab extends StatelessWidget {
             ],
             Text(
               label,
-              style: _mono(
+              style: _ui(
                 size: 9 * s,
                 weight: selected ? FontWeight.w700 : FontWeight.w400,
                 color: _kBlack,
@@ -404,7 +455,7 @@ class _WorkCard extends StatelessWidget {
                       work.studio,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _serif(
+                      style: _display(
                         size: 14 * s,
                         weight: FontWeight.w600,
                         color: _kInk,
@@ -412,10 +463,10 @@ class _WorkCard extends StatelessWidget {
                     ),
                     SizedBox(height: 3 * s),
                     Text(
-                      work.type.label.toUpperCase(),
+                      work.type.label.toUpperCaseTr(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(
+                      style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
@@ -428,7 +479,7 @@ class _WorkCard extends StatelessWidget {
               SizedBox(width: 12 * s),
               Text(
                 timeAgo,
-                style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
               ),
               SizedBox(width: 4 * s),
               _WorkMenuButton(scale: s, work: work, controller: controller),
@@ -440,7 +491,7 @@ class _WorkCard extends StatelessWidget {
             work.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _serif(
+            style: _display(
               size: 13 * s,
               weight: FontWeight.w500,
               color: _kInk,
@@ -452,7 +503,7 @@ class _WorkCard extends StatelessWidget {
             _ExpandableDescription(
               scale: s,
               text: work.description!,
-              style: _mono(size: 9 * s, color: _kTaupe, spacing: 0.2),
+              style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
             ),
           ],
           SizedBox(height: 16 * s),
@@ -552,7 +603,7 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
               behavior: HitTestBehavior.opaque,
               child: Text(
                 'DEVAMINI OKU',
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kGold,
@@ -616,7 +667,7 @@ class _WorkMenuButton extends StatelessWidget {
         content: Text(
           'Bu gönderiyi kalıcı olarak silmek istediğine emin misin? '
           'Bu işlem geri alınamaz.',
-          style: _mono(
+          style: _ui(
             size: 9,
             color: _kTaupe,
             spacing: 0.2,
@@ -667,7 +718,7 @@ class _WorkMenuButton extends StatelessWidget {
           height: 40,
           child: Text(
             'GÖNDERİYİ BİLDİR',
-            style: _mono(
+            style: _ui(
               size: 9,
               weight: FontWeight.w600,
               color: _kInk,
@@ -681,7 +732,7 @@ class _WorkMenuButton extends StatelessWidget {
             height: 40,
             child: Text(
               'SİL',
-              style: _mono(
+              style: _ui(
                 size: 9,
                 weight: FontWeight.w600,
                 color: _kDanger,
@@ -732,7 +783,7 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
         children: [
           Text(
             'Bu içeriği neden bildiriyorsun? Mesajı dilediğin gibi düzenleyebilirsin.',
-            style: _mono(
+            style: _ui(
               size: 9,
               color: _kTaupe,
               spacing: 0.2,
@@ -750,7 +801,7 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
               maxLines: 5,
               maxLength: 500,
               cursorColor: _kGold,
-              style: _mono(
+              style: _ui(
                 size: 10,
                 color: _kBlack,
                 spacing: 0.2,
@@ -767,7 +818,7 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
                 fillColor: Colors.transparent,
                 counterText: '',
                 hintText: 'Bildirme sebebini yaz...',
-                hintStyle: _mono(size: 10, color: _kTaupe, spacing: 0.2),
+                hintStyle: _ui(size: 10, color: _kTaupe, spacing: 0.2),
               ),
             ),
           ),
@@ -791,9 +842,9 @@ class _ReportReasonDialogState extends State<_ReportReasonDialog> {
 
 // ─────────────────────────────────────────────────────────────────
 // EDİTORYAL DİYALOG KABI — uygulamanın kendi paleti/tipografisiyle
-// (bkz. dosya başındaki _kCream/_kGold/... ve _serif/_mono) çizilen,
+// (bkz. dosya başındaki _kCream/_kGold/... ve _display/_ui) çizilen,
 // Material'ın varsayılan AlertDialog'u yerine geçen ortak kabuk.
-// Font yalnızca _mono/_serif üzerinden geldiği için ileride uygulama
+// Font yalnızca _ui/_display üzerinden geldiği için ileride uygulama
 // genelinde font değişirse buradaki diyaloglar da otomatik güncellenir.
 // ─────────────────────────────────────────────────────────────────
 class _EditorialDialogAction {
@@ -836,7 +887,7 @@ class _EditorialDialog extends StatelessWidget {
           children: [
             Text(
               title,
-              style: _mono(
+              style: _ui(
                 size: 9,
                 weight: FontWeight.w700,
                 color: _kBlack,
@@ -864,7 +915,7 @@ class _EditorialDialog extends StatelessWidget {
                       ),
                       child: Text(
                         action.label,
-                        style: _mono(
+                        style: _ui(
                           size: 9,
                           weight: FontWeight.w700,
                           color: action.color,
@@ -951,7 +1002,7 @@ class _CoverPlaceholder extends StatelessWidget {
                     SizedBox(height: 6 * s),
                     Text(
                       'ÖNİZLEME YOK',
-                      style: _mono(
+                      style: _ui(
                         size: 7 * s,
                         color: Colors.white.withValues(alpha: 0.22),
                         spacing: 2,
@@ -1012,7 +1063,7 @@ class _IconCount extends StatelessWidget {
         SizedBox(width: 7 * s),
         Text(
           Formatters.compactCount(count),
-          style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+          style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
         ),
       ],
     );
@@ -1123,7 +1174,7 @@ class _LikeActionState extends State<_LikeAction> {
               SizedBox(width: 7 * s),
               Text(
                 Formatters.compactCount(count < 0 ? 0 : count),
-                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.5),
+                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
               ),
             ],
           ),

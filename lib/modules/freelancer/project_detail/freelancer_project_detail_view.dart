@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/project_model.dart';
 import 'project_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -12,31 +13,31 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kCompleted = Color(0xFF6B8F71);
 const _kCancelled = Color(0xFFBE6A5A);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -121,7 +122,7 @@ class _FreelancerProjectDetailViewState
 
   String get _projectCode {
     final p = controller.project;
-    return '#PRJ-${p.createdAt.year}-${p.id.substring(0, p.id.length >= 8 ? 8 : p.id.length).toUpperCase()}';
+    return '#PRJ-${p.createdAt.year}-${p.id.substring(0, p.id.length >= 8 ? 8 : p.id.length).toUpperCaseTr()}';
   }
 
   String get _statusLabel {
@@ -199,7 +200,7 @@ class _FreelancerProjectDetailViewState
                       child: Text(
                         'Proje Detayı',
                         textAlign: TextAlign.center,
-                        style: _serif(
+                        style: _display(
                           size: 22 * s,
                           weight: FontWeight.w600,
                           color: _kInk,
@@ -247,7 +248,7 @@ class _FreelancerProjectDetailViewState
                                 children: [
                                   Text(
                                     _statusLabel,
-                                    style: _mono(
+                                    style: _ui(
                                       size: 8 * s,
                                       weight: FontWeight.w700,
                                       color: _statusColor,
@@ -261,7 +262,7 @@ class _FreelancerProjectDetailViewState
                                         : (project.category ?? ''),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: _serif(
+                                    style: _display(
                                       size: 24 * s,
                                       weight: FontWeight.w600,
                                       color: _kInk,
@@ -270,7 +271,7 @@ class _FreelancerProjectDetailViewState
                                   SizedBox(height: 2 * s),
                                   Text(
                                     '${project.shootingType ?? ''} · «${project.category ?? ''}»',
-                                    style: _mono(
+                                    style: _ui(
                                       size: 8 * s,
                                       color: _kBlack,
                                       spacing: 0.5,
@@ -310,7 +311,7 @@ class _FreelancerProjectDetailViewState
                             padding: EdgeInsets.only(top: 12 * s),
                             child: Text(
                               project.notes ?? project.description,
-                              style: _mono(
+                              style: _ui(
                                 size: 10 * s,
                                 color: _kBlack,
                                 spacing: 0.2,
@@ -512,7 +513,7 @@ class _FreelancerProjectDetailViewState
                   Expanded(
                     child: Text(
                       client?.fullName ?? 'Müşteri',
-                      style: _mono(
+                      style: _ui(
                         size: 11 * s,
                         weight: FontWeight.w600,
                         color: _kBlack,
@@ -529,7 +530,7 @@ class _FreelancerProjectDetailViewState
                       color: _kGold.withValues(alpha: 0.15),
                       child: Text(
                         'Mesaj',
-                        style: _mono(
+                        style: _ui(
                           size: 9 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
@@ -574,7 +575,7 @@ class _FreelancerProjectDetailViewState
                         SizedBox(width: 6 * s),
                         Text(
                           'Müşteriyle Mesajlaş',
-                          style: _mono(
+                          style: _ui(
                             size: 11 * s,
                             weight: FontWeight.w700,
                             color: Colors.white,
@@ -610,7 +611,7 @@ class _FreelancerProjectDetailViewState
                     '${m.title} · ${m.timeLabel}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
@@ -622,7 +623,7 @@ class _FreelancerProjectDetailViewState
                     m.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: FontWeight.w600,
                       color: _kGold,
@@ -674,7 +675,7 @@ class _FreelancerProjectDetailViewState
               ),
               Text(
                 existing == null ? 'İlerleme Ekle' : 'İlerlemeyi Düzenle',
-                style: _serif(
+                style: _display(
                   size: 22 * s,
                   weight: FontWeight.w600,
                   color: _kInk,
@@ -683,7 +684,7 @@ class _FreelancerProjectDetailViewState
               SizedBox(height: 20 * s),
               Text(
                 'BAŞLIK',
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
@@ -699,7 +700,7 @@ class _FreelancerProjectDetailViewState
               SizedBox(height: 18 * s),
               Text(
                 'AÇIKLAMA',
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
@@ -745,7 +746,7 @@ class _FreelancerProjectDetailViewState
                   alignment: Alignment.center,
                   child: Text(
                     'KAYDET',
-                    style: _mono(
+                    style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: Colors.white,
@@ -895,13 +896,13 @@ class _SheetField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       cursorColor: _kGold,
-      style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+      style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
       decoration: InputDecoration(
         isDense: true,
         filled: true,
         fillColor: Colors.white,
         hintText: hint,
-        hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+        hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
         contentPadding: EdgeInsets.symmetric(
           horizontal: 14 * s,
           vertical: 12 * s,
@@ -950,7 +951,7 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: _mono(
+                  style: _ui(
                     size: 8 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
@@ -1012,10 +1013,10 @@ class _GridCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label.toUpperCase(),
+                item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -1025,7 +1026,7 @@ class _GridCell extends StatelessWidget {
           item.value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: _mono(
+          style: _ui(
             size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
@@ -1057,13 +1058,13 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
         Text(
           value,
-          style: _mono(
+          style: _ui(
             size: 9 * s,
             weight: FontWeight.w700,
             color: _kBlack,
