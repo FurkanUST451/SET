@@ -68,14 +68,6 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
                         hint: 'ör. "Mercedes-Benz The Chase"',
                       ),
                       SizedBox(height: 20 * s),
-                      _sectionLabel(s, 'İMZA'),
-                      SizedBox(height: 10 * s),
-                      _TextInput(
-                        scale: s,
-                        controller: controller.studioController,
-                        hint: 'Stüdyo veya isim (ör. FRAMEWORKS)',
-                      ),
-                      SizedBox(height: 20 * s),
                       _sectionLabel(s, 'AÇIKLAMA'),
                       SizedBox(height: 10 * s),
                       _TextInput(

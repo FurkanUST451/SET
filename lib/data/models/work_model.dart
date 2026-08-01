@@ -40,6 +40,7 @@ class WorkModel {
     this.freelancerId,
     this.description,
     this.mediaUrl,
+    this.thumbnailUrl,
     this.isVideo = false,
     this.createdAt,
   });
@@ -56,8 +57,29 @@ class WorkModel {
   final String? freelancerId;
   final String? description;
   final String? mediaUrl;
+
+  // Video işleri için upload sırasında üretilen JPEG önizleme (bkz.
+  // freelancer_upload_work_controller.dart _uploadThumbnail).
+  final String? thumbnailUrl;
   final bool isVideo;
   final DateTime? createdAt;
+
+  // Firestore'a yüklenmiş gerçek işler için true (createdAt set edilir).
+  bool get isLive => createdAt != null;
+
+  // Bir bildirim (report) oluşturulurken içeriğin o anki hâlinin
+  // anlık görüntüsü (bkz. report_model.dart) — gönderi sonradan
+  // silinse/değişse bile admin panelinde bildirim anındaki bilgiler kalır.
+  Map<String, dynamic> toReportSnapshot() => {
+        'workId': id,
+        'title': title,
+        'studio': studio,
+        'type': type.name,
+        'freelancerId': freelancerId,
+        'mediaUrl': mediaUrl,
+        'thumbnailUrl': thumbnailUrl,
+        'description': description,
+      };
 
   factory WorkModel.fromJson(Map<String, dynamic> json) {
     return WorkModel(
@@ -71,6 +93,7 @@ class WorkModel {
       freelancerId: json['freelancerId'] as String?,
       description: json['description'] as String?,
       mediaUrl: json['mediaUrl'] as String?,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
       isVideo: json['isVideo'] as bool? ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
@@ -89,6 +112,7 @@ class WorkModel {
         'freelancerId': freelancerId,
         'description': description,
         'mediaUrl': mediaUrl,
+        'thumbnailUrl': thumbnailUrl,
         'isVideo': isVideo,
         'createdAt': createdAt?.toIso8601String(),
       };
