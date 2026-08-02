@@ -93,8 +93,10 @@ class ChatDetailView extends GetView<ChatDetailController> {
     final double s = (width / 390).clamp(0.85, 1.15).toDouble();
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) => controller.goBack(),
+      canPop: Get.key.currentState?.canPop() ?? false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) controller.goBack();
+      },
       child: MediaQuery.withNoTextScaling(
         child: Scaffold(
           backgroundColor: _kChatBg,
@@ -252,6 +254,24 @@ class _BriefCard extends StatelessWidget {
   final double scale;
   final ChatDetailController controller;
 
+  String _categoryAsset(String category) {
+    final cat = category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = scale;
@@ -276,9 +296,15 @@ class _BriefCard extends StatelessWidget {
               Container(
                 width: 38 * s,
                 height: 38 * s,
-                color: _kGold.withValues(alpha: 0.15),
+                decoration: const BoxDecoration(color: Colors.white),
                 alignment: Alignment.center,
-                child: Icon(Icons.work_outline_rounded, color: _kGold, size: 18 * s),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  _categoryAsset(category),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.work_outline_rounded, color: _kGold, size: 18 * s),
+                ),
               ),
               SizedBox(width: 12 * s),
               Expanded(

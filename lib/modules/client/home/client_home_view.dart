@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_strings.dart';
+import '../../../core/utils/app_navigation.dart';
 import '../../../widgets/set_bottom_nav.dart';
 import 'client_home_controller.dart';
 import 'tabs/client_chat_tab.dart';
@@ -32,17 +33,24 @@ class ClientHomeView extends GetView<ClientHomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      body: Obx(() => IndexedStack(
-            index: controller.currentIndex.value,
-            children: _tabs,
-          )),
-      bottomNavigationBar: Obx(() => SetBottomNav(
-            currentIndex: controller.currentIndex.value,
-            onTap: controller.changeTab,
-            items: _navItems,
-          )),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (controller.handleBackPress()) moveAppToBackground();
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: Obx(() => IndexedStack(
+              index: controller.currentIndex.value,
+              children: _tabs,
+            )),
+        bottomNavigationBar: Obx(() => SetBottomNav(
+              currentIndex: controller.currentIndex.value,
+              onTap: controller.changeTab,
+              items: _navItems,
+            )),
+      ),
     );
   }
 }

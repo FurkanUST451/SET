@@ -193,15 +193,6 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
               ],
             ),
           ),
-          SizedBox(width: 10 * s),
-          _IconBtn(scale: s, icon: Icons.search_rounded, onTap: () {}),
-          SizedBox(width: 8 * s),
-          _IconBtn(
-            scale: s,
-            icon: Icons.notifications_none_rounded,
-            badge: true,
-            onTap: () {},
-          ),
         ],
       ),
     );
@@ -638,50 +629,6 @@ class _MetaCell extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─── İkon butonu ──────────────────────────────────────────────────
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({
-    required this.scale,
-    required this.icon,
-    required this.onTap,
-    this.badge = false,
-  });
-
-  final double scale;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool badge;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 44 * s,
-        height: 44 * s,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, size: 20 * s, color: _kInk),
-            if (badge)
-              Positioned(
-                top: 11 * s,
-                right: 12 * s,
-                child: Container(width: 6 * s, height: 6 * s, color: _kGold),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
