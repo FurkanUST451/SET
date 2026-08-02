@@ -201,14 +201,6 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
               ],
             ),
           ),
-          SizedBox(width: 10 * s),
-          _IconBtn(scale: s, icon: Icons.search_rounded, onTap: () {}),
-          SizedBox(width: 8 * s),
-          _IconBtn(
-              scale: s,
-              icon: Icons.notifications_none_rounded,
-              badge: true,
-              onTap: () {}),
         ],
       ),
     );
@@ -845,10 +837,8 @@ class _BriefCard extends StatelessWidget {
                 brief.answers.notes!.isNotEmpty) ...[
               SizedBox(height: 14 * s),
               GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
-                  'category': brief.category,
-                  'brief': brief,
-                }),
+                onTap: () => Get.toNamed(AppRoutes.briefDetail,
+                    arguments: {'brief': brief}),
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
@@ -890,10 +880,8 @@ class _BriefCard extends StatelessWidget {
               // Alt bilgi
               SizedBox(height: 18 * s),
               GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.sendOffer, arguments: {
-                  'category': brief.category,
-                  'brief': brief,
-                }),
+                onTap: () => Get.toNamed(AppRoutes.briefDetail,
+                    arguments: {'brief': brief}),
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(42 * s, 12 * s, 38 * s, 14 * s),
@@ -962,57 +950,6 @@ class _MetaCell extends StatelessWidget {
               size: 10 * s, weight: FontWeight.w400, color: _kBlack, spacing: 0.3),
         ),
       ],
-    );
-  }
-}
-
-// ─── İkon butonu ──────────────────────────────────────────────────
-class _IconBtn extends StatelessWidget {
-  const _IconBtn({
-    required this.scale,
-    required this.icon,
-    required this.onTap,
-    this.badge = false,
-  });
-
-  final double scale;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool badge;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 44 * s,
-        height: 44 * s,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, size: 20 * s, color: _kInk),
-            if (badge)
-              Positioned(
-                top: 11 * s,
-                right: 12 * s,
-                child: Container(
-                  width: 6 * s,
-                  height: 6 * s,
-                  decoration: const BoxDecoration(
-                    color: _kGold,
-                    shape: BoxShape.rectangle,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
