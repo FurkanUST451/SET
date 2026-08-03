@@ -18,14 +18,29 @@ class SplashController extends GetxController {
     _decideInitialRoute();
   }
 
+  // Açılıştaki fotoğraf animasyonu en az bu kadar görünür kalır. Süre
+  // "started" anından itibaren ölçülür; uygulama arka planda zaten açılmış
+  // ve veriler önceden çekilmişse (_resolveRoute hızlı biterse) sadece
+  // kalan fark kadar beklenir — bu pay toplam süreye asla üstüne eklenmez.
+  static const _minSplashDuration = Duration(milliseconds: 500);
+
   Future<void> _decideInitialRoute() async {
+    final started = DateTime.now();
+    final route = await _resolveRoute();
+    final elapsed = DateTime.now().difference(started);
+    if (elapsed < _minSplashDuration) {
+      await Future.delayed(_minSplashDuration - elapsed);
+    }
+    Get.offAllNamed(route);
+  }
+
+  Future<String> _resolveRoute() async {
     final hasOnboarded =
         StorageService.read<bool>(StorageService.onboardingComplete) ?? false;
 
     // Onboarding hiç gösterilmemişse oraya gönder
     if (!hasOnboarded) {
-      Get.offAllNamed(AppRoutes.onboarding);
-      return;
+      return AppRoutes.onboarding;
     }
 
     // Firebase Auth oturumu yoksa her zaman giriş ekranına
@@ -33,8 +48,7 @@ class SplashController extends GetxController {
     if (firebaseUser == null) {
       StorageService.remove(StorageService.userId);
       StorageService.remove(StorageService.userRole);
-      Get.offAllNamed(AppRoutes.login);
-      return;
+      return AppRoutes.login;
     }
 
     // Önceki oturumdan gelen kullanıcıyı UserController'a yükle
@@ -52,16 +66,15 @@ class SplashController extends GetxController {
 
     // Rol seçilmemişse role selection'a
     if (roleName == null) {
-      Get.offAllNamed(AppRoutes.roleSelection);
-      return;
+      return AppRoutes.roleSelection;
     }
 
     // Rol belirli → doğrudan home'a
     switch (UserRole.fromName(roleName)) {
       case UserRole.client:
-        Get.offAllNamed(AppRoutes.clientHome);
+        return AppRoutes.clientHome;
       case UserRole.freelancer:
-        Get.offAllNamed(AppRoutes.freelancerHome);
+        return AppRoutes.freelancerHome;
     }
   }
 }

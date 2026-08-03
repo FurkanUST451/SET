@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../core/constants/app_assets.dart';
+import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
+import '../client_projects_controller.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -71,50 +73,8 @@ class _FeaturedProject {
   final String city;
 }
 
-class _ActiveProject {
-  const _ActiveProject({
-    required this.workId,
-    required this.tag,
-    required this.title,
-    required this.subtitle,
-    required this.deliveryTime,
-    required this.budget,
-    required this.shootDate,
-    required this.location,
-    required this.stageIndex,
-    required this.stages,
-    required this.nextStep,
-  });
-
-  final String workId;
-  final String tag;
-  final String title;
-  final String subtitle;
-  final String deliveryTime;
-  final String budget;
-  final String shootDate;
-  final String location;
-  final int stageIndex;
-  final List<String> stages;
-  final String nextStep;
-}
-
 class ClientHomeTab extends StatelessWidget {
   const ClientHomeTab({super.key});
-
-  static const _activeProject = _ActiveProject(
-    workId: 'w1',
-    tag: 'DEVAM EDEN PROJE',
-    title: 'Mercedes Campaign',
-    subtitle: 'Reklam Filmi Yatay',
-    deliveryTime: '7 Gün',
-    budget: '40K',
-    shootDate: '12 Ağu',
-    location: 'İstanbul / Beşiktaş',
-    stageIndex: 3,
-    stages: ['Brief Onayı', 'Ekip', 'Planlama', 'Çekim', 'Teslim'],
-    nextStep: 'Kurgu onayı',
-  );
 
   static const _projects = [
     _FeaturedProject(
@@ -166,9 +126,26 @@ class ClientHomeTab extends StatelessWidget {
                         _buildHero(s),
                         SizedBox(height: 46 * s),
                         _buildStartButton(s),
-                        SizedBox(height: 18 * s),
-                        _ActiveProjectCard(scale: s, project: _activeProject),
-                        SizedBox(height: 36 * s),
+                        Obx(() {
+                          final controller =
+                              Get.find<ClientProjectsController>();
+                          ProjectModel? active;
+                          for (final p in controller.projects) {
+                            if (p.status == ProjectStatus.active) {
+                              active = p;
+                              break;
+                            }
+                          }
+                          if (active == null) return SizedBox(height: 36 * s);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 18 * s),
+                              _ActiveProjectCard(scale: s, project: active),
+                              SizedBox(height: 36 * s),
+                            ],
+                          );
+                        }),
                         _buildFeaturedSection(s),
                         SizedBox(height: 36 * s),
                         _buildInspirationSection(context, s),
@@ -379,8 +356,8 @@ class ClientHomeTab extends StatelessWidget {
     );
   }
 
-  // ── Ortak bölüm başlığı: label + "TÜMÜNÜ GÖR" ────────────────
-  Widget _sectionHeaderRow(double s, String label) {
+  // ── Ortak bölüm başlığı: label + (opsiyonel) "TÜMÜNÜ GÖR" ────
+  Widget _sectionHeaderRow(double s, String label, {bool showAll = true}) {
     return Row(
       children: [
         Expanded(
@@ -394,25 +371,26 @@ class ClientHomeTab extends StatelessWidget {
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () {},
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            children: [
-              Text(
-                'TÜMÜNÜ GÖR',
-                style: _ui(
-                  size: 8 * s,
-                  weight: FontWeight.w700,
-                  color: _kGold,
-                  spacing: 1,
+        if (showAll)
+          GestureDetector(
+            onTap: () {},
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                Text(
+                  'TÜMÜNÜ GÖR',
+                  style: _ui(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kGold,
+                    spacing: 1,
+                  ),
                 ),
-              ),
-              SizedBox(width: 4 * s),
-              Icon(Icons.arrow_forward_rounded, size: 13 * s, color: _kGold),
-            ],
+                SizedBox(width: 4 * s),
+                Icon(Icons.arrow_forward_rounded, size: 13 * s, color: _kGold),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -424,7 +402,7 @@ class ClientHomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeaderRow(s, 'ÖNE ÇIKAN PROJELER'),
+          _sectionHeaderRow(s, 'ÖNE ÇIKAN PROJELER', showAll: false),
           SizedBox(height: 6 * s),
           for (var i = 0; i < _projects.length; i++) ...[
             _FeaturedProjectRow(scale: s, project: _projects[i]),
@@ -658,29 +636,62 @@ class _FeaturedProjectRow extends StatelessWidget {
   }
 }
 
-// ── Devam eden proje kartı — koyu, kesik köşeli "bilet" kartı ──────────
+// Kart, ilerleme "aşama"larını backend'de henüz karşılığı olmayan
+// bir alan olduğu için sabit/gösterimlik tutar.
+const _kActiveProjectStages = [
+  'Brief Onayı',
+  'Ekip',
+  'Planlama',
+  'Çekim',
+  'Teslim',
+];
+const _kActiveProjectStageIndex = 3;
+
+// ── Devam eden proje kartı — Projelerim'deki onaylı projenin önizlemesi ─
 class _ActiveProjectCard extends StatelessWidget {
   const _ActiveProjectCard({required this.scale, required this.project});
 
   final double scale;
-  final _ActiveProject project;
+  final ProjectModel project;
+
+  String get _title =>
+      (project.category != null && project.category!.isNotEmpty)
+      ? project.category!
+      : project.title;
+
+  String get _subtitle => project.shootingType ?? '';
+
+  String get _nextStep => (project.notes != null && project.notes!.isNotEmpty)
+      ? project.notes!
+      : 'Ekiple iletişimde kal';
+
+  String get _compactBudget {
+    final b = project.budget;
+    if (b >= 1000) {
+      final k = b / 1000;
+      final kStr = k == k.roundToDouble()
+          ? k.toStringAsFixed(0)
+          : k.toStringAsFixed(1);
+      return '${kStr}K';
+    }
+    return b.toStringAsFixed(0);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final s = scale;
+    // Kart içeriği "Projeni Başlat" bandına göre biraz büyütülür. Kartın dış
+    // kenar boşluğu ise bandınkinden (26*scale) belirgin şekilde daha dar
+    // tutulur — kart neredeyse ekran kenarına kadar genişler.
+    final s = scale * 1.12;
+    final marginH = 6.0 * scale;
     final radius = 0.0;
     final chamfer = 22.0 * s;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 26 * s),
+      padding: EdgeInsets.symmetric(horizontal: marginH),
       child: GestureDetector(
-        onTap: () => Get.toNamed(
-          AppRoutes.portfolioProjectDetail,
-          arguments: {
-            'workId': project.workId,
-            'title': project.title,
-            'category': project.tag,
-          },
-        ),
+        // Projelerim sekmesindeki onaylı proje kartıyla aynı detay akışı.
+        onTap: () =>
+            Get.find<ClientProjectsController>().openProjectDetail(project),
         behavior: HitTestBehavior.opaque,
         child: ClipPath(
           clipper: _CornerChamferClipper(
@@ -694,7 +705,7 @@ class _ActiveProjectCard extends StatelessWidget {
               Container(
                 width: double.infinity,
                 color: _kCardBg,
-                padding: EdgeInsets.fromLTRB(24 * s, 20 * s, 24 * s, 18 * s),
+                padding: EdgeInsets.fromLTRB(24 * s, 20 * s, 24 * s, 6 * s),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -702,7 +713,7 @@ class _ActiveProjectCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            project.tag,
+                            'DEVAM EDEN PROJE',
                             style: _ui(
                               size: 8 * s,
                               weight: FontWeight.w700,
@@ -730,22 +741,24 @@ class _ActiveProjectCard extends StatelessWidget {
                     ),
                     SizedBox(height: 10 * s),
                     Text(
-                      project.title,
+                      _title,
                       style: _display(
-                        size: 25 * s,
+                        size: 23 * s,
                         weight: FontWeight.w600,
                         color: _kBlack,
                       ),
                     ),
-                    SizedBox(height: 4 * s),
-                    Text(
-                      project.subtitle,
-                      style: _ui(
-                        size: 10 * s,
-                        color: _kBlack.withValues(alpha: 0.6),
-                        spacing: 0.3,
+                    if (_subtitle.isNotEmpty) ...[
+                      SizedBox(height: 4 * s),
+                      Text(
+                        _subtitle,
+                        style: _ui(
+                          size: 10 * s,
+                          color: _kBlack.withValues(alpha: 0.6),
+                          spacing: 0.3,
+                        ),
                       ),
-                    ),
+                    ],
                     SizedBox(height: 18 * s),
                     Row(
                       children: [
@@ -753,44 +766,47 @@ class _ActiveProjectCard extends StatelessWidget {
                           child: _DarkMetaCell(
                             scale: s,
                             label: 'TESLİM',
-                            value: project.deliveryTime,
+                            value: project.deliveryTime ?? '—',
                           ),
                         ),
                         Expanded(
                           child: _DarkMetaCell(
                             scale: s,
                             label: 'BÜTÇE',
-                            value: project.budget,
+                            value: _compactBudget,
                           ),
                         ),
                         Expanded(
                           child: _DarkMetaCell(
                             scale: s,
                             label: 'ÇEKİM',
-                            value: project.shootDate,
+                            value: project.dateRange ?? '—',
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 14 * s),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 12 * s,
-                          color: _kBlack.withValues(alpha: 0.45),
-                        ),
-                        SizedBox(width: 5 * s),
-                        Text(
-                          project.location,
-                          style: _ui(
-                            size: 9 * s,
-                            color: _kBlack.withValues(alpha: 0.6),
-                            spacing: 0.3,
+                    if (project.location != null &&
+                        project.location!.isNotEmpty) ...[
+                      SizedBox(height: 14 * s),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 12 * s,
+                            color: _kBlack.withValues(alpha: 0.45),
                           ),
-                        ),
-                      ],
-                    ),
+                          SizedBox(width: 5 * s),
+                          Text(
+                            project.location!,
+                            style: _ui(
+                              size: 9 * s,
+                              color: _kBlack.withValues(alpha: 0.6),
+                              spacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     SizedBox(height: 18 * s),
                     Row(
                       children: [
@@ -805,7 +821,7 @@ class _ActiveProjectCard extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          '${project.stageIndex}/${project.stages.length} AŞAMA',
+                          '$_kActiveProjectStageIndex/${_kActiveProjectStages.length} AŞAMA',
                           style: _ui(
                             size: 7 * s,
                             weight: FontWeight.w700,
@@ -816,10 +832,14 @@ class _ActiveProjectCard extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 8 * s),
-                    _ProgressStages(scale: s, project: project),
+                    _ProgressStages(
+                      scale: s,
+                      stages: _kActiveProjectStages,
+                      stageIndex: _kActiveProjectStageIndex,
+                    ),
                     SizedBox(height: 16 * s),
                     Divider(height: 1, color: _kBlack.withValues(alpha: 0.12)),
-                    SizedBox(height: 14 * s),
+                    SizedBox(height: 6 * s),
                     Row(
                       children: [
                         Expanded(
@@ -836,7 +856,7 @@ class _ActiveProjectCard extends StatelessWidget {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: project.nextStep,
+                                  text: _nextStep,
                                   style: _ui(
                                     size: 8 * s,
                                     weight: FontWeight.w700,
@@ -927,14 +947,19 @@ class _DarkMetaCell extends StatelessWidget {
 
 // ── Aşama ilerleme çubuğu — 5 segment + altında etiketler ──────────────
 class _ProgressStages extends StatelessWidget {
-  const _ProgressStages({required this.scale, required this.project});
+  const _ProgressStages({
+    required this.scale,
+    required this.stages,
+    required this.stageIndex,
+  });
   final double scale;
-  final _ActiveProject project;
+  final List<String> stages;
+  final int stageIndex;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    final count = project.stages.length;
+    final count = stages.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -945,9 +970,9 @@ class _ProgressStages extends StatelessWidget {
                 child: Container(
                   height: 3 * s,
                   decoration: BoxDecoration(
-                    color: i < project.stageIndex
+                    color: i < stageIndex
                         ? _kGold
-                        : (i == project.stageIndex
+                        : (i == stageIndex
                               ? _kGold.withValues(alpha: 0.5)
                               : _kBlack.withValues(alpha: 0.1)),
                     borderRadius: BorderRadius.circular(2 * s),
@@ -964,14 +989,14 @@ class _ProgressStages extends StatelessWidget {
             for (var i = 0; i < count; i++)
               Expanded(
                 child: Text(
-                  project.stages[i].toUpperCase(),
+                  stages[i].toUpperCase(),
                   textAlign: i == 0
                       ? TextAlign.left
                       : (i == count - 1 ? TextAlign.right : TextAlign.center),
                   style: _ui(
                     size: 6 * s,
                     weight: FontWeight.w600,
-                    color: i <= project.stageIndex
+                    color: i <= stageIndex
                         ? _kBlack.withValues(alpha: 0.75)
                         : _kBlack.withValues(alpha: 0.35),
                     spacing: 0.4,

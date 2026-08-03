@@ -31,8 +31,8 @@ class _SplashImageCarousel extends StatefulWidget {
 }
 
 class _SplashImageCarouselState extends State<_SplashImageCarousel> {
-  // 1.7 kat hızlandırıldı (350ms → ~206ms).
-  static const _interval = Duration(milliseconds: 206);
+  // 1.7 kat, ardından 2 kat daha hızlandırıldı (350ms → ~206ms → ~103ms).
+  static const _interval = Duration(milliseconds: 103);
 
   int _index = 0;
   Timer? _timer;
@@ -56,10 +56,11 @@ class _SplashImageCarouselState extends State<_SplashImageCarousel> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 147,
-      height: 147,
+      // 0.8 kat küçültüldü (147 → ~118).
+      width: 118,
+      height: 118,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 88),
+        duration: const Duration(milliseconds: 44),
         transitionBuilder: (child, animation) =>
             FadeTransition(opacity: animation, child: child),
         child: Image.asset(
