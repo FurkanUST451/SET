@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/offer_model.dart';
+import 'brief_repository.dart';
 import 'chat_repository.dart';
 import 'project_repository.dart';
 
@@ -8,12 +9,15 @@ class OfferRepository {
   OfferRepository({
     required ChatRepository chatRepository,
     required ProjectRepository projectRepository,
+    required BriefRepository briefRepository,
   })  : _chatRepo = chatRepository,
-        _projectRepo = projectRepository;
+        _projectRepo = projectRepository,
+        _briefRepo = briefRepository;
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final ChatRepository _chatRepo;
   final ProjectRepository _projectRepo;
+  final BriefRepository _briefRepo;
 
   CollectionReference<Map<String, dynamic>> get _offers =>
       _db.collection('offers');
@@ -85,6 +89,9 @@ class OfferRepository {
         clientId: clientId,
         freelancerId: freelancerId,
       );
+      if (offer.briefId.isNotEmpty) {
+        await _briefRepo.updateStatus(offer.briefId, 'accepted');
+      }
     }
   }
 }

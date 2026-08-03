@@ -48,7 +48,16 @@ class FreelancerOfferDetailController extends GetxController {
         briefTitle: briefTitle,
       );
 
-      Get.toNamed(
+      if (brief.status == 'offer_sent') {
+        await _briefRepo.updateStatus(brief.id, 'submitted');
+      }
+      // Daha önce reddedilmişse (yeniden değerlendirip mesajlaşmayı
+      // seçtiyse) reddedilmiş işaretini kaldır.
+      if (brief.rejectedByIds.contains(me.id)) {
+        await _briefRepo.unrejectByFreelancer(brief.id, me.id);
+      }
+
+      Get.offNamed(
         AppRoutes.chatDetail,
         arguments: {
           'chatId': chat.id,
@@ -131,9 +140,7 @@ class FreelancerOfferDetailController extends GetxController {
       final userId = _userController.currentUser?.id ?? '';
       if (userId.isEmpty) return;
 
-      final updatedIds =
-          brief.sentToIds.where((id) => id != userId).toList();
-      await _briefRepo.removeSentToId(brief.id, userId, updatedIds);
+      await _briefRepo.rejectByFreelancer(brief.id, userId);
       Get.back(result: 'rejected');
     } catch (_) {
       Get.snackbar(

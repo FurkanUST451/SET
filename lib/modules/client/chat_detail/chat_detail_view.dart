@@ -210,11 +210,6 @@ class ChatDetailView extends GetView<ChatDetailController> {
                     ],
                   ),
                 ),
-                SizedBox(width: 8 * s),
-                _SquareBtn(scale: s, icon: Icons.call_outlined, onTap: () {}),
-                SizedBox(width: 8 * s),
-                _SquareBtn(scale: s, icon: Icons.videocam_outlined, onTap: () {}),
-                SizedBox(width: 14 * s),
               ],
             ),
           ),
@@ -743,33 +738,6 @@ class _MyBubble extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Bar ikon butonu ──────────────────────────────────────────────
-class _SquareBtn extends StatelessWidget {
-  const _SquareBtn({required this.scale, required this.icon, required this.onTap});
-  final double scale;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 40 * s,
-        height: 40 * s,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.zero,
-          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
-        ),
-        child: Icon(icon, size: 18 * s, color: _kInk),
       ),
     );
   }

@@ -17,6 +17,7 @@ const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x0F000000);
+const _kGreen = Color(0xFF6B8F71); // onaylı proje durumu
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
 TextStyle _display({
@@ -71,9 +72,15 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
 
   List<BriefModel> _apply(List<BriefModel> all) {
     if (_filterIndex == _activeFilterIndex) return [];
+    // Kabul edilip projeye dönüşen brief'ler artık ONAYLI PROJE kartı
+    // olarak gösteriliyor; iptal edilenler ise kapanmış sayılır — ikisi de
+    // burada tekrar gösterilmesin.
+    final base = all
+        .where((b) => b.status != 'accepted' && b.status != 'cancelled')
+        .toList();
     final st = _filterStatus[_filterIndex];
-    if (st == null) return all;
-    return all.where((b) => b.status == st).toList();
+    if (st == null) return base;
+    return base.where((b) => b.status == st).toList();
   }
 
   // Aktif projeler "TÜMÜ" ve "AKTİF PROJELER" filtrelerinde gösterilir.
@@ -404,7 +411,7 @@ class _ProjectCard extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
               child: Row(
                 children: [
-                  _PulsingDot(color: _kGold, size: 8 * s),
+                  _PulsingDot(color: _kGreen, size: 8 * s),
                   SizedBox(width: 8 * s),
                   Text(
                     'ONAYLI PROJE',
@@ -603,8 +610,9 @@ class _BriefCard extends StatelessWidget {
   Color get _statusColor {
     switch (brief.status) {
       case 'offer_sent':
-      case 'submitted':
         return _kBlack;
+      case 'submitted':
+        return _kGold;
       default:
         return _kMuted;
     }

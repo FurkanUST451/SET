@@ -16,6 +16,7 @@ const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
+const _kDanger = Color(0xFFBE6A5A);
 
 TextStyle _display({
   required double size,
@@ -202,18 +203,50 @@ class BriefDetailView extends GetView<BriefDetailController> {
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {},
-                      behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: EdgeInsets.all(8 * s),
-                        child: Icon(
-                          Icons.more_horiz_rounded,
-                          size: 22 * s,
-                          color: _kTaupe,
-                        ),
-                      ),
-                    ),
+                    controller.canCancel
+                        ? PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            color: _kCream,
+                            surfaceTintColor: Colors.transparent,
+                            elevation: 3,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                              side: BorderSide(color: _kDivider),
+                            ),
+                            icon: Icon(
+                              Icons.more_horiz_rounded,
+                              size: 22 * s,
+                              color: _kTaupe,
+                            ),
+                            onSelected: (value) {
+                              if (value == 'cancel') {
+                                _showCancelBriefDialog(context, s, controller);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'cancel',
+                                height: 40,
+                                child: Text(
+                                  "Brief'i Sil",
+                                  style: _ui(
+                                    size: 9 * s,
+                                    weight: FontWeight.w600,
+                                    color: _kDanger,
+                                    spacing: 0.6,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Padding(
+                            padding: EdgeInsets.all(8 * s),
+                            child: Icon(
+                              Icons.more_horiz_rounded,
+                              size: 22 * s,
+                              color: _kTaupe.withValues(alpha: 0.3),
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -1023,6 +1056,193 @@ class _MilestoneDot extends StatelessWidget {
             ),
           Icon(Icons.check_rounded, size: 22 * s, color: _kInk),
         ],
+      ),
+    );
+  }
+}
+
+// ── Brief iptal onayı — sebep seçimi + Sil/İptal ────────────────────────────
+void _showCancelBriefDialog(
+    BuildContext context, double s, BriefDetailController controller) {
+  showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    builder: (ctx) => _CancelBriefDialog(scale: s, controller: controller),
+  );
+}
+
+class _CancelBriefDialog extends StatefulWidget {
+  const _CancelBriefDialog({required this.scale, required this.controller});
+
+  final double scale;
+  final BriefDetailController controller;
+
+  @override
+  State<_CancelBriefDialog> createState() => _CancelBriefDialogState();
+}
+
+class _CancelBriefDialogState extends State<_CancelBriefDialog> {
+  static const _reasons = <String>[
+    'Yanlış brief gönderdim.',
+    'Projeden vazgeçtim.',
+    'Başka bir freelancer ile anlaştım.',
+    'Belirtmek istemiyorum.',
+  ];
+
+  String _selected = _reasons.first;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.scale;
+    return Dialog(
+      backgroundColor: _kCream,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 24 * s, vertical: 24 * s),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: _kCardBorder),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(22 * s, 22 * s, 22 * s, 18 * s),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Emin misin?',
+              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+            ),
+            SizedBox(height: 6 * s),
+            Text(
+              'Bu brief iptal edilecek ve gönderdiğin freelancerlara '
+              '"İptal Edildi" olarak görünecek.',
+              style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2, height: 1.5),
+            ),
+            SizedBox(height: 18 * s),
+            Text(
+              'İPTALİN SEBEBİ NEDİR?',
+              style: _ui(
+                size: 8 * s,
+                weight: FontWeight.w700,
+                color: _kBlack,
+                spacing: 1.2,
+              ),
+            ),
+            SizedBox(height: 10 * s),
+            Wrap(
+              spacing: 8 * s,
+              runSpacing: 8 * s,
+              children: [
+                for (final r in _reasons)
+                  _ReasonChip(
+                    scale: s,
+                    label: r,
+                    selected: _selected == r,
+                    onTap: () => setState(() => _selected = r),
+                  ),
+              ],
+            ),
+            SizedBox(height: 22 * s),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: 46 * s,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.14)),
+                      ),
+                      child: Text(
+                        'İPTAL',
+                        style: _ui(
+                          size: 10 * s,
+                          weight: FontWeight.w700,
+                          color: _kInk,
+                          spacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10 * s),
+                Expanded(
+                  child: Obx(() => GestureDetector(
+                        onTap: widget.controller.isCancelling.value
+                            ? null
+                            : () => widget.controller.cancelBrief(_selected),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          height: 46 * s,
+                          alignment: Alignment.center,
+                          color: _kDanger,
+                          child: widget.controller.isCancelling.value
+                              ? SizedBox(
+                                  width: 18 * s,
+                                  height: 18 * s,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'SİL',
+                                  style: _ui(
+                                    size: 10 * s,
+                                    weight: FontWeight.w700,
+                                    color: Colors.white,
+                                    spacing: 1,
+                                  ),
+                                ),
+                        ),
+                      )),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReasonChip extends StatelessWidget {
+  const _ReasonChip({
+    required this.scale,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final double scale;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 10 * s),
+        decoration: BoxDecoration(
+          color: selected ? _kGold : Colors.white,
+          border: Border.all(color: selected ? _kGold : _kCardBorder),
+        ),
+        child: Text(
+          label,
+          style: _ui(
+            size: 9.5 * s,
+            weight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? Colors.white : _kInk,
+            spacing: 0.2,
+          ),
+        ),
       ),
     );
   }
