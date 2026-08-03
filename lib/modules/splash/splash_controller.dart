@@ -19,8 +19,6 @@ class SplashController extends GetxController {
   }
 
   Future<void> _decideInitialRoute() async {
-    await Future.delayed(const Duration(seconds: 2));
-
     final hasOnboarded =
         StorageService.read<bool>(StorageService.onboardingComplete) ?? false;
 

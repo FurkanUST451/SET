@@ -286,6 +286,35 @@ class _SlideInReveal extends StatelessWidget {
   }
 }
 
+// ─── Kart içi alt bölüm — bir önceki seçim yapılınca yukarıdan yumuşakça belirir ───
+class _SlideDownReveal extends StatelessWidget {
+  const _SlideDownReveal({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: !visible
+          ? const SizedBox(width: double.infinity)
+          : TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, animatedChild) => Transform.translate(
+                offset: Offset(0, (1 - value) * -18),
+                child: Opacity(opacity: value, child: animatedChild),
+              ),
+              child: child,
+            ),
+    );
+  }
+}
+
 // ─── Ortak açılır kart kabuğu ─────────────────────────────────────────────────
 class _ExpandableCard extends StatelessWidget {
   const _ExpandableCard({
@@ -364,6 +393,7 @@ class _ExpandableCard extends StatelessWidget {
           AnimatedSize(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOut,
+            alignment: Alignment.topCenter,
             child: !expanded
                 ? const SizedBox(width: double.infinity)
                 : Container(
@@ -524,15 +554,32 @@ class _DateCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (controller.isDateFixed.value == true) ...[
-                SizedBox(height: 14 * s),
-                _DateStrip(scale: s, controller: controller),
-                SizedBox(height: 8 * s),
-                Text(
-                  'Başlangıç ve bitiş gününe dokun. Tek gün için aynı güne iki kez dokun.',
-                  style: _ui(size: 7.5 * s, color: _kMuted, spacing: 0.2),
+              _SlideDownReveal(
+                visible: controller.isDateFixed.value == true,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 14 * s),
+                  child: _MonthStrip(scale: s, controller: controller),
                 ),
-              ] else if (controller.isDateFixed.value == false) ...[
+              ),
+              _SlideDownReveal(
+                visible: controller.isDateFixed.value == true &&
+                    controller.selectedMonth.value != null,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 14 * s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _DateStrip(scale: s, controller: controller),
+                      SizedBox(height: 8 * s),
+                      Text(
+                        'Başlangıç ve bitiş gününe dokun. Tek gün için aynı güne iki kez dokun.',
+                        style: _ui(size: 7.5 * s, color: _kMuted, spacing: 0.2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (controller.isDateFixed.value == false) ...[
                 SizedBox(height: 12 * s),
                 Text(
                   'Ekip, senin takvimine göre esnek planlanacak.',
@@ -583,7 +630,59 @@ class _ModeTab extends StatelessWidget {
 
 const List<String> _kWeekdayShort = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'];
 
-// Sağa sola serbestçe kaydırılabilen yatay tarih şeridi.
+// Ay seçimi için yatay kaydırılabilen şerit — gün şeridinden önce görüntülenir.
+class _MonthStrip extends StatelessWidget {
+  const _MonthStrip({required this.scale, required this.controller});
+  final double scale;
+  final SendOfferController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final months = controller.availableMonths;
+
+    return SizedBox(
+      height: 44 * s,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: months.length,
+        itemBuilder: (context, i) {
+          final month = months[i];
+          final selectedMonth = controller.selectedMonth.value;
+          final selected = selectedMonth != null &&
+              selectedMonth.year == month.year &&
+              selectedMonth.month == month.month;
+
+          return GestureDetector(
+            onTap: () => controller.selectMonth(month),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              margin: EdgeInsets.only(right: 8 * s),
+              padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 10 * s),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? _kGold : Colors.transparent,
+                border: Border.all(color: selected ? _kGold : _kCardBorder),
+              ),
+              child: Text(
+                controller.monthLabel(month),
+                style: _ui(
+                  size: 9 * s,
+                  weight: selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected ? Colors.white : _kInk,
+                  spacing: 0.3,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Seçilen ayın günlerini gösteren, sağa sola serbestçe kaydırılabilen şerit.
 class _DateStrip extends StatelessWidget {
   const _DateStrip({required this.scale, required this.controller});
   final double scale;
@@ -592,9 +691,13 @@ class _DateStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final month = controller.selectedMonth.value!;
     final today = DateTime.now();
-    final start = DateTime(today.year, today.month, today.day);
-    const dayCount = 90;
+    final isCurrentMonth =
+        month.year == today.year && month.month == today.month;
+    final startDay = isCurrentMonth ? today.day : 1;
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    final dayCount = daysInMonth - startDay + 1;
 
     return SizedBox(
       height: 62 * s,
@@ -603,7 +706,7 @@ class _DateStrip extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: dayCount,
         itemBuilder: (context, i) {
-          final day = start.add(Duration(days: i));
+          final day = DateTime(month.year, month.month, startDay + i);
           final rangeStart = controller.rangeStart.value;
           final rangeEnd = controller.rangeEnd.value;
           final isStart = rangeStart != null && _isSameDay(day, rangeStart);
@@ -672,54 +775,156 @@ class _DeliveryCard extends StatelessWidget {
           valueText: controller.selectedDelivery.value,
           expanded: controller.isDeliveryExpanded.value,
           onToggle: controller.toggleDeliveryExpanded,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                spacing: 8 * s,
-                runSpacing: 8 * s,
-                children: [
-                  ...SendOfferController.deliveryOptions.map((o) => _Chip(
-                        scale: s,
-                        label: o,
-                        selected: !controller.isCustomDelivery.value &&
-                            controller.selectedDelivery.value == o,
-                        onTap: () => controller.selectDelivery(o),
-                      )),
-                  _Chip(
-                    scale: s,
-                    label: 'Özel',
-                    selected: controller.isCustomDelivery.value,
-                    onTap: controller.selectCustomDelivery,
-                  ),
-                ],
+          child: ClipRect(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) => SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
               ),
-              if (controller.isCustomDelivery.value) ...[
-                SizedBox(height: 12 * s),
-                SizedBox(
-                  width: 120 * s,
-                  child: TextField(
-                    controller: controller.customDeliveryController,
-                    keyboardType: TextInputType.number,
-                    style: _display(size: 15 * s, color: _kInk),
-                    onChanged: controller.setCustomDeliveryDays,
-                    onSubmitted: (_) => controller.submitCustomDelivery(),
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Gün sayısı',
-                      hintStyle: _ui(size: 9 * s, color: _kMuted),
-                      enabledBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: _kCardBorder)),
-                      focusedBorder:
-                          const UnderlineInputBorder(borderSide: BorderSide(color: _kGold)),
+              child: controller.isCustomDelivery.value
+                  ? _CustomDeliveryInput(
+                      key: const ValueKey('custom'),
+                      scale: s,
+                      controller: controller,
+                    )
+                  : _DeliveryOptionsList(
+                      key: const ValueKey('options'),
+                      scale: s,
+                      controller: controller,
                     ),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ));
+  }
+}
+
+class _DeliveryOptionsList extends StatelessWidget {
+  const _DeliveryOptionsList({super.key, required this.scale, required this.controller});
+  final double scale;
+  final SendOfferController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final o in SendOfferController.deliveryOptions)
+          _DeliveryOptionButton(
+            scale: s,
+            label: o,
+            selected: !controller.isCustomDelivery.value &&
+                controller.selectedDelivery.value == o,
+            onTap: () => controller.selectDelivery(o),
+          ),
+        _DeliveryOptionButton(
+          scale: s,
+          label: 'Özel',
+          selected: controller.isCustomDelivery.value,
+          onTap: controller.selectCustomDelivery,
+        ),
+      ],
+    );
+  }
+}
+
+class _DeliveryOptionButton extends StatelessWidget {
+  const _DeliveryOptionButton({
+    required this.scale,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final double scale;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        height: 48 * s,
+        margin: EdgeInsets.only(bottom: 8 * s),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? _kGold : Colors.transparent,
+          border: Border.all(color: selected ? _kGold : _kCardBorder),
+        ),
+        child: Text(
+          label,
+          style: _display(
+            size: 14 * s,
+            weight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? Colors.white : _kInk,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomDeliveryInput extends StatelessWidget {
+  const _CustomDeliveryInput({super.key, required this.scale, required this.controller});
+  final double scale;
+  final SendOfferController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Container(
+      width: double.infinity,
+      height: 48 * s,
+      padding: EdgeInsets.symmetric(horizontal: 12 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _kCardBorder),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: controller.cancelCustomDelivery,
+            behavior: HitTestBehavior.opaque,
+            child: Icon(Icons.arrow_back_rounded, size: 18 * s, color: _kMuted),
+          ),
+          SizedBox(width: 10 * s),
+          Expanded(
+            child: TextField(
+              controller: controller.customDeliveryController,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              style: _display(size: 15 * s, color: _kInk),
+              onChanged: controller.setCustomDeliveryDays,
+              onSubmitted: (_) => controller.submitCustomDelivery(),
+              textInputAction: TextInputAction.done,
+              decoration: InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.zero,
+                hintText: 'Gün sayısı',
+                hintStyle: _ui(size: 9 * s, color: _kMuted),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -739,24 +944,56 @@ class _LocationCard extends StatelessWidget {
           valueText: controller.selectedLocation.value,
           expanded: controller.isLocationExpanded.value,
           onToggle: controller.toggleLocationExpanded,
-          child: TextField(
-            controller: controller.locationController,
-            style: _display(size: 15 * s, color: _kInk),
-            onChanged: controller.setLocationText,
-            onSubmitted: (_) => controller.submitLocationText(),
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(
-              isDense: true,
-              filled: true,
-              fillColor: Colors.white,
-              hintText: 'Şehir / ilçe yazın',
-              hintStyle: _ui(size: 9 * s, color: _kMuted),
-              enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: _kCardBorder)),
-              focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: _kGold)),
-            ),
-          ),
+          child: _LocationList(scale: s, controller: controller),
         ));
+  }
+}
+
+// 81 il + İstanbul'un iki yakası, büyükşehirler listenin başında olacak
+// şekilde seçilebilir dikey liste.
+class _LocationList extends StatelessWidget {
+  const _LocationList({required this.scale, required this.controller});
+  final double scale;
+  final SendOfferController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return SizedBox(
+      height: 260 * s,
+      child: ListView.separated(
+        physics: const BouncingScrollPhysics(),
+        itemCount: SendOfferController.locationOptions.length,
+        separatorBuilder: (_, _) => Divider(height: 1, color: _kDivider),
+        itemBuilder: (context, i) {
+          final name = SendOfferController.locationOptions[i];
+          final selected = controller.selectedLocation.value == name;
+          return GestureDetector(
+            onTap: () => controller.selectLocation(name),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 12 * s),
+              color: selected ? _kGold.withValues(alpha: 0.1) : Colors.transparent,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: _display(
+                        size: 14 * s,
+                        weight: selected ? FontWeight.w700 : FontWeight.w500,
+                        color: selected ? _kGold : _kInk,
+                      ),
+                    ),
+                  ),
+                  if (selected)
+                    Icon(Icons.check_rounded, size: 18 * s, color: _kGold),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

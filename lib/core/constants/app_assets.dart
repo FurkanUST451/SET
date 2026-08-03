@@ -9,6 +9,7 @@ class AppAssets {
   static const String _profilePhotos = '$_images/profile_photos';
   static const String _placeholder = '$_images/placeholder';
   static const String _briefImages = '$_images/brief_images';
+  static const String _pageImages = '$_images/page_images';
 
   // Login / choose-auth screens
   static const String loginLogo = '$_loginPages/logo.png';
@@ -74,6 +75,16 @@ class AppAssets {
   static const String briefSetIllustration = '$_briefImages/cep_saati.png';
   static const String briefSetIllustrationShadow =
       '$_briefImages/cep_saati_shadow.png';
+
+  // Splash ekranı — sırayla değişen tanıtım görselleri
+  static const List<String> splashPageImages = [
+    '$_pageImages/apple.png',
+    '$_pageImages/atlas.png',
+    '$_pageImages/bird.png',
+    '$_pageImages/feather.png',
+    '$_pageImages/key.png',
+    '$_pageImages/pot.png',
+  ];
 
   // Proje detayı — Mercedes Campaign yer tutucu görselleri
   static const String portfolioMercedesBg = '$_placeholder/mercedes_bg.png';

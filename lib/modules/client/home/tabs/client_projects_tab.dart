@@ -388,7 +388,10 @@ class _ProjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return Container(
+    return GestureDetector(
+      onTap: () =>
+          Get.find<ClientProjectsController>().openProjectDetail(project),
+      child: Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -576,6 +579,7 @@ class _ProjectCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
     );
   }
 }
