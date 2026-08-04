@@ -21,9 +21,14 @@ class AuthController extends GetxController {
   bool get isLoggedIn =>
       _user.hasUser || StorageService.has(StorageService.userId);
 
+  // Giriş yaparkenki yükleme animasyonu ağ isteği çok hızlı dönse bile en az
+  // bu kadar görünür kalır.
+  static const _minLoginLoadingDuration = Duration(milliseconds: 700);
+
   Future<bool> login({required String email, required String password}) async {
     isLoading.value = true;
     errorMessage.value = null;
+    final started = DateTime.now();
     try {
       final authUser = await _repo.login(email: email, password: password);
       // Firestore'dan tam profili çek
@@ -37,6 +42,10 @@ class AuthController extends GetxController {
       errorMessage.value = e.toString();
       return false;
     } finally {
+      final elapsed = DateTime.now().difference(started);
+      if (elapsed < _minLoginLoadingDuration) {
+        await Future.delayed(_minLoginLoadingDuration - elapsed);
+      }
       isLoading.value = false;
     }
   }

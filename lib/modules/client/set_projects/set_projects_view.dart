@@ -58,30 +58,36 @@ class SetProjectsView extends StatelessWidget {
       backgroundColor: _kCream,
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(24 * s, 0, 24 * s, 110 * s),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(24 * s, 0, 24 * s, 24 * s),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _TopBar(scale: s),
-                    SizedBox(height: 18 * s),
-
-                    // Dosya no + proje index
-                    Text(
-                      'PROJE / 01',
-                      textAlign: TextAlign.right,
-                      style: _ui(
-                          size: 8 * s,
-                          weight: FontWeight.w700,
-                          color: _kGold,
-                          spacing: 1.4),
+                    // Geri oku — kendi satırında.
+                    GestureDetector(
+                      onTap: () => Get.back<void>(),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4 * s),
+                        child: Icon(Icons.arrow_back_rounded,
+                            size: 22 * s, color: _kInk),
+                      ),
                     ),
-                    SizedBox(height: 6 * s),
+                    SizedBox(height: 8 * s),
+                    // Proje indeksi + dosya no — okun hemen altında, sayfa
+                    // bu çizgiyle başlar.
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Text(
+                          'PROJE / 01',
+                          style: _ui(
+                              size: 8 * s,
+                              weight: FontWeight.w700,
+                              color: _kGold,
+                              spacing: 1.4),
+                        ),
+                        SizedBox(width: 10 * s),
                         Expanded(
                             child: Container(height: 1, color: _kCardBorder)),
                         SizedBox(width: 10 * s),
@@ -200,140 +206,9 @@ class SetProjectsView extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // ── Sabit alt bölüm: Düzenle + Paylaş ────────────────────────
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  color: _kCream,
-                  padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 8 * s),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {},
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            height: 50 * s,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: _kInk, width: 1.2),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.edit_outlined,
-                                    size: 15 * s, color: _kInk),
-                                SizedBox(width: 8 * s),
-                                Text(
-                                  'DÜZENLE',
-                                  style: _ui(
-                                      size: 9 * s,
-                                      weight: FontWeight.w700,
-                                      color: _kInk,
-                                      spacing: 1),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12 * s),
-                      GestureDetector(
-                        onTap: () {},
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          width: 50 * s,
-                          height: 50 * s,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: _kInk, width: 1.2),
-                          ),
-                          child: Icon(Icons.ios_share_outlined,
-                              size: 17 * s, color: _kInk),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Top bar
-// ---------------------------------------------------------------------------
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return SizedBox(
-      height: 48 * s,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => Get.back<void>(),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: EdgeInsets.all(4 * s),
-                child:
-                    Icon(Icons.arrow_back_rounded, size: 22 * s, color: _kInk),
-              ),
             ),
           ),
-          Text(
-            'SET · HALLETSİN',
-            style: _ui(
-                size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 2),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () {},
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                width: 36 * s,
-                height: 36 * s,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _kCardBorder),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(Icons.notifications_none_rounded,
-                        size: 18 * s, color: _kInk),
-                    Positioned(
-                      top: 8 * s,
-                      right: 9 * s,
-                      child: Container(
-                        width: 6 * s,
-                        height: 6 * s,
-                        decoration: const BoxDecoration(color: _kGold),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      );
   }
 }
 
@@ -554,20 +429,6 @@ class _ManagerCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 14 * s),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'YANIT SÜRESİ · ORT. 12 DK',
-                style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 0.6),
-              ),
-              Text(
-                'HAT · 7/24',
-                style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 0.6),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -582,9 +443,9 @@ const _steps = [
   ('BRİF', '24 MAY', Icons.check_rounded, true),
   ('PLANLAMA', '25 MAY', Icons.check_rounded, true),
   ('EKİP\nOLUŞUMU', 'ŞU AN', Icons.groups_rounded, false),
-  ('ÇEKİM', '--', Icons.videocam_outlined, false),
+  ('ÇEKİM', '--', Icons.videocam_rounded, false),
   ('KURGU', '--', Icons.content_cut_rounded, false),
-  ('TESLİM', '--', Icons.flag_outlined, false),
+  ('TESLİM', '--', Icons.flag_rounded, false),
 ];
 const _currentStep = 2;
 
@@ -641,7 +502,7 @@ class _DottedLine extends StatelessWidget {
   }
 }
 
-class _StepCircle extends StatelessWidget {
+class _StepCircle extends StatefulWidget {
   const _StepCircle({
     required this.scale,
     required this.index,
@@ -652,43 +513,91 @@ class _StepCircle extends StatelessWidget {
   final double size;
 
   @override
+  State<_StepCircle> createState() => _StepCircleState();
+}
+
+class _StepCircleState extends State<_StepCircle>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _pulse;
+
+  bool get _isCurrent => widget.index == _currentStep;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isCurrent) {
+      _pulse = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 900),
+      )..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final s = scale;
-    final step = _steps[index];
+    final s = widget.scale;
+    final size = widget.size;
+    final step = _steps[widget.index];
     final label = step.$1;
-    final dateLabel = step.$2;
     final icon = step.$3;
     final isDone = step.$4;
-    final isCurrent = index == _currentStep;
+    final isCurrent = _isCurrent;
 
     Widget circle;
     if (isDone) {
+      // Tamamlanmış adım — dolgun, düz renkli daire.
       circle = Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF0E8DC),
-          border: Border.all(color: Colors.black12),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: _kGold,
         ),
-        child: Icon(Icons.check_rounded, size: 16 * s, color: _kInk),
+        child: Icon(Icons.check_rounded, size: 18 * s, color: Colors.white),
       );
     } else if (isCurrent) {
-      circle = Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: _kGold.withValues(alpha: 0.12),
-          border: Border.all(color: _kGold, width: 1.4),
-        ),
-        child: Icon(icon, size: 16 * s, color: _kGold),
+      // Mevcut adım — dolgun daire + sinyal gibi yanıp sönen çerçeve.
+      circle = AnimatedBuilder(
+        animation: _pulse!,
+        builder: (context, child) {
+          final t = _pulse!.value;
+          return Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _kGold,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.15 + 0.75 * t),
+                width: 2.5 * s,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _kGold.withValues(alpha: 0.45 * t),
+                  blurRadius: 10 * s,
+                  spreadRadius: 2 * s,
+                ),
+              ],
+            ),
+            child: child,
+          );
+        },
+        child: Icon(icon, size: 18 * s, color: Colors.white),
       );
     } else {
       circle = Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
           color: Colors.white,
-          border: Border.all(color: _kCardBorder),
+          border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
         ),
         child: Icon(icon, size: 16 * s, color: _kMuted),
       );
@@ -711,18 +620,6 @@ class _StepCircle extends StatelessWidget {
               height: 1.2,
             ),
           ),
-          if (dateLabel.isNotEmpty) ...[
-            SizedBox(height: 2 * s),
-            Text(
-              dateLabel,
-              textAlign: TextAlign.center,
-              style: _ui(
-                size: 6.5 * s,
-                color: isCurrent ? _kGold : _kTaupe,
-                spacing: 0.3,
-              ),
-            ),
-          ],
         ],
       ),
     );

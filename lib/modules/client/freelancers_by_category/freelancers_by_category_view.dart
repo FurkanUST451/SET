@@ -130,7 +130,22 @@ class FreelancersByCategoryView
                           ),
                         ),
                         SizedBox(height: 10 * s),
-                        Container(width: 34 * s, height: 1.4, color: _kGold),
+                        Row(
+                          children: [
+                            Container(
+                              width: 6 * s,
+                              height: 6 * s,
+                              color: _kGold,
+                            ),
+                            SizedBox(width: 8 * s),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: _kCardBorder,
+                              ),
+                            ),
+                          ],
+                        ),
                         SizedBox(height: 10 * s),
                         Text(
                           '5 KİŞİYE ÜCRETSİZ TEKLİF  ·  FAZLASI KREDİ İLE',
@@ -213,19 +228,47 @@ class FreelancersByCategoryView
                         );
                       }
                       return ListView.separated(
-                        padding: EdgeInsets.fromLTRB(0, 0, 0, 100 * s),
+                        padding: EdgeInsets.fromLTRB(
+                          24 * s,
+                          10 * s,
+                          24 * s,
+                          120 * s,
+                        ),
                         itemCount: controller.freelancers.length,
-                        separatorBuilder: (_, _) => SizedBox(height: 14 * s),
+                        separatorBuilder: (_, _) => _DotDivider(scale: s),
                         itemBuilder: (_, i) {
                           final f = controller.freelancers[i];
                           return Obx(
-                            () => _FreelancerCard(
-                              scale: s,
-                              freelancer: f,
-                              user: controller.userFor(f),
-                              selected: controller.isSelected(f),
-                              onProfile: () => controller.openDetail(f),
-                              onInvite: () => controller.toggleSelect(f),
+                            () => Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                _FreelancerCard(
+                                  scale: s,
+                                  freelancer: f,
+                                  user: controller.userFor(f),
+                                  selected: controller.isSelected(f),
+                                  onProfile: () => controller.openDetail(f),
+                                  onInvite: () => controller.toggleSelect(f),
+                                ),
+                                Positioned(
+                                  top: -8 * s,
+                                  left: -8 * s,
+                                  child: _CornerBracket(
+                                    scale: s,
+                                    top: true,
+                                    left: true,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: -8 * s,
+                                  right: -8 * s,
+                                  child: _CornerBracket(
+                                    scale: s,
+                                    top: false,
+                                    left: false,
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
@@ -238,42 +281,70 @@ class FreelancersByCategoryView
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 24 * s,
-                child: Obx(() {
-                  final count = controller.selectedIds.length;
-                  final sending = controller.isSending.value;
-                  return GestureDetector(
-                    onTap: sending ? null : controller.sendOffers,
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedOpacity(
-                      opacity: count > 0 ? 1.0 : 0.45,
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        height: 54 * s,
-                        color: _kGold,
-                        alignment: Alignment.center,
-                        child: sending
-                            ? SizedBox(
-                                width: 22 * s,
-                                height: 22 * s,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                'SEÇİLENLERE TEKLİF GÖNDER  →',
-                                style: _ui(
-                                  size: 10 * s,
-                                  weight: FontWeight.w700,
-                                  color: Colors.white,
-                                  spacing: 1.2,
-                                ),
-                              ),
-                      ),
+                bottom: 14 * s,
+                child: Column(
+                  children: [
+                    Obx(() {
+                      final count = controller.selectedIds.length;
+                      final sending = controller.isSending.value;
+                      return GestureDetector(
+                        onTap: sending ? null : controller.sendOffers,
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedOpacity(
+                          opacity: count > 0 ? 1.0 : 0.45,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            height: 54 * s,
+                            color: _kGold,
+                            alignment: Alignment.center,
+                            child: sending
+                                ? SizedBox(
+                                    width: 22 * s,
+                                    height: 22 * s,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    'SEÇİLENLERE TEKLİF GÖNDER  →',
+                                    style: _ui(
+                                      size: 10 * s,
+                                      weight: FontWeight.w700,
+                                      color: Colors.white,
+                                      spacing: 1.2,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      );
+                    }),
+                    SizedBox(height: 10 * s),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 11 * s,
+                          color: _kTaupe,
+                        ),
+                        SizedBox(width: 6 * s),
+                        Flexible(
+                          child: Text(
+                            'Tüm bilgilerin güvenliği SET güvencesiyle korunur.'
+                                .toUpperCaseTr(),
+                            style: _ui(
+                              size: 7.5 * s,
+                              weight: FontWeight.w600,
+                              color: _kTaupe,
+                              spacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                }),
+                  ],
+                ),
               ),
             ],
           ),
@@ -301,6 +372,13 @@ class _FreelancerCard extends StatelessWidget {
   final VoidCallback onInvite;
 
   int get _jobCount => freelancer.experience * 12 + 15;
+
+  String get _feeRangeLabel {
+    if (freelancer.experience >= 15) return '25K-500K TL';
+    if (freelancer.experience >= 8) return '15K-250K TL';
+    if (freelancer.experience >= 3) return '8K-120K TL';
+    return '2K-50K TL';
+  }
 
   String _buildDisplayName(FreelancerModel f, UserModel u) {
     final name = f.name.isNotEmpty ? f.name : u.name;
@@ -462,8 +540,8 @@ class _FreelancerCard extends StatelessWidget {
                         _StatItem(
                           scale: s,
                           icon: Icons.sell_outlined,
-                          label: 'PUAN',
-                          value: freelancer.rating.toStringAsFixed(1),
+                          label: 'ÜCRET',
+                          value: _feeRangeLabel,
                         ),
                       ],
                     ),
@@ -505,7 +583,7 @@ class _FreelancerCard extends StatelessWidget {
                         width: 30 * s,
                         height: 30 * s,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(8 * s),
                           color: selected ? _kGold : Colors.white,
                           border: Border.all(
                             color: selected ? _kGold : _kInk,
@@ -587,6 +665,70 @@ class _StatItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Kart köşe süslemesi ──────────────────────────────────────────────────
+class _CornerBracket extends StatelessWidget {
+  const _CornerBracket({
+    required this.scale,
+    required this.top,
+    required this.left,
+  });
+
+  final double scale;
+  final bool top;
+  final bool left;
+
+  @override
+  Widget build(BuildContext context) {
+    final double len = 22 * scale;
+    const double thickness = 2;
+    return SizedBox(
+      width: len,
+      height: len,
+      child: Stack(
+        children: [
+          Positioned(
+            top: top ? 0 : null,
+            bottom: top ? null : 0,
+            left: left ? 0 : null,
+            right: left ? null : 0,
+            child: Container(width: len, height: thickness, color: _kGold),
+          ),
+          Positioned(
+            top: top ? 0 : null,
+            bottom: top ? null : 0,
+            left: left ? 0 : null,
+            right: left ? null : 0,
+            child: Container(width: thickness, height: len, color: _kGold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Kartlar arası nokta ayracı ───────────────────────────────────────────
+class _DotDivider extends StatelessWidget {
+  const _DotDivider({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12 * s),
+      child: Row(
+        children: [
+          Expanded(child: Container(height: 1, color: _kCardBorder)),
+          SizedBox(width: 8 * s),
+          Container(width: 5 * s, height: 5 * s, color: _kGold),
+          SizedBox(width: 8 * s),
+          Expanded(child: Container(height: 1, color: _kCardBorder)),
+        ],
+      ),
     );
   }
 }

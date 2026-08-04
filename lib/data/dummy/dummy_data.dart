@@ -8,12 +8,12 @@ class DummyData {
 
   static const List<String> categories = [
     'Video Çekim',
-    'Kurgu',
-    'Ses Tasarımı',
-    'CGI & VFX',
     'Fotoğraf',
-    'Grafik Tasarım',
     'Sosyal Medya Yönetimi',
+    'Grafik Tasarım',
+    'Kurgu',
+    'CGI & VFX',
+    'Ses Tasarımı',
   ];
 
   static final List<PortfolioProjectModel> portfolioProjects = [

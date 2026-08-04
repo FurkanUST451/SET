@@ -131,59 +131,73 @@ class _ProjectModeViewState extends State<ProjectModeView> {
                   ],
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Projene en uygun üretim sürecini seç.',
+                      style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    ),
+                    SizedBox(height: 6 * s),
+                    Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                          text: 'Nasıl\n',
+                          style: _display(
+                            size: 36 * s,
+                            weight: FontWeight.w600,
+                            color: _kTextInk,
+                            height: 1.0,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'ilerleyelim?',
+                          style: _display(
+                            size: 36 * s,
+                            weight: FontWeight.w600,
+                            color: _kGold,
+                            height: 1.0,
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20 * s),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 12 * s),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Projene en uygun üretim sürecini seç.',
-                        style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
+                      Expanded(
+                        child: _ModeCard(
+                          scale: s,
+                          selected: _selected == 'freelancer',
+                          dark: false,
+                          onTap: () =>
+                              setState(() => _selected = 'freelancer'),
+                          child: _FreelancerCard(scale: s),
+                        ),
                       ),
-                      SizedBox(height: 6 * s),
-                      Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                            text: 'Nasıl\n',
-                            style: _display(
-                              size: 36 * s,
-                              weight: FontWeight.w600,
-                              color: _kTextInk,
-                              height: 1.0,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'ilerleyelim?',
-                            style: _display(
-                              size: 36 * s,
-                              weight: FontWeight.w600,
-                              color: _kGold,
-                              height: 1.0,
-                            ),
-                          ),
-                        ]),
-                      ),
-                      SizedBox(height: 28 * s),
-                      _ModeCard(
-                        scale: s,
-                        selected: _selected == 'freelancer',
-                        dark: false,
-                        onTap: () => setState(() => _selected = 'freelancer'),
-                        child: _FreelancerCard(scale: s),
-                      ),
-                      SizedBox(height: 16 * s),
-                      _ModeCard(
-                        scale: s,
-                        selected: _selected == 'set',
-                        dark: true,
-                        onTap: () => setState(() => _selected = 'set'),
-                        child: _SetCard(scale: s),
+                      SizedBox(width: 12 * s),
+                      Expanded(
+                        child: _ModeCard(
+                          scale: s,
+                          selected: _selected == 'set',
+                          dark: true,
+                          onTap: () => setState(() => _selected = 'set'),
+                          child: _SetCard(scale: s),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
+              SizedBox(height: 12 * s),
               // Alt sabit bölüm
               Padding(
                 padding: EdgeInsets.fromLTRB(0, 8 * s, 0, 6 * s),
@@ -413,7 +427,7 @@ class _BottomIconsRow extends StatelessWidget {
   }
 }
 
-// ─── Üst kart ─────────────────────────────────────────────────────────────────
+// ─── Sol sütun kartı ──────────────────────────────────────────────────────────
 class _FreelancerCard extends StatelessWidget {
   const _FreelancerCard({required this.scale});
   final double scale;
@@ -422,58 +436,55 @@ class _FreelancerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     return Padding(
-      padding: EdgeInsets.all(18 * s),
+      padding: EdgeInsets.all(14 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'KENDİ EKİBİNİ SEÇ',
-                      style: _ui(
-                        size: 9 * s,
-                        weight: FontWeight.w700,
-                        color: _kGold,
-                        spacing: 1.3,
-                      ),
-                    ),
-                    SizedBox(height: 8 * s),
-                    Text(
-                      'Freelancer Bul',
-                      style: _display(
-                        size: 24 * s,
-                        weight: FontWeight.w600,
-                        color: _kTextInk,
-                        height: 1.05,
-                      ),
-                    ),
-                    SizedBox(height: 5 * s),
-                    Text(
-                      'Binlerce yetenek arasından seç.',
-                      style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
-                    ),
-                  ],
-                ),
-              ),
-              // Görsel, metinden bağımsız kendi alanında durur (üst üste binmez).
-              _CardIllustration(
-                image: AppAssets.briefFreelancerIllustration,
-                shadow: AppAssets.briefFreelancerIllustrationShadow,
-                height: 108 * s,
-                width: 132 * s,
-              ),
-            ],
+          Text(
+            'KENDİ EKİBİNİ SEÇ',
+            style: _ui(
+              size: 8 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1,
+            ),
           ),
-          SizedBox(height: 16 * s),
-          Center(child: _AvatarStack(scale: s, dark: false)),
-          SizedBox(height: 16 * s),
-          Divider(height: 1, color: Colors.black.withValues(alpha: 0.1)),
+          SizedBox(height: 6 * s),
+          Text(
+            'Freelancer Bul',
+            style: _display(
+              size: 19 * s,
+              weight: FontWeight.w600,
+              color: _kTextInk,
+              height: 1.05,
+            ),
+          ),
+          SizedBox(height: 5 * s),
+          Text(
+            'Binlerce yetenek arasından seç.',
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2, height: 1.3),
+          ),
           SizedBox(height: 12 * s),
+          Center(
+            child: _CardIllustration(
+              image: AppAssets.briefFreelancerIllustration,
+              shadow: AppAssets.briefFreelancerIllustrationShadow,
+              height: 140 * s,
+              width: 158 * s,
+            ),
+          ),
+          const Spacer(),
+          SizedBox(height: 12 * s),
+          Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: _AvatarStack(scale: s, dark: false),
+            ),
+          ),
+          SizedBox(height: 14 * s),
+          Divider(height: 1, color: Colors.black.withValues(alpha: 0.1)),
+          SizedBox(height: 10 * s),
           _BottomIconsRow(
             scale: s,
             icons: const [
@@ -508,19 +519,14 @@ class _ProcessSteps extends StatelessWidget {
       children: [
         for (int i = 0; i < steps.length; i++) ...[
           if (i != 0)
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: circleSize / 2,
-                  left: 2 * s,
-                  right: 2 * s,
-                ),
-                child: Container(
-                  height: 1,
-                  color: steps[i - 1].$3
-                      ? _kGold.withValues(alpha: 0.5)
-                      : Colors.white.withValues(alpha: 0.15),
-                ),
+            Padding(
+              padding: EdgeInsets.only(top: circleSize / 2),
+              child: Container(
+                width: 12 * s,
+                height: 1,
+                color: steps[i - 1].$3
+                    ? _kGold.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.15),
               ),
             ),
           Column(
@@ -566,7 +572,7 @@ class _ProcessSteps extends StatelessWidget {
   }
 }
 
-// ─── Alt kart (koyu) ──────────────────────────────────────────────────────────
+// ─── Sağ sütun kartı (koyu) ───────────────────────────────────────────────────
 class _SetCard extends StatelessWidget {
   const _SetCard({required this.scale});
   final double scale;
@@ -575,74 +581,73 @@ class _SetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     return Padding(
-      padding: EdgeInsets.all(18 * s),
+      padding: EdgeInsets.all(14 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'BİZ YÖNETELİM',
-                      style: _ui(
-                        size: 9 * s,
-                        weight: FontWeight.w700,
-                        color: _kGold,
-                        spacing: 1.3,
-                      ),
-                    ),
-                    SizedBox(height: 8 * s),
-                    Text(
-                      'SET Halletsin',
-                      style: _display(
-                        size: 24 * s,
-                        weight: FontWeight.w600,
-                        color: Colors.white,
-                        height: 1.05,
-                      ),
-                    ),
-                    SizedBox(height: 5 * s),
-                    Text(
-                      'Sen sonuca odaklan.',
-                      style: _ui(
-                        size: 8.5 * s,
-                        color: Colors.white.withValues(alpha: 0.55),
-                        spacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Görsel, metinden bağımsız kendi alanında durur (üst üste binmez).
-              _CardIllustration(
-                image: AppAssets.briefSetIllustration,
-                shadow: AppAssets.briefSetIllustrationShadow,
-                height: 108 * s,
-                width: 132 * s,
-                shadowOpacity: 0.5,
-              ),
-            ],
+          Text(
+            'BİZ YÖNETELİM',
+            style: _ui(
+              size: 8 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1,
+            ),
           ),
-          SizedBox(height: 16 * s),
-          _ProcessSteps(scale: s),
-          SizedBox(height: 16 * s),
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
+          SizedBox(height: 6 * s),
+          Text(
+            'SET Halletsin',
+            style: _display(
+              size: 19 * s,
+              weight: FontWeight.w600,
+              color: Colors.white,
+              height: 1.05,
+            ),
+          ),
+          SizedBox(height: 5 * s),
+          Text(
+            'Sen sonuca odaklan.',
+            style: _ui(
+              size: 8 * s,
+              color: Colors.white.withValues(alpha: 0.55),
+              spacing: 0.2,
+              height: 1.3,
+            ),
+          ),
           SizedBox(height: 12 * s),
+          Center(
+            child: _CardIllustration(
+              image: AppAssets.briefSetIllustration,
+              shadow: AppAssets.briefSetIllustrationShadow,
+              height: 140 * s,
+              width: 158 * s,
+              shadowOpacity: 0.5,
+            ),
+          ),
+          const Spacer(),
+          SizedBox(height: 12 * s),
+          Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: _ProcessSteps(scale: s),
+            ),
+          ),
+          SizedBox(height: 14 * s),
+          Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
+          SizedBox(height: 10 * s),
           Row(
             children: [
-              Icon(Icons.access_time_rounded, size: 14 * s, color: _kGold),
+              Icon(Icons.access_time_rounded, size: 13 * s, color: _kGold),
               SizedBox(width: 6 * s),
               Expanded(
                 child: Text(
                   'Zaman kazandırır, stressiz ilerlersin.',
                   style: _ui(
-                    size: 9 * s,
+                    size: 8 * s,
                     color: Colors.white.withValues(alpha: 0.5),
                     spacing: 0.2,
+                    height: 1.3,
                   ),
                 ),
               ),
