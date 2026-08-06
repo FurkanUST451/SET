@@ -44,6 +44,29 @@ class FreelancerOfferDetailView
 
   // ── Category helper (aynı mantık: BriefDetailView) ─────────────────────────
 
+  static String _categoryAsset(String cat) {
+    final c = cat.toLowerCase();
+    if (c.contains('video') || c.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    }
+    if (c.contains('fotoğraf') || c.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    }
+    if (c.contains('ses') || c.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    }
+    if (c.contains('cgi') || c.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    }
+    if (c.contains('kurgu') || c.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    }
+    if (c.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
   static IconData _categoryIcon(String cat) {
     final c = cat.toLowerCase();
     if (c.contains('video') || c.contains('film')) return Icons.videocam_rounded;
@@ -205,9 +228,15 @@ class FreelancerOfferDetailView
           Container(
             width: 56 * s,
             height: 56 * s,
-            color: _kGold,
+            decoration: const BoxDecoration(color: Colors.white),
             alignment: Alignment.center,
-            child: Icon(_categoryIcon(category), size: 28 * s, color: Colors.white),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              _categoryAsset(category),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(_categoryIcon(category), size: 28 * s, color: _kGold),
+            ),
           ),
           SizedBox(width: 14 * s),
           Expanded(

@@ -36,6 +36,7 @@ class InitialBinding extends Bindings {
       OfferRepository(
         chatRepository: Get.find<ChatRepository>(),
         projectRepository: Get.find<ProjectRepository>(),
+        briefRepository: Get.find<BriefRepository>(),
       ),
       permanent: true,
     );

@@ -66,10 +66,48 @@ class BriefRepository {
     });
   }
 
-  Future<void> removeSentToId(
-      String briefId, String freelancerId, List<String> updatedIds) async {
+  // Freelancer teklifi reddeder — sentToIds'e dokunulmaz, sadece
+  // rejectedByIds'e eklenir. Böylece brief o freelancer'ın kendi
+  // listesinden kaybolmaz, "Reddedildi" kartı olarak görünmeye devam eder.
+  Future<void> rejectByFreelancer(String briefId, String freelancerId) async {
     await _briefs.doc(briefId).update({
-      'sentToIds': updatedIds,
+      'rejectedByIds': FieldValue.arrayUnion([freelancerId]),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  // Freelancer daha önce reddettiği bir teklifi "yeniden değerlendirip"
+  // mesajlaşmayı seçerse reddedilmiş işaretini geri alır.
+  Future<void> unrejectByFreelancer(
+      String briefId, String freelancerId) async {
+    await _briefs.doc(briefId).update({
+      'rejectedByIds': FieldValue.arrayRemove([freelancerId]),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  // Freelancer teklifi kendi listesinden tamamen siler — sentToIds'den
+  // çıkarılır, bir daha o freelancer'ın listesinde görünmez.
+  Future<void> removeFreelancerFromBrief(
+      String briefId, String freelancerId) async {
+    await _briefs.doc(briefId).update({
+      'sentToIds': FieldValue.arrayRemove([freelancerId]),
+      'rejectedByIds': FieldValue.arrayRemove([freelancerId]),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> updateStatus(String briefId, String status) async {
+    await _briefs.doc(briefId).update({
+      'status': status,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> cancelBrief(String briefId, String reason) async {
+    await _briefs.doc(briefId).update({
+      'status': 'cancelled',
+      'cancelReason': reason,
       'updatedAt': DateTime.now().toIso8601String(),
     });
   }

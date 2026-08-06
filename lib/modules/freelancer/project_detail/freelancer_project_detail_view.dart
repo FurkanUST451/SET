@@ -151,6 +151,24 @@ class _FreelancerProjectDetailViewState
     }
   }
 
+  String _categoryAsset(String category) {
+    final cat = category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
   IconData _categoryIcon(String category) {
     final cat = category.toLowerCase();
     if (cat.contains('video') || cat.contains('film')) {
@@ -233,12 +251,17 @@ class _FreelancerProjectDetailViewState
                             Container(
                               width: 56 * s,
                               height: 56 * s,
-                              color: _kGold,
+                              decoration: const BoxDecoration(color: Colors.white),
                               alignment: Alignment.center,
-                              child: Icon(
-                                _categoryIcon(project.category ?? ''),
-                                size: 28 * s,
-                                color: Colors.white,
+                              clipBehavior: Clip.antiAlias,
+                              child: Image.asset(
+                                _categoryAsset(project.category ?? ''),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Icon(
+                                  _categoryIcon(project.category ?? ''),
+                                  size: 28 * s,
+                                  color: _kGold,
+                                ),
                               ),
                             ),
                             SizedBox(width: 14 * s),

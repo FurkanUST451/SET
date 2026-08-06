@@ -59,23 +59,32 @@ class BriefModel {
     required this.createdAt,
     required this.updatedAt,
     this.sentToIds = const [],
+    this.rejectedByIds = const [],
+    this.cancelReason,
   });
 
   final String id;
   final String ownerId;
   final String title;
   final String category;
-  final String status; // 'draft' | 'submitted' | 'offer_sent'
+  final String status; // 'draft' | 'offer_sent' | 'submitted' | 'accepted' | 'cancelled'
   final BriefAnswers answers;
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<String> sentToIds;
+  // Bu brief'i reddeden freelancer'ların id'leri — sentToIds'den ayrı
+  // tutulur ki reddeden freelancer kendi listesinde "Reddedildi" kartını
+  // görmeye devam etsin (o freelancer için brief listeden silinmez).
+  final List<String> rejectedByIds;
+  final String? cancelReason;
 
   BriefModel copyWith({
     String? status,
     BriefAnswers? answers,
     List<String>? sentToIds,
+    List<String>? rejectedByIds,
     DateTime? updatedAt,
+    String? cancelReason,
   }) =>
       BriefModel(
         id: id,
@@ -87,6 +96,8 @@ class BriefModel {
         createdAt: createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         sentToIds: sentToIds ?? this.sentToIds,
+        rejectedByIds: rejectedByIds ?? this.rejectedByIds,
+        cancelReason: cancelReason ?? this.cancelReason,
       );
 
   Map<String, dynamic> toJson() => {
@@ -99,6 +110,8 @@ class BriefModel {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'sentToIds': sentToIds,
+        'rejectedByIds': rejectedByIds,
+        'cancelReason': cancelReason,
       };
 
   factory BriefModel.fromJson(Map<String, dynamic> json) => BriefModel(
@@ -114,5 +127,8 @@ class BriefModel {
         updatedAt: DateTime.parse(json['updatedAt'] as String),
         sentToIds:
             (json['sentToIds'] as List<dynamic>?)?.cast<String>() ?? [],
+        rejectedByIds:
+            (json['rejectedByIds'] as List<dynamic>?)?.cast<String>() ?? [],
+        cancelReason: json['cancelReason'] as String?,
       );
 }
