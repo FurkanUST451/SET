@@ -4,6 +4,7 @@ import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
+import '../home/tabs/profile_screens.dart' show ContactUsScreen;
 import 'brief_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -203,7 +204,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                         ),
                       ),
                     ),
-                    controller.canCancel
+                    controller.brief.status == 'accepted'
                         ? PopupMenuButton<String>(
                             padding: EdgeInsets.zero,
                             color: _kCream,
@@ -213,14 +214,24 @@ class BriefDetailView extends GetView<BriefDetailController> {
                               borderRadius: BorderRadius.zero,
                               side: BorderSide(color: _kDivider),
                             ),
-                            icon: Icon(
-                              Icons.more_horiz_rounded,
-                              size: 22 * s,
-                              color: _kTaupe,
+                            icon: Container(
+                              width: 36 * s,
+                              height: 36 * s,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                    color: Colors.black.withValues(alpha: 0.16)),
+                              ),
+                              child: Icon(
+                                Icons.more_horiz_rounded,
+                                size: 20 * s,
+                                color: _kInk,
+                              ),
                             ),
                             onSelected: (value) {
                               if (value == 'cancel') {
-                                _showCancelBriefDialog(context, s, controller);
+                                _showCancelProjectDialog(context, s, controller);
                               }
                             },
                             itemBuilder: (context) => [
@@ -228,7 +239,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                                 value: 'cancel',
                                 height: 40,
                                 child: Text(
-                                  "Brief'i Sil",
+                                  'İptal Et',
                                   style: _ui(
                                     size: 9 * s,
                                     weight: FontWeight.w600,
@@ -239,14 +250,51 @@ class BriefDetailView extends GetView<BriefDetailController> {
                               ),
                             ],
                           )
-                        : Padding(
-                            padding: EdgeInsets.all(8 * s),
-                            child: Icon(
-                              Icons.more_horiz_rounded,
-                              size: 22 * s,
-                              color: _kTaupe.withValues(alpha: 0.3),
-                            ),
-                          ),
+                        : controller.canCancel
+                            ? PopupMenuButton<String>(
+                                padding: EdgeInsets.zero,
+                                color: _kCream,
+                                surfaceTintColor: Colors.transparent,
+                                elevation: 3,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                  side: BorderSide(color: _kDivider),
+                                ),
+                                icon: Icon(
+                                  Icons.more_horiz_rounded,
+                                  size: 22 * s,
+                                  color: _kTaupe,
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'cancel') {
+                                    _showCancelBriefDialog(
+                                        context, s, controller);
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'cancel',
+                                    height: 40,
+                                    child: Text(
+                                      "Brief'i Sil",
+                                      style: _ui(
+                                        size: 9 * s,
+                                        weight: FontWeight.w600,
+                                        color: _kDanger,
+                                        spacing: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Padding(
+                                padding: EdgeInsets.all(8 * s),
+                                child: Icon(
+                                  Icons.more_horiz_rounded,
+                                  size: 22 * s,
+                                  color: _kTaupe.withValues(alpha: 0.3),
+                                ),
+                              ),
                   ],
                 ),
               ),
@@ -540,7 +588,11 @@ class BriefDetailView extends GetView<BriefDetailController> {
               )
             : Column(
                 children: [
-                  ...show.map((f) => _FreelancerRow(scale: s, freelancer: f)),
+                  ...show.map((f) => _FreelancerRow(
+                        scale: s,
+                        freelancer: f,
+                        isRejected: brief.rejectedByIds.contains(f.userId),
+                      )),
                   if (show.length < count) ...[
                     SizedBox(height: 4 * s),
                     GestureDetector(
@@ -578,6 +630,41 @@ class BriefDetailView extends GetView<BriefDetailController> {
 
   // ── Alt bar ────────────────────────────────────────────────────────────────
   Widget _buildBottomBar(double s) {
+    if (controller.brief.status == 'accepted') {
+      return Container(
+        padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 28 * s),
+        decoration: const BoxDecoration(
+          color: _kCream,
+          border: Border(top: BorderSide(color: _kDivider)),
+        ),
+        child: GestureDetector(
+          onTap: () => Get.to<void>(() => const ContactUsScreen()),
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: double.infinity,
+            height: 52 * s,
+            color: _kGold,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.support_agent_rounded, size: 17 * s, color: Colors.white),
+                SizedBox(width: 8 * s),
+                Text(
+                  'SET DESTEK',
+                  style: _ui(
+                    size: 10 * s,
+                    weight: FontWeight.w700,
+                    color: Colors.white,
+                    spacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 28 * s),
       decoration: const BoxDecoration(
@@ -818,9 +905,14 @@ class _InfoRow extends StatelessWidget {
 
 // ── Freelancer satırı ────────────────────────────────────────────────────────
 class _FreelancerRow extends StatelessWidget {
-  const _FreelancerRow({required this.scale, required this.freelancer});
+  const _FreelancerRow({
+    required this.scale,
+    required this.freelancer,
+    this.isRejected = false,
+  });
   final double scale;
   final FreelancerModel freelancer;
+  final bool isRejected;
 
   @override
   Widget build(BuildContext context) {
@@ -872,13 +964,15 @@ class _FreelancerRow extends StatelessWidget {
           SizedBox(width: 8 * s),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8 * s, vertical: 4 * s),
-            color: _kGold.withValues(alpha: 0.12),
+            color: isRejected
+                ? _kDanger.withValues(alpha: 0.12)
+                : _kGold.withValues(alpha: 0.12),
             child: Text(
-              'TEKLİF BEKLENİYOR',
+              isRejected ? 'REDDEDİLDİ' : 'TEKLİF BEKLENİYOR',
               style: _ui(
                 size: 7 * s,
                 weight: FontWeight.w700,
-                color: _kGold,
+                color: isRejected ? _kDanger : _kGold,
                 spacing: 0.8,
               ),
             ),
@@ -1242,6 +1336,182 @@ class _ReasonChip extends StatelessWidget {
             color: selected ? Colors.white : _kInk,
             spacing: 0.2,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Onaylı proje iptali — serbest metin sebep + Gönder/Vazgeç ──────────────
+void _showCancelProjectDialog(
+    BuildContext context, double s, BriefDetailController controller) {
+  showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    builder: (ctx) => _CancelProjectDialog(scale: s),
+  );
+}
+
+class _CancelProjectDialog extends StatefulWidget {
+  const _CancelProjectDialog({required this.scale});
+
+  final double scale;
+
+  @override
+  State<_CancelProjectDialog> createState() => _CancelProjectDialogState();
+}
+
+class _CancelProjectDialogState extends State<_CancelProjectDialog> {
+  final _reasonController = TextEditingController();
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _reasonController.addListener(() {
+      final hasText = _reasonController.text.trim().isNotEmpty;
+      if (hasText != _hasText) setState(() => _hasText = hasText);
+    });
+  }
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final reason = _reasonController.text.trim();
+    if (reason.isEmpty) return;
+    Navigator.of(context).pop();
+    Get.snackbar(
+      'Talebiniz alındı',
+      'İptal talebini aldık, destek ekibimiz en kısa sürede seninle iletişime geçecek.',
+      backgroundColor: const Color(0xFF2E7D32),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.scale;
+    return Dialog(
+      backgroundColor: _kCream,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 24 * s, vertical: 24 * s),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: _kCardBorder),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(22 * s, 22 * s, 22 * s, 18 * s),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Projeyi İptal Et',
+              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+            ),
+            SizedBox(height: 6 * s),
+            Text(
+              'Bu proje iptal edilecek ve destek ekibimiz senin ve freelancer\'ın '
+              'sürecini kapatmak için iletişime geçecek.',
+              style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2, height: 1.5),
+            ),
+            SizedBox(height: 18 * s),
+            Text(
+              'İPTAL ETME NEDENİNİZİ BELİRTİN',
+              style: _ui(
+                size: 8 * s,
+                weight: FontWeight.w700,
+                color: _kBlack,
+                spacing: 1.2,
+              ),
+            ),
+            SizedBox(height: 10 * s),
+            Container(
+              color: Colors.white,
+              child: TextField(
+                controller: _reasonController,
+                maxLines: 4,
+                maxLength: 500,
+                cursorColor: _kGold,
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.5),
+                decoration: InputDecoration(
+                  hintText: 'Nedeninizi buraya yazın...',
+                  hintStyle: _ui(size: 10 * s, color: _kTaupe, spacing: 0.2),
+                  filled: true,
+                  fillColor: Colors.white,
+                  counterText: '',
+                  isDense: true,
+                  contentPadding: EdgeInsets.all(12 * s),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.14)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.14)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: _kGold),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 22 * s),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: 46 * s,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.14)),
+                      ),
+                      child: Text(
+                        'VAZGEÇ',
+                        style: _ui(
+                          size: 10 * s,
+                          weight: FontWeight.w700,
+                          color: _kInk,
+                          spacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10 * s),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _hasText ? _submit : null,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: 46 * s,
+                      alignment: Alignment.center,
+                      color: _hasText ? _kDanger : _kDanger.withValues(alpha: 0.35),
+                      child: Text(
+                        'GÖNDER',
+                        style: _ui(
+                          size: 10 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                          spacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

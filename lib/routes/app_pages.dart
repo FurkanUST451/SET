@@ -22,6 +22,8 @@ import '../modules/client/freelancers_by_category/freelancers_by_category_bindin
 import '../modules/client/freelancers_by_category/freelancers_by_category_view.dart';
 import '../modules/client/home/client_home_binding.dart';
 import '../modules/client/home/client_home_view.dart';
+import '../modules/client/offer_review/offer_review_binding.dart';
+import '../modules/client/offer_review/offer_review_view.dart';
 import '../modules/client/project_mode/project_mode_view.dart';
 import '../modules/client/send_offer/send_offer_binding.dart';
 import '../modules/client/send_offer/send_offer_view.dart';
@@ -113,6 +115,11 @@ class AppPages {
       name: AppRoutes.chatDetail,
       page: () => const ChatDetailView(),
       binding: ChatDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.offerReview,
+      page: () => const OfferReviewView(),
+      binding: OfferReviewBinding(),
     ),
     GetPage(
       name: AppRoutes.projectDetail,

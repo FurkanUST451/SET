@@ -39,6 +39,9 @@ class ChatDetailController extends GetxController {
 
   String get myId => _userController.currentUser?.id ?? '';
 
+  bool get hasAcceptedOffer =>
+      offers.values.any((o) => o.status == OfferStatus.accepted);
+
   String? get _otherUserId {
     final chat = _chat;
     if (chat == null) return null;
@@ -162,34 +165,6 @@ class ChatDetailController extends GetxController {
   Future<void> respondToOffer(OfferModel offer, bool accept) async {
     final chat = _chat;
     if (chat == null) return;
-
-    if (accept) {
-      final confirmed = await Get.dialog<bool>(
-        AlertDialog(
-          backgroundColor: const Color(0xFFF5EBD8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          title: const Text('Teklifi Kabul Et',
-              style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black87)),
-          content: Text(
-            '${offer.amount.toStringAsFixed(0)} ₺ tutarındaki teklifi kabul ediyor musunuz? Proje aktif hale gelecek.',
-            style: const TextStyle(color: Colors.black54),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('Vazgeç', style: TextStyle(color: Colors.black54)),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text('Kabul Et',
-                  style: TextStyle(color: Color(0xFF2E7D32), fontWeight: FontWeight.w700)),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return;
-    }
 
     try {
       await _offerRepo.respondToOffer(
