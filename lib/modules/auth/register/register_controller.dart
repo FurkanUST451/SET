@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/models/user_model.dart';
 import '../../../routes/app_routes.dart';
 import '../../app/auth_controller.dart';
+import '../../app/user_controller.dart';
 
 class RegisterController extends GetxController {
   final AuthController _auth = Get.find<AuthController>();
+  final UserController _user = Get.find<UserController>();
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -37,6 +40,26 @@ class RegisterController extends GetxController {
       password: passwordController.text,
     );
     if (ok) Get.offAllNamed(AppRoutes.roleSelection);
+  }
+
+  Future<void> loginWithGoogle() async {
+    final result = await _auth.loginWithGoogle();
+    if (!result.ok) return;
+    if (result.isNewUser) {
+      Get.offAllNamed(AppRoutes.roleSelection);
+      return;
+    }
+    // Google hesabı zaten kayıtlıysa (login ekranındaki akışla aynı),
+    // rolüne göre doğrudan ana sayfaya yönlendir.
+    final role = _user.currentUser?.role;
+    switch (role) {
+      case UserRole.freelancer:
+        Get.offAllNamed(AppRoutes.freelancerHome);
+      case UserRole.client:
+        Get.offAllNamed(AppRoutes.clientHome);
+      case null:
+        Get.offAllNamed(AppRoutes.roleSelection);
+    }
   }
 
   @override

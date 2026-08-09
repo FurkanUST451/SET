@@ -377,11 +377,15 @@ class RegisterView extends GetView<RegisterController> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: _AuthIconButton(
-                                      scale: s,
-                                      icon: AppAssets.loginGoogle,
-                                      label: 'GOOGLE',
-                                      onTap: () {},
+                                    child: Obx(
+                                      () => _AuthIconButton(
+                                        scale: s,
+                                        icon: AppAssets.loginGoogle,
+                                        label: 'GOOGLE',
+                                        onTap: controller.isLoading.value
+                                            ? null
+                                            : controller.loginWithGoogle,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(width: 12 * s),
@@ -629,7 +633,7 @@ class _AuthIconButton extends StatelessWidget {
   final double scale;
   final String icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

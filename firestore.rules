@@ -112,6 +112,44 @@ service cloud.firestore {
         );
 
       allow update, delete: if false;
+
+      // Freelancer'ın projeye girdiği ilerleme kayıtları. İlk "Brief Onayı"
+      // girdisi client tarafında projects.createdAt'ten türetilip burada
+      // saklanmaz — bu koleksiyon yalnızca freelancer'ın elle eklediği
+      // gerçek ilerleme güncellemelerini tutar.
+      match /progress/{entryId} {
+        allow read: if request.auth != null
+          && (
+            get(/databases/$(database)/documents/projects/$(projectId)).data.clientId == request.auth.uid
+            || get(/databases/$(database)/documents/projects/$(projectId)).data.freelancerId == request.auth.uid
+          );
+
+        allow create: if request.auth != null
+          && request.auth.uid == request.resource.data.freelancerId
+          && get(/databases/$(database)/documents/projects/$(projectId)).data.freelancerId == request.auth.uid
+          && request.resource.data.projectId == projectId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500
+          && request.resource.data.createdAt is string
+          && request.resource.data.createdAt.size() > 0;
+
+        allow update: if request.auth != null
+          && resource.data.freelancerId == request.auth.uid
+          && request.resource.data.freelancerId == resource.data.freelancerId
+          && request.resource.data.projectId == resource.data.projectId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500;
+
+        allow delete: if request.auth != null && resource.data.freelancerId == request.auth.uid;
+      }
     }
 
     // ---- Keşfet (Discover) ----

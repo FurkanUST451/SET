@@ -85,6 +85,36 @@ class AuthController extends GetxController {
     }
   }
 
+  // ok=false => kullanıcı iptal etti ya da hata oluştu (errorMessage set edilir).
+  Future<({bool ok, bool isNewUser})> loginWithGoogle() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final authUser = await _repo.loginWithGoogle();
+      if (authUser == null) return (ok: false, isNewUser: false);
+
+      // Firestore'da profili var mı diye bak; yoksa ilk girişidir.
+      final stored = await _userRepo.fetchUser(authUser.id);
+      final isNewUser = stored == null;
+      final finalUser = stored ??
+          authUser.copyWith(
+            avatarUrl:
+                authUser.avatarUrl ?? placeholderAvatarFor(null, authUser.id),
+          );
+      if (isNewUser) {
+        await _userRepo.upsertUser(finalUser);
+      }
+      _user.setUser(finalUser);
+      unawaited(_notifications.registerDevice(finalUser.id));
+      return (ok: true, isNewUser: isNewUser);
+    } catch (e) {
+      errorMessage.value = e.toString();
+      return (ok: false, isNewUser: false);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     isLoading.value = true;
     try {

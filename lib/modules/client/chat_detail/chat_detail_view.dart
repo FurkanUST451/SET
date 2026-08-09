@@ -6,6 +6,7 @@ import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/brief_model.dart';
 import '../../../data/models/message_model.dart';
 import '../../../data/models/offer_model.dart';
+import '../../../routes/app_routes.dart';
 import 'chat_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -226,9 +227,11 @@ class ChatDetailView extends GetView<ChatDetailController> {
       return Obx(() {
         final offer = controller.offers[msg.offerId];
         if (offer == null) return const SizedBox.shrink();
+        final brief = controller.brief.value;
         return _OfferBubble(
           scale: s,
           offer: offer,
+          brief: brief,
           isMe: isMe,
           time: time,
           onAccept: () => controller.respondToOffer(offer, true),
@@ -467,6 +470,7 @@ class _OfferBubble extends StatelessWidget {
   const _OfferBubble({
     required this.scale,
     required this.offer,
+    required this.brief,
     required this.isMe,
     required this.time,
     required this.onAccept,
@@ -475,10 +479,11 @@ class _OfferBubble extends StatelessWidget {
 
   final double scale;
   final OfferModel offer;
+  final BriefModel? brief;
   final bool isMe;
   final String time;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
+  final Future<void> Function() onAccept;
+  final Future<void> Function() onReject;
 
   String get _statusLabel {
     switch (offer.status) {
@@ -550,43 +555,28 @@ class _OfferBubble extends StatelessWidget {
               ],
               if (!isMe && offer.status == OfferStatus.pending) ...[
                 SizedBox(height: 10 * s),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: onReject,
-                        child: Container(
-                          height: 38 * s,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: _kDanger)),
-                          child: Text('Reddet',
-                              style: _ui(
-                                  size: 9 * s,
-                                  weight: FontWeight.w700,
-                                  color: _kDanger,
-                                  spacing: 0.4)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8 * s),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: onAccept,
-                        child: Container(
-                          height: 38 * s,
-                          alignment: Alignment.center,
-                          color: _kGold,
-                          child: Text('Kabul Et',
-                              style: _ui(
-                                  size: 9 * s,
-                                  weight: FontWeight.w700,
-                                  color: Colors.white,
-                                  spacing: 0.4)),
-                        ),
-                      ),
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: () => Get.toNamed(
+                    AppRoutes.offerReview,
+                    arguments: {
+                      'offer': offer,
+                      'brief': brief,
+                      'onAccept': onAccept,
+                      'onReject': onReject,
+                    },
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    height: 38 * s,
+                    alignment: Alignment.center,
+                    color: _kGold,
+                    child: Text('İNCELE',
+                        style: _ui(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                            spacing: 0.6)),
+                  ),
                 ),
               ],
               SizedBox(height: 4 * s),
@@ -763,19 +753,29 @@ class _Composer extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 12 * s),
           child: Row(
             children: [
-              GestureDetector(
-                onTap: () => _showOfferSheet(context, controller, s),
-                child: Container(
-                  width: 46 * s,
-                  height: 46 * s,
-                  margin: EdgeInsets.only(right: 10 * s),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: _kGold.withValues(alpha: 0.5)),
+              Obx(() {
+                final disabled = controller.hasAcceptedOffer;
+                return GestureDetector(
+                  onTap: disabled
+                      ? null
+                      : () => _showOfferSheet(context, controller, s),
+                  child: Container(
+                    width: 46 * s,
+                    height: 46 * s,
+                    margin: EdgeInsets.only(right: 10 * s),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                          color: disabled
+                              ? _kMuted.withValues(alpha: 0.3)
+                              : _kGold.withValues(alpha: 0.5)),
+                    ),
+                    child: Icon(Icons.payments_outlined,
+                        size: 19 * s,
+                        color: disabled ? _kMuted : _kGold),
                   ),
-                  child: Icon(Icons.payments_outlined, size: 19 * s, color: _kGold),
-                ),
-              ),
+                );
+              }),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16 * s),
