@@ -54,7 +54,20 @@ class LoginController extends GetxController {
       password: passwordController.text,
     );
     if (!ok) return;
+    _navigateAfterLogin();
+  }
 
+  Future<void> loginWithGoogle() async {
+    final result = await _auth.loginWithGoogle();
+    if (!result.ok) return;
+    if (result.isNewUser) {
+      Get.offAllNamed(AppRoutes.roleSelection);
+      return;
+    }
+    _navigateAfterLogin();
+  }
+
+  void _navigateAfterLogin() {
     final role = _user.currentUser?.role;
     switch (role) {
       case UserRole.freelancer:

@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../data/models/freelancer_model.dart';
+import '../../../data/models/project_model.dart';
 import '../home/tabs/profile_screens.dart' show ContactUsScreen;
 import 'brief_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
@@ -147,18 +149,17 @@ class BriefDetailView extends GetView<BriefDetailController> {
   }
 
   // İlerleme — freelancer'ın eklediği aşamaların salt-okunur görünümü.
-  List<_Milestone> get _milestones {
+  // İlk kalem her zaman brief'in bir fiyatta anlaşılıp proje aktif olduğu
+  // an (project.createdAt); sonrası freelancer'ın girdiği gerçek kayıtlar.
+  _Milestone get _briefApprovalMilestone {
     final brief = controller.brief;
     final title = brief.title.isNotEmpty ? brief.title : brief.category;
-    return [
-      _Milestone(title: 'Brief Onayı', subtitle: title, timeLabel: 'Bugün'),
-      _Milestone(title: 'Ekip Kesinleşir', subtitle: title, timeLabel: '18:00'),
-      _Milestone(
-        title: 'Çekim Planlama',
-        subtitle: title,
-        timeLabel: brief.answers.dateRange ?? '—',
-      ),
-    ];
+    final project = controller.project!;
+    return _Milestone(
+      title: 'Brief Onayı',
+      subtitle: title,
+      timeLabel: _fmtFull(project.createdAt),
+    );
   }
 
   @override
@@ -350,31 +351,45 @@ class BriefDetailView extends GetView<BriefDetailController> {
                       ],
 
                       // İlerleme — sadece görüntüleme; düzenleme freelancer'da.
-                      _Section(
-                        scale: s,
-                        icon: Icons.timeline_outlined,
-                        label: 'İLERLEME',
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 6 * s),
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < _milestones.length; i++) ...[
-                                _MilestoneRow(
-                                  scale: s,
-                                  milestone: _milestones[i],
-                                ),
-                                if (i < _milestones.length - 1)
-                                  const Divider(
-                                    height: 1,
-                                    thickness: 1,
-                                    color: _kDivider,
+                      // Brief henüz onaylanıp projeye dönüşmediyse gösterecek
+                      // bir şey yok, bölüm hiç render edilmez.
+                      if (controller.project != null) ...[
+                        _Section(
+                          scale: s,
+                          icon: Icons.timeline_outlined,
+                          label: 'İLERLEME',
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 6 * s),
+                            child: Obx(() {
+                              final entries = controller.progressEntries;
+                              return Column(
+                                children: [
+                                  _MilestoneRow(
+                                    scale: s,
+                                    milestone: _briefApprovalMilestone,
                                   ),
-                              ],
-                            ],
+                                  for (final entry in entries) ...[
+                                    const Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: _kDivider,
+                                    ),
+                                    _MilestoneRow(
+                                      scale: s,
+                                      milestone: _Milestone(
+                                        title: entry.title,
+                                        subtitle: entry.description,
+                                        timeLabel: _fmtFull(entry.createdAt),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              );
+                            }),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 14 * s),
+                        SizedBox(height: 14 * s),
+                      ],
 
                       _Section(
                         scale: s,
@@ -405,6 +420,15 @@ class BriefDetailView extends GetView<BriefDetailController> {
                           ),
                         ),
                       ),
+
+                      if (controller.project != null) ...[
+                        SizedBox(height: 14 * s),
+                        // Anlaşılan ücret — sadece rakam, açıklama yok.
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 36 * s),
+                          child: _buildAgreedPriceBox(controller.project!, s),
+                        ),
+                      ],
 
                       SizedBox(height: 120 * s),
                     ],
@@ -553,6 +577,42 @@ class BriefDetailView extends GetView<BriefDetailController> {
     return Padding(
       padding: EdgeInsets.only(top: 16 * s),
       child: Column(children: rows),
+    );
+  }
+
+  // ── Anlaşılan ücret kutusu ───────────────────────────────────────────────
+  Widget _buildAgreedPriceBox(ProjectModel p, double s) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 14 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _kGold, width: 1.4),
+      ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'ANLAŞILAN ÜCRET',
+            style: _ui(
+              size: 13 * s,
+              weight: FontWeight.w700,
+              color: _kBlack,
+              spacing: 1.4,
+            ),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            '${Formatters.groupThousands(p.budget)} ₺',
+            style: _display(
+              size: 15 * s,
+              weight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1031,18 +1091,20 @@ class _MilestoneRow extends StatelessWidget {
                       spacing: 0.2,
                     ),
                   ),
-                  SizedBox(height: 3 * s),
-                  Text(
-                    milestone.subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: _ui(
-                      size: 9 * s,
-                      weight: FontWeight.w400,
-                      color: _kGold,
-                      spacing: 0.3,
+                  if (milestone.subtitle.isNotEmpty) ...[
+                    SizedBox(height: 3 * s),
+                    Text(
+                      milestone.subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ui(
+                        size: 9 * s,
+                        weight: FontWeight.w400,
+                        color: _kGold,
+                        spacing: 0.3,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

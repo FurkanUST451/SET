@@ -73,7 +73,10 @@ class ClientProjectsController extends GetxController {
       );
       return;
     }
-    Get.toNamed(AppRoutes.briefDetail, arguments: {'brief': brief});
+    Get.toNamed(
+      AppRoutes.briefDetail,
+      arguments: {'brief': brief, 'project': project},
+    );
   }
 
   Future<void> updateBriefNotes(String briefId, String notes) async {

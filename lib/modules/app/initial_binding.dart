@@ -5,6 +5,7 @@ import '../../data/repositories/brief_repository.dart';
 import '../../data/repositories/chat_repository.dart';
 import '../../data/repositories/freelancer_repository.dart';
 import '../../data/repositories/offer_repository.dart';
+import '../../data/repositories/progress_repository.dart';
 import '../../data/repositories/project_repository.dart';
 import '../../data/repositories/report_repository.dart';
 import '../../data/repositories/user_repository.dart';
@@ -41,6 +42,7 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
     Get.put<WorkRepository>(WorkRepository(), permanent: true);
+    Get.put<ProgressRepository>(ProgressRepository(), permanent: true);
     // Genel bildirme (report) sistemi — Keşfet gönderileri ve ileride
     // sohbet mesajları gibi farklı içerik türleri aynı repo'yu paylaşır.
     Get.put<ReportRepository>(ReportRepository(), permanent: true);

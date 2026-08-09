@@ -496,7 +496,10 @@ class _LoginViewState extends State<LoginView>
                                         _authStart,
                                         _authEnd,
                                         s,
-                                        _AuthOptionsRow(scale: s),
+                                        _AuthOptionsRow(
+                                          scale: s,
+                                          controller: controller,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -692,9 +695,10 @@ class _LoginButton extends StatelessWidget {
 
 // ─── Google/Apple seçenekleri (ortalanmış, kare çerçeve) ────────────────────
 class _AuthOptionsRow extends StatelessWidget {
-  const _AuthOptionsRow({required this.scale});
+  const _AuthOptionsRow({required this.scale, required this.controller});
 
   final double scale;
+  final LoginController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -704,11 +708,15 @@ class _AuthOptionsRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 140 * s,
-          child: _AuthIconButton(
-            scale: s,
-            icon: AppAssets.loginGoogle,
-            label: 'GOOGLE',
-            onTap: () {},
+          child: Obx(
+            () => _AuthIconButton(
+              scale: s,
+              icon: AppAssets.loginGoogle,
+              label: 'GOOGLE',
+              onTap: controller.isLoading.value
+                  ? null
+                  : controller.loginWithGoogle,
+            ),
           ),
         ),
         SizedBox(width: 12 * s),
@@ -737,7 +745,7 @@ class _AuthIconButton extends StatelessWidget {
   final double scale;
   final String icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

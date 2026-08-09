@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../data/models/progress_entry_model.dart';
 import '../../../data/models/project_model.dart';
 import 'project_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
@@ -71,8 +73,6 @@ class _FreelancerProjectDetailViewState
   final FreelancerProjectDetailController controller =
       Get.find<FreelancerProjectDetailController>();
 
-  late List<_Milestone> _milestones;
-
   static const _months = [
     '',
     'Oca',
@@ -89,29 +89,15 @@ class _FreelancerProjectDetailViewState
     'Ara',
   ];
 
-  @override
-  void initState() {
-    super.initState();
+  // Zaman çizelgesinin ilk kalemi — brief bir fiyatta anlaşılıp proje aktif
+  // olduğu an (project.createdAt) otomatik oluşur, hiçbir yerde saklanmaz.
+  _Milestone get _briefApprovalMilestone {
     final project = controller.project;
-    _milestones = [
-      _Milestone(
-        title: 'Brief Onayı',
-        subtitle: project.title,
-        timeLabel: _fmtFull(project.createdAt),
-      ),
-      if (project.dateRange != null && project.dateRange!.isNotEmpty)
-        _Milestone(
-          title: 'Çekim Planlama',
-          subtitle: project.title,
-          timeLabel: project.dateRange!,
-        ),
-      if (project.deadline != null)
-        _Milestone(
-          title: 'Teslim',
-          subtitle: project.title,
-          timeLabel: _fmtFull(project.deadline!),
-        ),
-    ];
+    return _Milestone(
+      title: 'Brief Onayı',
+      subtitle: project.title,
+      timeLabel: _fmtFull(project.createdAt),
+    );
   }
 
   String _fmtFull(DateTime d) {
@@ -358,19 +344,22 @@ class _FreelancerProjectDetailViewState
                         onAdd: () => _openMilestoneSheet(),
                         child: Padding(
                           padding: EdgeInsets.only(top: 6 * s),
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < _milestones.length; i++) ...[
-                                _buildMilestoneRow(_milestones[i], s),
-                                if (i < _milestones.length - 1)
+                          child: Obx(() {
+                            final entries = controller.progressEntries;
+                            return Column(
+                              children: [
+                                _buildSyntheticRow(_briefApprovalMilestone, s),
+                                for (final entry in entries) ...[
                                   const Divider(
                                     height: 1,
                                     thickness: 1,
                                     color: _kDivider,
                                   ),
+                                  _buildEntryRow(entry, s),
+                                ],
                               ],
-                            ],
-                          ),
+                            );
+                          }),
                         ),
                       ),
                       SizedBox(height: 14 * s),
@@ -407,6 +396,10 @@ class _FreelancerProjectDetailViewState
                           ),
                         ),
                       ),
+                      SizedBox(height: 14 * s),
+
+                      // Anlaşılan ücret — sadece rakam, açıklama yok.
+                      _buildAgreedPriceBox(project, s),
 
                       SizedBox(height: 120 * s),
                     ],
@@ -419,6 +412,42 @@ class _FreelancerProjectDetailViewState
 
         // ── Alt eylem çubuğu ────────────────────────────────────────────────
         bottomNavigationBar: _buildBottomBar(s),
+      ),
+    );
+  }
+
+  // ── Anlaşılan ücret kutusu ───────────────────────────────────────────────
+  Widget _buildAgreedPriceBox(ProjectModel p, double s) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 14 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _kGold, width: 1.4),
+      ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'ANLAŞILAN ÜCRET',
+            style: _ui(
+              size: 13 * s,
+              weight: FontWeight.w700,
+              color: _kBlack,
+              spacing: 1.4,
+            ),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            '${Formatters.groupThousands(p.budget)} ₺',
+            style: _display(
+              size: 15 * s,
+              weight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -612,38 +641,34 @@ class _FreelancerProjectDetailViewState
     );
   }
 
-  // ── İlerleme satırı ──────────────────────────────────────────────────────────
-  Widget _buildMilestoneRow(_Milestone m, double s) {
-    return _SwipeToDeleteRow(
-      key: ValueKey(m),
-      scale: s,
-      onDelete: () => setState(() => _milestones.remove(m)),
-      onTap: () => _openMilestoneSheet(existing: m),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12 * s),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _MilestoneDot(scale: s),
-            SizedBox(width: 14 * s),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${m.title} · ${m.timeLabel}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: _ui(
-                      size: 11 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 0.2,
-                    ),
+  // ── İlerleme satırı (görsel gövde, hem sabit hem gerçek kayıt için) ─────────
+  Widget _milestoneRowBody(String title, String timeLabel, String subtitle, double s) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12 * s),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _MilestoneDot(scale: s),
+          SizedBox(width: 14 * s),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$title · $timeLabel',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _ui(
+                    size: 11 * s,
+                    weight: FontWeight.w700,
+                    color: _kBlack,
+                    spacing: 0.2,
                   ),
+                ),
+                if (subtitle.isNotEmpty) ...[
                   SizedBox(height: 3 * s),
                   Text(
-                    m.subtitle,
+                    subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: _ui(
@@ -654,19 +679,40 @@ class _FreelancerProjectDetailViewState
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            Icon(Icons.chevron_right, size: 16 * s, color: _kMuted),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Brief Onayı — otomatik oluşan, silinemeyen/düzenlenemeyen ilk kalem.
+  Widget _buildSyntheticRow(_Milestone m, double s) {
+    return _milestoneRowBody(m.title, m.timeLabel, m.subtitle, s);
+  }
+
+  // Freelancer'ın Firestore'a yazdığı gerçek ilerleme kaydı — kaydırarak sil,
+  // dokununca düzenle.
+  Widget _buildEntryRow(ProgressEntryModel entry, double s) {
+    return _SwipeToDeleteRow(
+      key: ValueKey(entry.id),
+      scale: s,
+      onDelete: () => controller.deleteProgress(entry),
+      onTap: () => _openMilestoneSheet(existing: entry),
+      child: _milestoneRowBody(
+        entry.title,
+        _fmtFull(entry.createdAt),
+        entry.description,
+        s,
       ),
     );
   }
 
   // ── İlerleme ekle / düzenle bottomsheet ────────────────────────────────────
-  Future<void> _openMilestoneSheet({_Milestone? existing}) async {
+  Future<void> _openMilestoneSheet({ProgressEntryModel? existing}) async {
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
-    final descCtrl = TextEditingController(text: existing?.subtitle ?? '');
+    final descCtrl = TextEditingController(text: existing?.description ?? '');
 
     await showModalBottomSheet<void>(
       context: context,
@@ -739,27 +785,16 @@ class _FreelancerProjectDetailViewState
               ),
               SizedBox(height: 24 * s),
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   final title = titleCtrl.text.trim();
                   if (title.isEmpty) return;
                   final desc = descCtrl.text.trim();
-                  setState(() {
-                    if (existing != null) {
-                      existing.title = title;
-                      existing.subtitle = desc;
-                    } else {
-                      final now = DateTime.now();
-                      _milestones.add(
-                        _Milestone(
-                          title: title,
-                          subtitle: desc,
-                          timeLabel:
-                              '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-                        ),
-                      );
-                    }
-                  });
-                  Navigator.of(ctx).pop();
+                  if (existing != null) {
+                    await controller.updateProgress(existing, title, desc);
+                  } else {
+                    await controller.addProgress(title, desc);
+                  }
+                  if (ctx.mounted) Navigator.of(ctx).pop();
                 },
                 behavior: HitTestBehavior.opaque,
                 child: Container(
