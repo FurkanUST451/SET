@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/comment_model.dart';
@@ -24,6 +25,7 @@ class WorksController extends GetxController {
   final ReportRepository _reportRepo;
   final RxList<WorkModel> uploadedWorks = <WorkModel>[].obs;
   StreamSubscription<List<WorkModel>>? _sub;
+  StreamSubscription<User?>? _authSub;
 
   List<WorkModel> get works => uploadedWorks;
 
@@ -33,12 +35,27 @@ class WorksController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _sub = _repo.watchAll().listen((list) => uploadedWorks.assignAll(list));
+    // Bu controller uygulama açılışında (InitialBinding) kuruluyor, yani
+    // henüz kullanıcı giriş yapmamış olabilir. "works" okuması Firestore
+    // kurallarında isSignedIn() şartına bağlı olduğu için giriş
+    // tamamlanmadan kurulan abonelik permission-denied ile sessizce ölür
+    // ve bir daha kendini yenilemez (Keşfet ilk açılışta boş görünür).
+    // Auth durumunu dinleyip kullanıcı giriş yaptığında aboneliği
+    // yeniden kuruyoruz.
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      _sub?.cancel();
+      if (user == null) {
+        uploadedWorks.clear();
+        return;
+      }
+      _sub = _repo.watchAll().listen((list) => uploadedWorks.assignAll(list));
+    });
   }
 
   @override
   void onClose() {
     _sub?.cancel();
+    _authSub?.cancel();
     super.onClose();
   }
 
