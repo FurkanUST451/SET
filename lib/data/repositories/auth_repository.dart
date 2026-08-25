@@ -4,7 +4,7 @@ import '../models/user_model.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  final GoogleSignIn _googleSignIn = GoogleSigngit statusIn(scopes: ['email']);
 
   Future<UserModel> login({
     required String email,

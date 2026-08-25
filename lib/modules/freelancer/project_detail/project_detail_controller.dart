@@ -46,14 +46,34 @@ class FreelancerProjectDetailController extends GetxController {
   }
 
   Future<void> addProgress(String title, String description) async {
-    final me = _userController.currentUser;
-    if (me == null) return;
-    await _progressRepo.addEntry(
-      projectId: project.id,
-      freelancerId: me.id,
-      title: title,
-      description: description,
-    );
+    try {
+      final me = _userController.currentUser;
+      if (me == null) {
+        Get.snackbar(
+          'Hata',
+          'Oturum bilgisi bulunamadı, lütfen tekrar giriş yapın.',
+          backgroundColor: const Color(0xFFD32F2F),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 6),
+        );
+        return;
+      }
+      await _progressRepo.addEntry(
+        projectId: project.id,
+        freelancerId: me.id,
+        title: title,
+        description: description,
+      );
+    } catch (e, st) {
+      debugPrint('addProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme kaydedilemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
   }
 
   Future<void> updateProgress(
@@ -61,13 +81,35 @@ class FreelancerProjectDetailController extends GetxController {
     String title,
     String description,
   ) async {
-    await _progressRepo.updateEntry(
-      entry.copyWith(title: title, description: description),
-    );
+    try {
+      await _progressRepo.updateEntry(
+        entry.copyWith(title: title, description: description),
+      );
+    } catch (e, st) {
+      debugPrint('updateProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme güncellenemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
   }
 
   Future<void> deleteProgress(ProgressEntryModel entry) async {
-    await _progressRepo.deleteEntry(project.id, entry.id);
+    try {
+      await _progressRepo.deleteEntry(project.id, entry.id);
+    } catch (e, st) {
+      debugPrint('deleteProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme silinemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
   }
 
   Future<void> _loadClient() async {
