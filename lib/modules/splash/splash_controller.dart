@@ -35,20 +35,14 @@ class SplashController extends GetxController {
   }
 
   Future<String> _resolveRoute() async {
-    final hasOnboarded =
-        StorageService.read<bool>(StorageService.onboardingComplete) ?? false;
-
-    // Onboarding hiç gösterilmemişse oraya gönder
-    if (!hasOnboarded) {
-      return AppRoutes.onboarding;
-    }
-
-    // Firebase Auth oturumu yoksa her zaman giriş ekranına
+    // Aktif bir oturum yoksa — daha önce onboarding görülmüş olsa bile —
+    // her zaman hoşgeldin (onboarding) ekranlarından geçilir; oradaki
+    // "Başla" butonu kullanıcıyı giriş ekranına yönlendirir.
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {
       StorageService.remove(StorageService.userId);
       StorageService.remove(StorageService.userRole);
-      return AppRoutes.login;
+      return AppRoutes.onboarding;
     }
 
     // Önceki oturumdan gelen kullanıcıyı UserController'a yükle

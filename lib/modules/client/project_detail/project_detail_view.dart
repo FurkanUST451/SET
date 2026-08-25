@@ -57,9 +57,6 @@ class _ProjectData {
     required this.projectIndex,
     required this.title,
     required this.statusLabel,
-    required this.budget,
-    required this.deliveryDays,
-    required this.location,
     required this.updateAuthor,
     required this.updateTime,
     required this.updateText,
@@ -69,9 +66,6 @@ class _ProjectData {
   final String projectIndex;
   final String title;
   final String statusLabel;
-  final String budget;
-  final String deliveryDays;
-  final String location;
   final String updateAuthor;
   final String updateTime;
   final String updateText;
@@ -83,9 +77,6 @@ const _allProjects = [
     projectIndex: 'PROJE / 01',
     title: 'Cafe Tanıtım Filmi',
     statusLabel: 'EKİP KURULUYOR',
-    budget: '120.000 TL',
-    deliveryDays: '7 Gün',
-    location: 'Beşiktaş',
     updateAuthor: 'Selin A.',
     updateTime: 'BUGÜN · 14:32',
     updateText:
@@ -97,13 +88,73 @@ const _allProjects = [
 // Static data
 // ---------------------------------------------------------------------------
 
+class _StepInfo {
+  const _StepInfo({
+    required this.no,
+    required this.title,
+    required this.description,
+    required this.dateLabel,
+    required this.icon,
+    required this.isDone,
+  });
+
+  final String no;
+  final String title;
+  final String description;
+  final String dateLabel;
+  final IconData icon;
+  final bool isDone;
+}
+
 const _steps = [
-  ('01', 'BRİF', '24 MAY', Icons.check_rounded, true),
-  ('02', 'PLANLAMA', '25 MAY', Icons.check_rounded, true),
-  ('03', 'EKİP\nOLUŞUMU', '', Icons.groups_rounded, false),
-  ('04', 'ÇEKİM', '--', Icons.videocam_outlined, false),
-  ('05', 'KURGU', '--', Icons.build_outlined, false),
-  ('06', 'TESLİM', '--', Icons.flag_outlined, false),
+  _StepInfo(
+    no: '01',
+    title: 'BRİF',
+    description: 'Proje kapsamı ve hedefler netleştirildi.',
+    dateLabel: '24 MAY',
+    icon: Icons.check_rounded,
+    isDone: true,
+  ),
+  _StepInfo(
+    no: '02',
+    title: 'PLANLAMA',
+    description: 'Çekim takvimi ve ekip planı oluşturuldu.',
+    dateLabel: '25 MAY',
+    icon: Icons.check_rounded,
+    isDone: true,
+  ),
+  _StepInfo(
+    no: '03',
+    title: 'EKİP OLUŞUMU',
+    description: 'Yönetmen, görüntü yönetmeni ve ekip belirleniyor.',
+    dateLabel: '',
+    icon: Icons.groups_rounded,
+    isDone: false,
+  ),
+  _StepInfo(
+    no: '04',
+    title: 'ÇEKİM',
+    description: 'Sahne çekimleri gerçekleştirilecek.',
+    dateLabel: '',
+    icon: Icons.videocam_outlined,
+    isDone: false,
+  ),
+  _StepInfo(
+    no: '05',
+    title: 'KURGU',
+    description: 'Ham görüntüler kurgulanıp son haline getirilecek.',
+    dateLabel: '',
+    icon: Icons.build_outlined,
+    isDone: false,
+  ),
+  _StepInfo(
+    no: '06',
+    title: 'TESLİM',
+    description: 'Final dosyalar teslim edilecek.',
+    dateLabel: '',
+    icon: Icons.flag_outlined,
+    isDone: false,
+  ),
 ];
 const _currentStep = 2;
 
@@ -188,39 +239,6 @@ class ProjectDetailView extends StatelessWidget {
 
                       // ── Süreç adımları ────────────────────────────────────
                       _StepProgress(scale: s),
-                      SizedBox(height: 24 * s),
-
-                      // ── Bütçe / Teslim / Lokasyon ─────────────────────────
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _StatItem(
-                              scale: s,
-                              icon: Icons.account_balance_wallet_outlined,
-                              label: 'BÜTÇE',
-                              value: project.budget,
-                            ),
-                          ),
-                          Container(width: 1, height: 40 * s, color: _kCardBorder),
-                          Expanded(
-                            child: _StatItem(
-                              scale: s,
-                              icon: Icons.calendar_today_outlined,
-                              label: 'TESLİM',
-                              value: project.deliveryDays,
-                            ),
-                          ),
-                          Container(width: 1, height: 40 * s, color: _kCardBorder),
-                          Expanded(
-                            child: _StatItem(
-                              scale: s,
-                              icon: Icons.location_on_outlined,
-                              label: 'LOKASYON',
-                              value: project.location,
-                            ),
-                          ),
-                        ],
-                      ),
                       SizedBox(height: 24 * s),
                       Container(height: 1, color: _kCardBorder),
                       SizedBox(height: 18 * s),
@@ -684,173 +702,171 @@ class _StepProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    final circleSize = 40.0 * s;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        for (int i = 0; i < _steps.length; i++) ...[
-          if (i != 0)
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: circleSize / 2 - 0.5),
-                child: _DottedLine(color: i - 1 < _currentStep
-                    ? _kGold.withValues(alpha: 0.5)
-                    : _kCardBorder),
-              ),
-            ),
-          _StepCircle(scale: s, index: i, size: circleSize),
-        ],
+        for (int i = 0; i < _steps.length; i++)
+          _StepRow(scale: s, index: i, isLast: i == _steps.length - 1),
       ],
     );
   }
 }
 
-class _DottedLine extends StatelessWidget {
-  const _DottedLine({required this.color});
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const dashWidth = 4.0;
-        const dashSpace = 4.0;
-        final count = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(
-            count < 1 ? 1 : count,
-            (_) => Container(width: dashWidth, height: 1.4, color: color),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _StepCircle extends StatelessWidget {
-  const _StepCircle({
+class _StepRow extends StatelessWidget {
+  const _StepRow({
     required this.scale,
     required this.index,
-    required this.size,
+    required this.isLast,
   });
   final double scale;
   final int index;
-  final double size;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     final step = _steps[index];
-    final label = step.$2;
-    final dateLabel = step.$3;
-    final icon = step.$4;
-    final isDone = step.$5;
     final isCurrent = index == _currentStep;
+    final isDone = step.isDone;
+    final circleSize = 36.0 * s;
 
-    Widget circle;
+    final Color circleFill;
+    final Color circleBorder;
+    final Color iconColor;
+    final Widget iconWidget;
     if (isDone) {
-      circle = Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF0E8DC),
-          border: Border.all(color: Colors.black12),
-        ),
-        child: Icon(Icons.check_rounded, size: 16 * s, color: _kInk),
-      );
+      circleFill = const Color(0xFFF0E8DC);
+      circleBorder = Colors.black12;
+      iconColor = _kInk;
+      iconWidget = Icon(Icons.check_rounded, size: 16 * s, color: iconColor);
     } else if (isCurrent) {
-      circle = Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: _kGold.withValues(alpha: 0.12),
-          border: Border.all(color: _kGold, width: 1.4),
-        ),
-        child: Icon(icon, size: 16 * s, color: _kGold),
-      );
+      circleFill = _kGold;
+      circleBorder = _kGold;
+      iconColor = Colors.white;
+      iconWidget = Icon(step.icon, size: 16 * s, color: iconColor);
     } else {
-      circle = Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: _kCardBorder),
-        ),
-        child: Icon(icon, size: 16 * s, color: _kMuted),
-      );
+      circleFill = Colors.white;
+      circleBorder = _kCardBorder;
+      iconColor = _kMuted;
+      iconWidget = Icon(step.icon, size: 15 * s, color: iconColor);
     }
 
-    return SizedBox(
-      width: 52 * s,
-      child: Column(
+    final titleColor = isCurrent ? _kInk : (isDone ? _kTaupe : _kMuted);
+    final descColor = isCurrent ? _kInk.withValues(alpha: 0.75) : _kMuted;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          circle,
-          SizedBox(height: 6 * s),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: _ui(
-              size: 7 * s,
-              weight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-              color: isCurrent ? _kGold : _kBlack,
-              spacing: 0.4,
-              height: 1.2,
-            ),
+          Column(
+            children: [
+              Container(
+                width: circleSize,
+                height: circleSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: circleFill,
+                  border: Border.all(
+                    color: circleBorder,
+                    width: isCurrent ? 0 : 1.2,
+                  ),
+                  boxShadow: isCurrent
+                      ? [
+                          BoxShadow(
+                            color: _kGold.withValues(alpha: 0.35),
+                            blurRadius: 10 * s,
+                            spreadRadius: 1 * s,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(child: iconWidget),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 1.6,
+                    margin: EdgeInsets.symmetric(vertical: 4 * s),
+                    color: index < _currentStep
+                        ? _kGold.withValues(alpha: 0.5)
+                        : _kCardBorder,
+                  ),
+                ),
+            ],
           ),
-          if (dateLabel.isNotEmpty) ...[
-            SizedBox(height: 2 * s),
-            Text(
-              dateLabel,
-              textAlign: TextAlign.center,
-              style: _ui(
-                size: 6.5 * s,
-                color: isCurrent ? _kGold : _kTaupe,
-                spacing: 0.3,
+          SizedBox(width: 14 * s),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 22 * s),
+              child: Container(
+                padding: isCurrent
+                    ? EdgeInsets.all(12 * s)
+                    : EdgeInsets.symmetric(vertical: 2 * s),
+                decoration: isCurrent
+                    ? BoxDecoration(
+                        color: _kGold.withValues(alpha: 0.08),
+                        border: Border.all(
+                            color: _kGold.withValues(alpha: 0.4), width: 1),
+                      )
+                    : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          step.title,
+                          style: _ui(
+                            size: 10.5 * s,
+                            weight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+                            color: titleColor,
+                            spacing: 0.6,
+                          ),
+                        ),
+                        if (isCurrent)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6 * s, vertical: 3 * s),
+                            color: _kGold,
+                            child: Text(
+                              'ŞU AN',
+                              style: _ui(
+                                size: 6.5 * s,
+                                weight: FontWeight.w700,
+                                color: Colors.white,
+                                spacing: 0.8,
+                              ),
+                            ),
+                          )
+                        else if (step.dateLabel.isNotEmpty)
+                          Text(
+                            step.dateLabel,
+                            style: _ui(
+                              size: 7 * s,
+                              weight: FontWeight.w600,
+                              color: _kTaupe,
+                              spacing: 0.6,
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 4 * s),
+                    Text(
+                      step.description,
+                      style: _ui(
+                        size: 8.5 * s,
+                        color: descColor,
+                        spacing: 0.2,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
         ],
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Stat item
-// ---------------------------------------------------------------------------
-
-class _StatItem extends StatelessWidget {
-  const _StatItem({
-    required this.scale,
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-  final double scale;
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Column(
-      children: [
-        Icon(icon, size: 18 * s, color: _kGold),
-        SizedBox(height: 8 * s),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: _display(size: 16 * s, weight: FontWeight.w600, color: _kInk),
-        ),
-        SizedBox(height: 4 * s),
-        Text(
-          label,
-          style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 1),
-        ),
-      ],
     );
   }
 }

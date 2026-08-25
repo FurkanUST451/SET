@@ -64,13 +64,28 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     'TÜMÜ',
     'AKTİF PROJELER',
     'TEKLİF AŞAMASINDA',
-    'ANLAŞMA BEKLİYOR'
+    'ANLAŞMA BEKLİYOR',
+    'SET HALLETSİN',
   ];
-  static const _filterStatus = <String?>[null, null, 'offer_sent', 'submitted'];
+  static const _filterStatus = <String?>[
+    null,
+    null,
+    'offer_sent',
+    'submitted',
+    null,
+  ];
   static const _activeFilterIndex = 1;
+  static const _setFilterIndex = 4;
+
+  // SET Halletsin tarafından yönetilen proje kartı "TÜMÜ" ve "SET HALLETSİN"
+  // filtrelerinde gösterilir.
+  bool get _showSetCard =>
+      _filterIndex == 0 || _filterIndex == _setFilterIndex;
 
   List<BriefModel> _apply(List<BriefModel> all) {
-    if (_filterIndex == _activeFilterIndex) return [];
+    if (_filterIndex == _activeFilterIndex || _filterIndex == _setFilterIndex) {
+      return [];
+    }
     final st = _filterStatus[_filterIndex];
     if (st == null) return all;
     return all.where((b) => b.status == st).toList();
@@ -89,66 +104,63 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     final controller = Get.find<ClientProjectsController>();
     final width = MediaQuery.sizeOf(context).width;
     final double s = (width / 390).clamp(0.85, 1.15).toDouble();
-    // Kayan nav bar (68 yükseklik + 16 alt boşluk) üstünde kalması için pay.
-    final double navClear = MediaQuery.paddingOf(context).bottom + 68 + 16 + 14;
 
     return Scaffold(
       backgroundColor: _kCream,
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopStrip(s),
-                  SizedBox(height: 18 * s),
-                  _buildHeader(s, controller),
-                  SizedBox(height: 20 * s),
-                  _buildFilterBar(s),
-                  SizedBox(height: 8 * s),
-                  Expanded(
-                    child: Obx(() {
-                      if (controller.isLoading.value) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: _kGold),
-                        );
-                      }
-                      if (controller.errorMsg.isNotEmpty) {
-                        return _ErrorView(
-                            scale: s, onRetry: controller.loadBriefs);
-                      }
-                      final briefs = _apply(controller.briefs);
-                      final activeProjects = _activeProjects(controller);
-                      if (briefs.isEmpty && activeProjects.isEmpty) {
-                        return _EmptyState(scale: s);
-                      }
-                      return RefreshIndicator(
-                        color: _kGold,
-                        onRefresh: controller.loadBriefs,
-                        child: ListView(
-                          padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 130 * s),
-                          children: [
-                            for (var i = 0; i < activeProjects.length; i++) ...[
-                              _ProjectCard(scale: s, project: activeProjects[i]),
-                              if (i < activeProjects.length - 1 ||
-                                  briefs.isNotEmpty)
-                                SizedBox(height: 18 * s),
-                            ],
-                            for (var i = 0; i < briefs.length; i++) ...[
-                              _BriefCard(scale: s, brief: briefs[i]),
-                              if (i < briefs.length - 1)
-                                SizedBox(height: 18 * s),
-                            ],
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+              _buildTopStrip(s),
+              SizedBox(height: 18 * s),
+              _buildHeader(s, controller),
+              SizedBox(height: 20 * s),
+              _buildFilterBar(s),
+              SizedBox(height: 8 * s),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _kGold),
+                    );
+                  }
+                  if (controller.errorMsg.isNotEmpty) {
+                    return _ErrorView(scale: s, onRetry: controller.loadBriefs);
+                  }
+                  final briefs = _apply(controller.briefs);
+                  final activeProjects = _activeProjects(controller);
+                  final showSetCard = _showSetCard;
+                  if (briefs.isEmpty && activeProjects.isEmpty && !showSetCard) {
+                    return _EmptyState(scale: s);
+                  }
+                  return RefreshIndicator(
+                    color: _kGold,
+                    onRefresh: controller.loadBriefs,
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 130 * s),
+                      children: [
+                        if (showSetCard) ...[
+                          _SetManagedProjectCard(scale: s),
+                          if (activeProjects.isNotEmpty || briefs.isNotEmpty)
+                            SizedBox(height: 18 * s),
+                        ],
+                        for (var i = 0; i < activeProjects.length; i++) ...[
+                          _ProjectCard(scale: s, project: activeProjects[i]),
+                          if (i < activeProjects.length - 1 ||
+                              briefs.isNotEmpty)
+                            SizedBox(height: 18 * s),
+                        ],
+                        for (var i = 0; i < briefs.length; i++) ...[
+                          _BriefCard(scale: s, brief: briefs[i]),
+                          if (i < briefs.length - 1) SizedBox(height: 18 * s),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
               ),
-              _buildSetFab(s, navClear),
             ],
           ),
         ),
@@ -192,7 +204,8 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                 SizedBox(height: 6 * s),
                 Obx(() {
                   final count = _apply(controller.briefs).length +
-                      _activeProjects(controller).length;
+                      _activeProjects(controller).length +
+                      (_showSetCard ? 1 : 0);
                   return Text(
                     '$count proje görüntüleniyor',
                     style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
@@ -252,36 +265,6 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     );
   }
 
-  // ── Kayan SET butonu (sağ alt) ──────────────────────────────────
-  // SET Halletsin ile ilerleyen projelerin takip ekranına götürür.
-  Widget _buildSetFab(double s, double bottom) {
-    return Positioned(
-      right: 24 * s,
-      bottom: bottom - 46 * s,
-      child: GestureDetector(
-        onTap: () => Get.toNamed(AppRoutes.setProjects),
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 56 * s,
-          height: 56 * s,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(12 * s),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18 * s),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.22),
-                blurRadius: 16 * s,
-                offset: Offset(0, 6 * s),
-              ),
-            ],
-          ),
-          child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
-        ),
-      ),
-    );
-  }
 }
 
 // ─── Sinyal gibi yanıp sönen durum noktası ─────────────────────────
@@ -318,6 +301,208 @@ class _PulsingDotState extends State<_PulsingDot>
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SET HALLETSİN CARD — SET ekibi tarafından uçtan uca yönetilen proje.
+// Diğer kartlardan altın degrade zemin ve sol vurgu çizgisiyle ayrılır.
+// ─────────────────────────────────────────────────────────────────
+class _SetManagedProjectCard extends StatelessWidget {
+  const _SetManagedProjectCard({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.setProjects),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: const BorderSide(color: _kCardBorder),
+            bottom: const BorderSide(color: _kCardBorder),
+            left: BorderSide(color: _kGold, width: 3 * s),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Durum satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(39 * s, 16 * s, 66 * s, 0),
+                  child: Row(
+                    children: [
+                      _PulsingDot(color: _kGold, size: 8 * s),
+                      SizedBox(width: 8 * s),
+                      Expanded(
+                        child: Text(
+                          'SET HALLETSİN · YÖNETİLEN PROJE',
+                          style: _ui(
+                              size: 8 * s,
+                              weight: FontWeight.w700,
+                              color: _kGold,
+                              spacing: 1.2),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Kimlik satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(39 * s, 16 * s, 42 * s, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 48 * s,
+                        height: 48 * s,
+                        decoration: const BoxDecoration(color: Colors.white),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          'assets/images/main_service_icons/video.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.videocam_rounded,
+                              size: 22 * s,
+                              color: _kGold),
+                        ),
+                      ),
+                      SizedBox(width: 14 * s),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48 * s,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Video Çekim',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _display(
+                                    size: 20 * s,
+                                    weight: FontWeight.w600,
+                                    color: _kInk),
+                              ),
+                              SizedBox(height: 3 * s),
+                              Text(
+                                'Düğün Hikayesi — Uçtan Uca Yönetim',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _ui(
+                                    size: 8 * s, color: _kBlack, spacing: 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Meta satırı (teslim / bütçe / çekim)
+                SizedBox(height: 18 * s),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 39 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.schedule_rounded,
+                          label: 'TESLİM',
+                          value: '21 Eyl',
+                        ),
+                      ),
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.payments_outlined,
+                          label: 'BÜTÇE',
+                          value: '620.0K',
+                        ),
+                      ),
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.calendar_today_rounded,
+                          label: 'ÇEKİM',
+                          value: '15 Eyl',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Açıklama + Detay
+                SizedBox(height: 14 * s),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(39 * s, 0, 38 * s, 16 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.badge_outlined,
+                          size: 13 * s, color: _kTaupe),
+                      SizedBox(width: 5 * s),
+                      Expanded(
+                        child: Text(
+                          'Proje Yöneticisi atandı',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ui(
+                              size: 9 * s,
+                              weight: FontWeight.w700,
+                              color: _kInk,
+                              spacing: 0.2),
+                        ),
+                      ),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        'DETAY',
+                        style: _ui(
+                            size: 8 * s,
+                            weight: FontWeight.w700,
+                            color: _kGold,
+                            spacing: 1.2),
+                      ),
+                      SizedBox(width: 4 * s),
+                      Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 12 * s,
+              right: 16 * s,
+              child: Container(
+                width: 34 * s,
+                height: 34 * s,
+                padding: EdgeInsets.all(6 * s),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10 * s),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.14),
+                      blurRadius: 8 * s,
+                      offset: Offset(0, 3 * s),
+                    ),
+                  ],
+                ),
+                child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
