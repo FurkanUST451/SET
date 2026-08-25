@@ -598,46 +598,99 @@ class _FreelancerProjectDetailViewState
   }
 
   Widget _buildBottomBar(double s) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 28 * s),
-      decoration: BoxDecoration(
-        color: _kCream,
-        border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.08))),
-      ),
-      child: Obx(() => GestureDetector(
-            onTap: controller.isOpeningChat.value ? null : controller.openChat,
-            child: Container(
-              height: 52 * s,
-              color: _kGold,
-              alignment: Alignment.center,
-              child: controller.isOpeningChat.value
-                  ? SizedBox(
-                      width: 18 * s,
-                      height: 18 * s,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_bubble_outline_rounded,
-                            size: 17 * s, color: Colors.white),
-                        SizedBox(width: 6 * s),
-                        Text(
-                          'Müşteriyle Mesajlaş',
-                          style: _ui(
-                            size: 11 * s,
-                            weight: FontWeight.w700,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 28 * s),
+          decoration: BoxDecoration(
+            color: _kCream,
+            border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.08))),
+          ),
+          child: Obx(() => GestureDetector(
+                onTap: controller.isOpeningChat.value ? null : controller.openChat,
+                child: Container(
+                  width: double.infinity,
+                  height: 52 * s,
+                  color: _kGold,
+                  alignment: Alignment.center,
+                  child: controller.isOpeningChat.value
+                      ? SizedBox(
+                          width: 18 * s,
+                          height: 18 * s,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
                             color: Colors.white,
-                            spacing: 0.5,
                           ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.chat_bubble_outline_rounded,
+                                size: 17 * s, color: Colors.white),
+                            SizedBox(width: 6 * s),
+                            Text(
+                              'Müşteriyle Mesajlaş',
+                              style: _ui(
+                                size: 11 * s,
+                                weight: FontWeight.w700,
+                                color: Colors.white,
+                                spacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                ),
+              )),
+        ),
+        Positioned(
+          top: -20 * s,
+          left: 16 * s,
+          child: GestureDetector(
+            onTap: () => _openMilestoneSheet(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 10 * s),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16 * s),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.14),
+                    blurRadius: 18 * s,
+                    offset: Offset(0, 8 * s),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'İlerleme',
+                    style: _ui(
+                      size: 11 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 0.5,
                     ),
+                  ),
+                  SizedBox(width: 8 * s),
+                  Container(
+                    width: 20 * s,
+                    height: 20 * s,
+                    decoration: const BoxDecoration(
+                      color: _kGold,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(Icons.add_rounded, size: 13 * s, color: Colors.white),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
+        ),
+      ],
     );
   }
 
