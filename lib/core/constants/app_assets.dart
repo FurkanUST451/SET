@@ -76,6 +76,9 @@ class AppAssets {
   static const String briefSetIllustrationShadow =
       '$_briefImages/cep_saati_shadow.png';
 
+  // Splash — marka/karşılama ekranlarının ana görseli
+  static const String splashHeroAtlas = '$_pageImages/atlas.png';
+
   // Splash ekranı — sırayla değişen tanıtım görselleri
   static const List<String> splashPageImages = [
     '$_pageImages/apple.png',

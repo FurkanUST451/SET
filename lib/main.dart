@@ -37,7 +37,7 @@ class SetApp extends StatelessWidget {
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: theme.mode,
-        initialRoute: AppRoutes.splash,
+        initialRoute: AppRoutes.splashBrand,
         getPages: AppPages.pages,
       ),
     );

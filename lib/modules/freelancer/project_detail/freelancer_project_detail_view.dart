@@ -6,6 +6,7 @@ import '../../../core/utils/avatar_image.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/progress_entry_model.dart';
 import '../../../data/models/project_model.dart';
+import '../../../routes/app_routes.dart';
 import 'project_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -211,7 +212,19 @@ class _FreelancerProjectDetailViewState
                         ),
                       ),
                     ),
-                    const SizedBox.shrink(),
+                    GestureDetector(
+                      onTap: () =>
+                          Get.toNamed(AppRoutes.freelancerSetProjects),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(
+                          Icons.timeline_outlined,
+                          size: 22 * s,
+                          color: _kInk,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

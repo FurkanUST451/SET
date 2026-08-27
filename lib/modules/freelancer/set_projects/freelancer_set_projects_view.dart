@@ -44,8 +44,80 @@ TextStyle _ui({
   height: height,
 );
 
-class SetProjectsView extends StatelessWidget {
-  const SetProjectsView({super.key});
+// ─── Süreç aşaması modeli — UI-only, freelancer bu ekrandan yönetir ───────────
+class _ProcessStep {
+  _ProcessStep({
+    required this.title,
+    required this.tag,
+    required this.icon,
+    required this.description,
+    this.isDone = false,
+  });
+
+  String title;
+  String tag;
+  IconData icon;
+  String description;
+  bool isDone;
+}
+
+class FreelancerSetProjectsView extends StatefulWidget {
+  const FreelancerSetProjectsView({super.key});
+
+  @override
+  State<FreelancerSetProjectsView> createState() =>
+      _FreelancerSetProjectsViewState();
+}
+
+class _FreelancerSetProjectsViewState
+    extends State<FreelancerSetProjectsView> {
+  final List<_ProcessStep> _steps = [
+    _ProcessStep(
+      title: 'BRİF',
+      tag: '24 MAY',
+      icon: Icons.assignment_outlined,
+      description: 'Proje kapsamı, hedefler ve gereksinimler netleştirildi.',
+      isDone: true,
+    ),
+    _ProcessStep(
+      title: 'PLANLAMA',
+      tag: '25 MAY',
+      icon: Icons.event_note_rounded,
+      description: 'Ekip planı ve süreç takvimi oluşturuldu.',
+      isDone: true,
+    ),
+    _ProcessStep(
+      title: 'EKİP OLUŞUMU',
+      tag: '',
+      icon: Icons.groups_rounded,
+      description:
+          'Görüntü yönetmeni, editör ve diğer ekip üyeleri bir araya getiriliyor.',
+    ),
+    _ProcessStep(
+      title: 'ÇEKİM',
+      tag: '',
+      icon: Icons.videocam_rounded,
+      description: 'Belirlenen lokasyonda çekim gerçekleştirilecek.',
+    ),
+    _ProcessStep(
+      title: 'KURGU',
+      tag: '',
+      icon: Icons.content_cut_rounded,
+      description: 'Ham görüntüler kurgulanıp son haline getirilecek.',
+    ),
+    _ProcessStep(
+      title: 'TESLİM',
+      tag: '',
+      icon: Icons.flag_rounded,
+      description: 'Tamamlanan proje teslim edilecek.',
+    ),
+  ];
+
+  // "Şu an" olan aşama — sırayla ilk tamamlanmamış adım.
+  int get _currentStep {
+    final i = _steps.indexWhere((s) => !s.isDone);
+    return i == -1 ? _steps.length - 1 : i;
+  }
 
   // Sayfanın çoğu bölümü 24*s yatay boşlukla ortalanır; en alttaki proje
   // detayı kartları ise ekranın sağına/soluna dayanmalı, o yüzden dışarıda
@@ -166,10 +238,50 @@ class SetProjectsView extends StatelessWidget {
                 ),
                 SizedBox(height: 28 * s),
                 _pad(s, Container(height: 1, color: _kCardBorder)),
-                SizedBox(height: 28 * s),
+                SizedBox(height: 18 * s),
+
+                // Süreç adımları başlığı + yönetim butonu — yalnızca
+                // hizmet veren (freelancer) bu ekrandan süreci düzenleyebilir.
+                _pad(
+                  s,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'SÜREÇ ADIMLARI',
+                          style: _ui(
+                            size: 8 * s,
+                            weight: FontWeight.w700,
+                            color: _kBlack,
+                            spacing: 1.5,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _openManageStepsSheet,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: 24 * s,
+                          height: 24 * s,
+                          color: _kGold,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 16 * s,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 14 * s),
 
                 // Süreç adımları — dikey zaman çizelgesi
-                _pad(s, _StepProgress(scale: s)),
+                _pad(
+                  s,
+                  _StepProgress(scale: s, steps: _steps, currentStep: _currentStep),
+                ),
                 SizedBox(height: 24 * s),
                 _pad(s, Container(height: 1, color: _kCardBorder)),
                 SizedBox(height: 18 * s),
@@ -192,9 +304,7 @@ class SetProjectsView extends StatelessWidget {
                 _pad(s, _TeamRow(scale: s)),
                 SizedBox(height: 32 * s),
 
-                // ── Proje detayı (Projelerim → proje kartı ile birebir) ──────
-                // Kenarları ekranın sağına/soluna dayanır — bu yüzden dışta
-                // bıraktığımız yatay padding'e girmez.
+                // ── Proje detayı ──────────────────────────────────
                 _ProjectDetailsHeaderCard(scale: s),
                 SizedBox(height: 14 * s),
                 _InfoSection(
@@ -257,6 +367,433 @@ class SetProjectsView extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Süreç adımlarını yönetme bottomsheet'i — sırala, düzenle, sil, ekle ──
+  void _openManageStepsSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _kCream,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (ctx) {
+        final s = (MediaQuery.sizeOf(ctx).width / 390)
+            .clamp(0.85, 1.15)
+            .toDouble();
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            void refresh() => setState(() {});
+            return DraggableScrollableSheet(
+              initialChildSize: 0.82,
+              minChildSize: 0.5,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (ctx, scrollController) {
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(20 * s, 20 * s, 20 * s, 20 * s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36 * s,
+                          height: 3 * s,
+                          color: _kCardBorder,
+                          margin: EdgeInsets.only(bottom: 18 * s),
+                        ),
+                      ),
+                      Text(
+                        'Süreç Adımlarını Yönet',
+                        style: _display(
+                          size: 22 * s,
+                          weight: FontWeight.w600,
+                          color: _kInk,
+                        ),
+                      ),
+                      SizedBox(height: 4 * s),
+                      Text(
+                        'Sürükleyerek sırala, dokunarak düzenle.',
+                        style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
+                      ),
+                      SizedBox(height: 16 * s),
+                      Expanded(
+                        child: ReorderableListView.builder(
+                          scrollController: scrollController,
+                          buildDefaultDragHandles: false,
+                          itemCount: _steps.length,
+                          onReorder: (oldIndex, newIndex) {
+                            setSheetState(() {
+                              if (newIndex > oldIndex) newIndex -= 1;
+                              final item = _steps.removeAt(oldIndex);
+                              _steps.insert(newIndex, item);
+                            });
+                            refresh();
+                          },
+                          itemBuilder: (ctx, i) {
+                            final step = _steps[i];
+                            return Container(
+                              key: ValueKey('step-$i-${step.title}'),
+                              margin: EdgeInsets.only(bottom: 10 * s),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(color: _kCardBorder),
+                              ),
+                              child: ListTile(
+                                onTap: () => _openStepEditSheet(
+                                  existingIndex: i,
+                                  onSaved: () {
+                                    setSheetState(() {});
+                                    refresh();
+                                  },
+                                ),
+                                leading: ReorderableDragStartListener(
+                                  index: i,
+                                  child: Icon(
+                                    Icons.drag_indicator_rounded,
+                                    color: _kTaupe,
+                                    size: 18 * s,
+                                  ),
+                                ),
+                                title: Text(
+                                  step.title.isEmpty
+                                      ? 'Başlıksız Aşama'
+                                      : step.title,
+                                  style: _ui(
+                                    size: 10 * s,
+                                    weight: FontWeight.w700,
+                                    color: _kBlack,
+                                    spacing: 0.3,
+                                  ),
+                                ),
+                                subtitle: step.description.isNotEmpty
+                                    ? Text(
+                                        step.description,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: _ui(
+                                          size: 9 * s,
+                                          color: _kTaupe,
+                                          spacing: 0.2,
+                                        ),
+                                      )
+                                    : null,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      step.isDone
+                                          ? Icons.check_circle_rounded
+                                          : Icons.radio_button_unchecked,
+                                      size: 16 * s,
+                                      color: step.isDone
+                                          ? _kOnline
+                                          : _kMuted,
+                                    ),
+                                    SizedBox(width: 8 * s),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setSheetState(() {
+                                          _steps.removeAt(i);
+                                        });
+                                        refresh();
+                                      },
+                                      behavior: HitTestBehavior.opaque,
+                                      child: Icon(
+                                        Icons.delete_outline_rounded,
+                                        size: 18 * s,
+                                        color: _kGold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 14 * s),
+                      GestureDetector(
+                        onTap: () => _openStepEditSheet(
+                          onSaved: () {
+                            setSheetState(() {});
+                            refresh();
+                          },
+                        ),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: double.infinity,
+                          height: 48 * s,
+                          color: _kInk,
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_rounded,
+                                size: 16 * s,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 6 * s),
+                              Text(
+                                'YENİ AŞAMA EKLE',
+                                style: _ui(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10 * s),
+                      GestureDetector(
+                        onTap: () => Navigator.of(ctx).pop(),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: double.infinity,
+                          height: 48 * s,
+                          color: _kGold,
+                          alignment: Alignment.center,
+                          child: Text(
+                            'TAMAM',
+                            style: _ui(
+                              size: 10 * s,
+                              weight: FontWeight.w700,
+                              color: Colors.white,
+                              spacing: 1.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ── Tek bir aşamayı ekle / düzenle bottomsheet'i ────────────────────────
+  void _openStepEditSheet({int? existingIndex, required VoidCallback onSaved}) {
+    final existing = existingIndex != null ? _steps[existingIndex] : null;
+    final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    final tagCtrl = TextEditingController(text: existing?.tag ?? '');
+    final descCtrl = TextEditingController(text: existing?.description ?? '');
+    bool isDone = existing?.isDone ?? false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _kCream,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (ctx) {
+        final s = (MediaQuery.sizeOf(ctx).width / 390)
+            .clamp(0.85, 1.15)
+            .toDouble();
+        return StatefulBuilder(
+          builder: (ctx, setLocalState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                20 * s,
+                20 * s,
+                20 * s,
+                MediaQuery.of(ctx).viewInsets.bottom + 20 * s,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36 * s,
+                      height: 3 * s,
+                      color: _kCardBorder,
+                      margin: EdgeInsets.only(bottom: 18 * s),
+                    ),
+                  ),
+                  Text(
+                    existing == null ? 'Yeni Aşama' : 'Aşamayı Düzenle',
+                    style: _display(
+                      size: 22 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                    ),
+                  ),
+                  SizedBox(height: 20 * s),
+                  Text(
+                    'BAŞLIK',
+                    style: _ui(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                      spacing: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 8 * s),
+                  _SheetField(
+                    controller: titleCtrl,
+                    scale: s,
+                    hint: 'Örn. Renk Düzeltme',
+                  ),
+                  SizedBox(height: 18 * s),
+                  Text(
+                    'TARİH / ETİKET (opsiyonel)',
+                    style: _ui(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                      spacing: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 8 * s),
+                  _SheetField(
+                    controller: tagCtrl,
+                    scale: s,
+                    hint: 'Örn. 28 MAY',
+                  ),
+                  SizedBox(height: 18 * s),
+                  Text(
+                    'İÇERİK',
+                    style: _ui(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                      spacing: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 8 * s),
+                  _SheetField(
+                    controller: descCtrl,
+                    scale: s,
+                    hint: 'Bu aşamada ne yapılacak?',
+                    maxLines: 3,
+                  ),
+                  SizedBox(height: 16 * s),
+                  GestureDetector(
+                    onTap: () =>
+                        setLocalState(() => isDone = !isDone),
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
+                      children: [
+                        Icon(
+                          isDone
+                              ? Icons.check_box_rounded
+                              : Icons.check_box_outline_blank_rounded,
+                          size: 18 * s,
+                          color: isDone ? _kGold : _kMuted,
+                        ),
+                        SizedBox(width: 8 * s),
+                        Text(
+                          'Bu aşama tamamlandı',
+                          style: _ui(
+                            size: 10 * s,
+                            weight: FontWeight.w600,
+                            color: _kBlack,
+                            spacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 24 * s),
+                  GestureDetector(
+                    onTap: () {
+                      final title = titleCtrl.text.trim();
+                      if (title.isEmpty) return;
+                      final tag = tagCtrl.text.trim();
+                      final desc = descCtrl.text.trim();
+                      if (existing != null && existingIndex != null) {
+                        existing.title = title;
+                        existing.tag = tag;
+                        existing.description = desc;
+                        existing.isDone = isDone;
+                      } else {
+                        _steps.add(
+                          _ProcessStep(
+                            title: title,
+                            tag: tag,
+                            icon: Icons.flag_outlined,
+                            description: desc,
+                            isDone: isDone,
+                          ),
+                        );
+                      }
+                      onSaved();
+                      Navigator.of(ctx).pop();
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: double.infinity,
+                      height: 52 * s,
+                      color: _kGold,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'KAYDET',
+                        style: _ui(
+                          size: 11 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                          spacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── Bottomsheet metin alanı ────────────────────────────────────────────────────
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.controller,
+    required this.scale,
+    this.hint,
+    this.maxLines = 1,
+  });
+
+  final TextEditingController controller;
+  final double scale;
+  final String? hint;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    OutlineInputBorder border(Color c) => OutlineInputBorder(
+      borderRadius: BorderRadius.zero,
+      borderSide: BorderSide(color: c),
+    );
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      cursorColor: _kGold,
+      style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
+      decoration: InputDecoration(
+        isDense: true,
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hint,
+        hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14 * s,
+          vertical: 12 * s,
+        ),
+        border: border(Colors.black.withValues(alpha: 0.12)),
+        enabledBorder: border(Colors.black.withValues(alpha: 0.12)),
+        focusedBorder: border(_kGold),
       ),
     );
   }
@@ -498,66 +1035,31 @@ class _ManagerCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Süreç adımları — dikey zaman çizelgesi
+// Süreç adımları — dikey zaman çizelgesi (freelancer tarafından düzenlenebilir)
 // ---------------------------------------------------------------------------
 
-const _steps = [
-  (
-    'BRİF',
-    '24 MAY',
-    Icons.assignment_outlined,
-    true,
-    'Proje kapsamı, hedefler ve gereksinimler netleştirildi.',
-  ),
-  (
-    'PLANLAMA',
-    '25 MAY',
-    Icons.event_note_rounded,
-    true,
-    'Ekip planı ve süreç takvimi oluşturuldu.',
-  ),
-  (
-    'EKİP OLUŞUMU',
-    'ŞU AN',
-    Icons.groups_rounded,
-    false,
-    'Görüntü yönetmeni, editör ve diğer ekip üyeleri bir araya getiriliyor.',
-  ),
-  (
-    'ÇEKİM',
-    '',
-    Icons.videocam_rounded,
-    false,
-    'Belirlenen lokasyonda çekim gerçekleştirilecek.',
-  ),
-  (
-    'KURGU',
-    '',
-    Icons.content_cut_rounded,
-    false,
-    'Ham görüntüler kurgulanıp son haline getirilecek.',
-  ),
-  (
-    'TESLİM',
-    '',
-    Icons.flag_rounded,
-    false,
-    'Tamamlanan proje teslim edilecek.',
-  ),
-];
-const _currentStep = 2;
-
 class _StepProgress extends StatelessWidget {
-  const _StepProgress({required this.scale});
+  const _StepProgress({
+    required this.scale,
+    required this.steps,
+    required this.currentStep,
+  });
   final double scale;
+  final List<_ProcessStep> steps;
+  final int currentStep;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     return Column(
       children: [
-        for (int i = 0; i < _steps.length; i++)
-          _StepRow(scale: s, index: i, isLast: i == _steps.length - 1),
+        for (int i = 0; i < steps.length; i++)
+          _StepRow(
+            scale: s,
+            step: steps[i],
+            isCurrent: i == currentStep,
+            isLast: i == steps.length - 1,
+          ),
       ],
     );
   }
@@ -566,11 +1068,13 @@ class _StepProgress extends StatelessWidget {
 class _StepRow extends StatefulWidget {
   const _StepRow({
     required this.scale,
-    required this.index,
+    required this.step,
+    required this.isCurrent,
     required this.isLast,
   });
   final double scale;
-  final int index;
+  final _ProcessStep step;
+  final bool isCurrent;
   final bool isLast;
 
   @override
@@ -581,16 +1085,28 @@ class _StepRowState extends State<_StepRow>
     with SingleTickerProviderStateMixin {
   AnimationController? _pulse;
 
-  bool get _isCurrent => widget.index == _currentStep;
-
   @override
   void initState() {
     super.initState();
-    if (_isCurrent) {
+    if (widget.isCurrent) {
       _pulse = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 900),
       )..repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _StepRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCurrent && _pulse == null) {
+      _pulse = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 900),
+      )..repeat(reverse: true);
+    } else if (!widget.isCurrent && _pulse != null) {
+      _pulse!.dispose();
+      _pulse = null;
     }
   }
 
@@ -604,16 +1120,11 @@ class _StepRowState extends State<_StepRow>
   Widget build(BuildContext context) {
     final s = widget.scale;
     final circleSize = 40.0 * s;
-    final step = _steps[widget.index];
-    final label = step.$1;
-    final tag = step.$2;
-    final icon = step.$3;
-    final isDone = step.$4;
-    final description = step.$5;
-    final isCurrent = _isCurrent;
+    final step = widget.step;
+    final isCurrent = widget.isCurrent;
 
     Widget circle;
-    if (isCurrent) {
+    if (isCurrent && _pulse != null) {
       // Yalnızca şu an yapılan iş aktif görünür — dolgun altın daire.
       circle = AnimatedBuilder(
         animation: _pulse!,
@@ -640,7 +1151,7 @@ class _StepRowState extends State<_StepRow>
             child: child,
           );
         },
-        child: Icon(icon, size: 18 * s, color: Colors.white),
+        child: Icon(step.icon, size: 18 * s, color: Colors.white),
       );
     } else {
       // Tamamlanmış ya da sıradaki işler — ikisi de deaktif görünür.
@@ -653,7 +1164,7 @@ class _StepRowState extends State<_StepRow>
           border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
         ),
         child: Icon(
-          icon,
+          step.icon,
           size: 16 * s,
           color: _kMuted,
         ),
@@ -672,7 +1183,7 @@ class _StepRowState extends State<_StepRow>
                   child: Container(
                     width: 1.4,
                     margin: EdgeInsets.symmetric(vertical: 4 * s),
-                    color: isDone
+                    color: step.isDone
                         ? _kGold.withValues(alpha: 0.35)
                         : _kCardBorder,
                   ),
@@ -692,7 +1203,7 @@ class _StepRowState extends State<_StepRow>
                   Row(
                     children: [
                       Text(
-                        label,
+                        step.title.isEmpty ? 'BAŞLIKSIZ' : step.title,
                         style: _ui(
                           size: 10 * s,
                           weight: isCurrent ? FontWeight.w700 : FontWeight.w600,
@@ -700,10 +1211,10 @@ class _StepRowState extends State<_StepRow>
                           spacing: 0.8,
                         ),
                       ),
-                      if (tag.isNotEmpty) ...[
+                      if (step.tag.isNotEmpty) ...[
                         SizedBox(width: 8 * s),
                         Text(
-                          tag,
+                          step.tag,
                           style: _ui(
                             size: 7.5 * s,
                             weight: FontWeight.w700,
@@ -714,30 +1225,32 @@ class _StepRowState extends State<_StepRow>
                       ],
                     ],
                   ),
-                  SizedBox(height: 8 * s),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(10 * s),
-                    decoration: BoxDecoration(
-                      color: isCurrent
-                          ? _kGold.withValues(alpha: 0.08)
-                          : Colors.white,
-                      border: Border.all(
+                  if (step.description.isNotEmpty) ...[
+                    SizedBox(height: 8 * s),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(10 * s),
+                      decoration: BoxDecoration(
                         color: isCurrent
-                            ? _kGold.withValues(alpha: 0.35)
-                            : _kCardBorder,
+                            ? _kGold.withValues(alpha: 0.08)
+                            : Colors.white,
+                        border: Border.all(
+                          color: isCurrent
+                              ? _kGold.withValues(alpha: 0.35)
+                              : _kCardBorder,
+                        ),
+                      ),
+                      child: Text(
+                        step.description,
+                        style: _ui(
+                          size: 9 * s,
+                          color: isCurrent ? _kInk : _kMuted,
+                          spacing: 0.2,
+                          height: 1.45,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      description,
-                      style: _ui(
-                        size: 9 * s,
-                        color: isCurrent ? _kInk : _kMuted,
-                        spacing: 0.2,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -956,7 +1469,7 @@ class _TeamRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Proje detayı — Projelerim'deki proje kartı ile birebir aynı görünüm.
+// Proje detayı
 // ---------------------------------------------------------------------------
 
 class _ProjectDetailsHeaderCard extends StatelessWidget {

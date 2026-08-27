@@ -649,32 +649,37 @@ class _TheirBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final timeStyle = _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5);
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: EdgeInsets.only(bottom: 12 * s, right: 40 * s),
-        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 10 * s),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.zero,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.zero,
+            bottomLeft: Radius.zero,
+            topRight: Radius.circular(14 * s),
+            bottomRight: Radius.circular(14 * s),
+          ),
           border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(
-                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
-                children: _highlightSpans(text, _kGold),
+        child: Text.rich(
+          TextSpan(
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
+            children: [
+              ..._highlightSpans(text, _kGold),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: SizedBox(width: 8 * s),
               ),
-            ),
-            SizedBox(height: 4 * s),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(time,
-                  style: _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
-            ),
-          ],
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Text(time, style: timeStyle),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -691,42 +696,40 @@ class _MyBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final timeStyle = _ui(
+        size: 7.5 * s, color: Colors.white.withValues(alpha: 0.45), spacing: 0.5);
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         margin: EdgeInsets.only(bottom: 12 * s, left: 40 * s),
-        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 10 * s),
         decoration: BoxDecoration(
           color: _kBubbleMe,
-          borderRadius: BorderRadius.zero,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(14 * s),
+            bottomLeft: Radius.circular(14 * s),
+            topRight: Radius.zero,
+            bottomRight: Radius.zero,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(
-                style: _ui(
-                    size: 10 * s,
-                    color: Colors.white.withValues(alpha: 0.92),
-                    spacing: 0.2),
-                children: _highlightSpans(text, _kGold),
+        child: Text.rich(
+          TextSpan(
+            style: _ui(
+                size: 10 * s,
+                color: Colors.white.withValues(alpha: 0.92),
+                spacing: 0.2),
+            children: [
+              ..._highlightSpans(text, _kGold),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: SizedBox(width: 8 * s),
               ),
-            ),
-            SizedBox(height: 4 * s),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(time,
-                    style: _ui(
-                        size: 7.5 * s,
-                        color: Colors.white.withValues(alpha: 0.45),
-                        spacing: 0.5)),
-                SizedBox(width: 4 * s),
-                Icon(Icons.done_all_rounded, size: 12 * s, color: _kGold),
-              ],
-            ),
-          ],
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Text(time, style: timeStyle),
+              ),
+            ],
+          ),
         ),
       ),
     );

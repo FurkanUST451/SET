@@ -2,6 +2,8 @@ class AppRoutes {
   AppRoutes._();
 
   // Boot
+  static const String splashBrand = '/splash-brand';
+  static const String splashWelcome = '/splash-welcome';
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
 
@@ -34,4 +36,5 @@ class AppRoutes {
   static const String freelancerOfferDetail = '/freelancer/offer-detail';
   static const String freelancerProjectDetail = '/freelancer/project-detail';
   static const String freelancerUploadWork = '/freelancer/upload-work';
+  static const String freelancerSetProjects = '/freelancer/set-projects';
 }

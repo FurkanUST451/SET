@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_fonts.dart';
 
+import '../../../../core/constants/app_assets.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_projects_controller.dart';
@@ -114,6 +115,11 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                 _buildHeader(s, list.length),
                 SizedBox(height: 20 * s),
                 _buildFilterBar(s),
+                SizedBox(height: 16 * s),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                  child: _SetHalletsinPreviewCard(scale: s),
+                ),
                 SizedBox(height: 8 * s),
                 Expanded(
                   child: RefreshIndicator(
@@ -279,6 +285,232 @@ class _PulsingDotState extends State<_PulsingDot>
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SET HALLETSİN ÖNİZLEME KARTI — freelancer'ın süreç takibi ekranını
+// (freelancer_set_projects_view.dart) deneyebilmesi için sabit bir giriş
+// noktası. Gerçek proje verisiyle beslenmez, doğrudan mock ekrana götürür.
+// Görünüm, client tarafındaki SET HALLETSİN kartıyla (client_projects_tab.dart
+// _SetProjectCard) birebir aynıdır.
+// ─────────────────────────────────────────────────────────────────
+class _SetHalletsinPreviewCard extends StatelessWidget {
+  const _SetHalletsinPreviewCard({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.freelancerSetProjects),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: _kCardBorder),
+            bottom: BorderSide(color: _kCardBorder),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Durum satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
+                  child: Row(
+                    children: [
+                      _PulsingDot(color: _kGold, size: 8 * s),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        'SET HALLEDİYOR',
+                        style: _ui(
+                          size: 8 * s,
+                          weight: FontWeight.w700,
+                          color: _kBlack,
+                          spacing: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Kimlik satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 42 * s, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 48 * s,
+                        height: 48 * s,
+                        decoration: const BoxDecoration(color: Colors.white),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          'assets/images/main_service_icons/video.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.videocam_rounded,
+                            size: 22 * s,
+                            color: _kGold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 14 * s),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48 * s,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Cafe Tanıtım Filmi',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _display(
+                                  size: 20 * s,
+                                  weight: FontWeight.w600,
+                                  color: _kInk,
+                                ),
+                              ),
+                              SizedBox(height: 3 * s),
+                              Text(
+                                'Tanıtım Filmi',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _ui(
+                                  size: 8 * s,
+                                  color: _kBlack,
+                                  spacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Meta satırı (teslim / bütçe / çekim)
+                SizedBox(height: 18 * s),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.schedule_rounded,
+                          label: 'TESLİM',
+                          value: '7 gün',
+                        ),
+                      ),
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.payments_outlined,
+                          label: 'BÜTÇE',
+                          value: '45K',
+                        ),
+                      ),
+                      Expanded(
+                        child: _MetaCell(
+                          scale: s,
+                          icon: Icons.calendar_today_rounded,
+                          label: 'ÇEKİM',
+                          value: '20 Ağu',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Konum
+                SizedBox(height: 24 * s),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 13 * s,
+                        color: _kTaupe,
+                      ),
+                      SizedBox(width: 5 * s),
+                      Expanded(
+                        child: Text(
+                          'İstanbul',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Açıklama + Detay
+                SizedBox(height: 14 * s),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 13 * s,
+                        color: _kTaupe,
+                      ),
+                      SizedBox(width: 5 * s),
+                      Expanded(
+                        child: Text(
+                          'Ekip kuruluyor · adımları görüntüle',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ui(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: _kInk,
+                            spacing: 0.2,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        'DETAY',
+                        style: _ui(
+                          size: 8 * s,
+                          weight: FontWeight.w700,
+                          color: _kGold,
+                          spacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(width: 4 * s),
+                      Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // Sağ üst SET rozeti
+            Positioned(
+              top: 12 * s,
+              right: 12 * s,
+              child: SizedBox(
+                width: 36 * s,
+                height: 36 * s,
+                child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

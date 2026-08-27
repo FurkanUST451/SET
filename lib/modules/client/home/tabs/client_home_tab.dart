@@ -140,9 +140,9 @@ class ClientHomeTab extends StatelessWidget {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 18 * s),
+                              SizedBox(height: 28 * s),
                               _ActiveProjectCard(scale: s, project: active),
-                              SizedBox(height: 36 * s),
+                              SizedBox(height: 44 * s),
                             ],
                           );
                         }),
@@ -661,22 +661,6 @@ class _ActiveProjectCard extends StatelessWidget {
 
   String get _subtitle => project.shootingType ?? '';
 
-  String get _nextStep => (project.notes != null && project.notes!.isNotEmpty)
-      ? project.notes!
-      : 'Ekiple iletişimde kal';
-
-  String get _compactBudget {
-    final b = project.budget;
-    if (b >= 1000) {
-      final k = b / 1000;
-      final kStr = k == k.roundToDouble()
-          ? k.toStringAsFixed(0)
-          : k.toStringAsFixed(1);
-      return '${kStr}K';
-    }
-    return b.toStringAsFixed(0);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Kart içeriği "Projeni Başlat" bandına göre biraz büyütülür. Kartın dış
@@ -705,7 +689,7 @@ class _ActiveProjectCard extends StatelessWidget {
               Container(
                 width: double.infinity,
                 color: _kCardBg,
-                padding: EdgeInsets.fromLTRB(24 * s, 20 * s, 24 * s, 6 * s),
+                padding: EdgeInsets.fromLTRB(24 * s, 20 * s, 24 * s, 20 * s),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -759,32 +743,6 @@ class _ActiveProjectCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                    SizedBox(height: 18 * s),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _DarkMetaCell(
-                            scale: s,
-                            label: 'TESLİM',
-                            value: project.deliveryTime ?? '—',
-                          ),
-                        ),
-                        Expanded(
-                          child: _DarkMetaCell(
-                            scale: s,
-                            label: 'BÜTÇE',
-                            value: _compactBudget,
-                          ),
-                        ),
-                        Expanded(
-                          child: _DarkMetaCell(
-                            scale: s,
-                            label: 'ÇEKİM',
-                            value: project.dateRange ?? '—',
-                          ),
-                        ),
-                      ],
-                    ),
                     if (project.location != null &&
                         project.location!.isNotEmpty) ...[
                       SizedBox(height: 14 * s),
@@ -839,35 +797,10 @@ class _ActiveProjectCard extends StatelessWidget {
                     ),
                     SizedBox(height: 16 * s),
                     Divider(height: 1, color: _kBlack.withValues(alpha: 0.12)),
-                    SizedBox(height: 6 * s),
+                    SizedBox(height: 12 * s),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'SONRAKİ ADIM · ',
-                                  style: _ui(
-                                    size: 8 * s,
-                                    weight: FontWeight.w700,
-                                    color: _kBlack.withValues(alpha: 0.45),
-                                    spacing: 0.8,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: _nextStep,
-                                  style: _ui(
-                                    size: 8 * s,
-                                    weight: FontWeight.w700,
-                                    color: _kBlack.withValues(alpha: 0.85),
-                                    spacing: 0.8,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                         Text(
                           'DETAY',
                           style: _ui(
@@ -905,42 +838,6 @@ class _ActiveProjectCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ── Kart içi meta hücresi (TESLİM / BÜTÇE / ÇEKİM) ──────────────────────
-class _DarkMetaCell extends StatelessWidget {
-  const _DarkMetaCell({
-    required this.scale,
-    required this.label,
-    required this.value,
-  });
-  final double scale;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: _ui(
-            size: 7 * s,
-            weight: FontWeight.w700,
-            color: _kBlack.withValues(alpha: 0.45),
-            spacing: 1,
-          ),
-        ),
-        SizedBox(height: 5 * s),
-        Text(
-          value,
-          style: _ui(size: 12 * s, weight: FontWeight.w600, color: _kBlack),
-        ),
-      ],
     );
   }
 }

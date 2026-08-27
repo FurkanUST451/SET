@@ -90,6 +90,18 @@ class _LoginViewState extends State<LoginView>
 
   final FocusNode _emailFocusNode = FocusNode();
 
+  // Bu alanlar View'ın kendi State'ine ait: GetX, LoginController'ı sayfa
+  // geçiş animasyonu bitmeden (henüz ekranda görünürken) dispose edebiliyor.
+  // Controller'lar GetxController'a bağlı olsaydı, çıkış animasyonu sırasında
+  // "used after being disposed" hatası oluşuyordu.
+  final TextEditingController _emailController = TextEditingController(
+    text: 'ornek@set.app',
+  );
+  final TextEditingController _passwordController = TextEditingController(
+    text: '123456',
+  );
+  final TextEditingController _resetEmailController = TextEditingController();
+
   late final AnimationController _intro = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: _totalMs),
@@ -99,8 +111,16 @@ class _LoginViewState extends State<LoginView>
   void dispose() {
     _intro.dispose();
     _emailFocusNode.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _resetEmailController.dispose();
     super.dispose();
   }
+
+  Future<void> _submit() => controller.submit(
+    email: _emailController.text,
+    password: _passwordController.text,
+  );
 
   double _reveal(
     double t,
@@ -317,8 +337,7 @@ class _LoginViewState extends State<LoginView>
                                           ),
                                           SizedBox(height: 6 * s),
                                           TextFormField(
-                                            controller:
-                                                controller.emailController,
+                                            controller: _emailController,
                                             focusNode: _emailFocusNode,
                                             keyboardType:
                                                 TextInputType.emailAddress,
@@ -370,7 +389,10 @@ class _LoginViewState extends State<LoginView>
                                             _PasswordField(
                                               scale: s,
                                               controller: controller,
+                                              textController:
+                                                  _passwordController,
                                               border: border,
+                                              onSubmitted: _submit,
                                             ),
                                             SizedBox(height: 10 * s),
                                             Align(
@@ -381,6 +403,8 @@ class _LoginViewState extends State<LoginView>
                                                     _showForgotPasswordSheet(
                                                   context,
                                                   controller,
+                                                  _emailController,
+                                                  _resetEmailController,
                                                   s,
                                                 ),
                                                 behavior:
@@ -410,6 +434,7 @@ class _LoginViewState extends State<LoginView>
                                             _LoginButton(
                                               scale: s,
                                               controller: controller,
+                                              onSubmit: _submit,
                                             ),
                                             SizedBox(height: 18 * s),
                                             Row(
@@ -574,12 +599,16 @@ class _PasswordField extends StatelessWidget {
   const _PasswordField({
     required this.scale,
     required this.controller,
+    required this.textController,
     required this.border,
+    required this.onSubmitted,
   });
 
   final double scale;
   final LoginController controller;
+  final TextEditingController textController;
   final OutlineInputBorder Function(Color) border;
+  final VoidCallback onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -599,13 +628,13 @@ class _PasswordField extends StatelessWidget {
         SizedBox(height: 6 * s),
         Obx(
           () => TextFormField(
-            controller: controller.passwordController,
+            controller: textController,
             obscureText: controller.obscurePassword.value,
             textInputAction: TextInputAction.done,
             validator: Validators.password,
             cursorColor: _kGold,
             style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
-            onFieldSubmitted: (_) => controller.submit(),
+            onFieldSubmitted: (_) => onSubmitted(),
             decoration: InputDecoration(
               isDense: true,
               filled: true,
@@ -652,17 +681,22 @@ class _PasswordField extends StatelessWidget {
 
 // ─── Giriş yap butonu ─────────────────────────────────────────────────────
 class _LoginButton extends StatelessWidget {
-  const _LoginButton({required this.scale, required this.controller});
+  const _LoginButton({
+    required this.scale,
+    required this.controller,
+    required this.onSubmit,
+  });
 
   final double scale;
   final LoginController controller;
+  final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     return Obx(
       () => GestureDetector(
-        onTap: controller.isLoading.value ? null : controller.submit,
+        onTap: controller.isLoading.value ? null : onSubmit,
         behavior: HitTestBehavior.opaque,
         child: Container(
           width: double.infinity,
@@ -826,9 +860,11 @@ class _CornerBracket extends StatelessWidget {
 void _showForgotPasswordSheet(
   BuildContext context,
   LoginController controller,
+  TextEditingController emailController,
+  TextEditingController resetEmailController,
   double s,
 ) {
-  controller.resetEmailController.text = controller.emailController.text;
+  resetEmailController.text = emailController.text;
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: _kCream,
@@ -861,7 +897,7 @@ void _showForgotPasswordSheet(
             ),
             SizedBox(height: 16 * s),
             TextField(
-              controller: controller.resetEmailController,
+              controller: resetEmailController,
               keyboardType: TextInputType.emailAddress,
               cursorColor: _kGold,
               style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
@@ -888,7 +924,7 @@ void _showForgotPasswordSheet(
                   onTap: controller.isSendingReset.value
                       ? null
                       : () => controller.sendPasswordReset(
-                          controller.resetEmailController.text,
+                          resetEmailController.text,
                         ),
                   child: Container(
                     height: 50 * s,
