@@ -164,7 +164,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · ÜRETİM',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -186,7 +186,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                 Text(
                   'Projelerim',
                   style: _display(
-                    size: 40 * s,
+                    size: 32 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
                   ),
@@ -194,7 +194,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                 SizedBox(height: 6 * s),
                 Text(
                   '$count proje görüntüleniyor',
-                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -235,7 +235,7 @@ class _FreelancerProjectsTabState extends State<FreelancerProjectsTab> {
                   Text(
                     _filterLabels[i],
                     style: _ui(
-                      size: 9 * s,
+                      size: 11 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: _kBlack,
                       spacing: 1,
@@ -329,7 +329,7 @@ class _SetHalletsinPreviewCard extends StatelessWidget {
                       Text(
                         'SET HALLEDİYOR',
                         style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
                           spacing: 1.4,
@@ -373,7 +373,7 @@ class _SetHalletsinPreviewCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: _display(
-                                  size: 20 * s,
+                                  size: 24 * s,
                                   weight: FontWeight.w600,
                                   color: _kInk,
                                 ),
@@ -384,7 +384,7 @@ class _SetHalletsinPreviewCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: _ui(
-                                  size: 8 * s,
+                                  size: 13 * s,
                                   color: _kBlack,
                                   spacing: 1,
                                 ),
@@ -486,7 +486,7 @@ class _SetHalletsinPreviewCard extends StatelessWidget {
                       Text(
                         'DETAY',
                         style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kGold,
                           spacing: 1.2,
@@ -636,7 +636,7 @@ class _ProjectCard extends StatelessWidget {
                   Text(
                     _statusLabel,
                     style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1.4,
@@ -677,7 +677,7 @@ class _ProjectCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                              size: 20 * s,
+                              size: 24 * s,
                               weight: FontWeight.w600,
                               color: _kInk,
                             ),
@@ -689,7 +689,7 @@ class _ProjectCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: _ui(
-                                size: 8 * s,
+                                size: 13 * s,
                                 color: _kBlack,
                                 spacing: 1,
                               ),
@@ -800,7 +800,7 @@ class _ProjectCard extends StatelessWidget {
                         ? clientName!.toUpperCaseTr()
                         : _formatDate(project.createdAt).toUpperCaseTr(),
                     style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kGold,
                       spacing: 1.2,
@@ -844,7 +844,7 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
+              style: _ui(size: 10 * s, color: _kBlack, spacing: 1),
             ),
           ],
         ),
@@ -892,7 +892,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(

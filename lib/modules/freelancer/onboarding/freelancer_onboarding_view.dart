@@ -80,7 +80,7 @@ class FreelancerOnboardingView extends GetView<FreelancerOnboardingController> {
                     SizedBox(width: 8 * s),
                     Text(
                       'Freelancer Profili',
-                      style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                   ],
                 ),
@@ -226,7 +226,7 @@ class _LabeledField extends StatelessWidget {
         if (label.isNotEmpty) ...[
           Text(
             label.toUpperCaseTr(),
-            style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
+            style: _ui(size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
           ),
           SizedBox(height: 7 * s),
         ],
@@ -297,7 +297,7 @@ class _PersonalInfoStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Kişisel Bilgiler',
-              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 20 * s),
 
           // Profil Fotoğrafı
@@ -490,7 +490,7 @@ class _PersonalInfoStep extends StatelessWidget {
                   itemBuilder: (_, i) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(cities[i],
-                        style: _display(size: 15 * s, weight: FontWeight.w500, color: _kInk)),
+                        style: _display(size: 17 * s, weight: FontWeight.w500, color: _kInk)),
                     onTap: () {
                       c.selectedCity.value = cities[i];
                       Navigator.of(context).pop();
@@ -569,7 +569,7 @@ class _CategoryStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kategoriler', style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+          Text('Kategoriler', style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 4 * s),
           Text('Birden fazla seçebilirsin',
               style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2)),
@@ -635,7 +635,7 @@ class _BioStep extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Kendini kısaca tanıt:',
-                style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 20 * s),
             _LabeledField(
               label: '',
@@ -665,7 +665,7 @@ class _PortfolioStep extends StatelessWidget {
         padding: EdgeInsets.all(24 * s),
         children: [
           Text('Bize projelerinden bahset',
-              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
           SizedBox(height: 4 * s),
           Text(
             'Bize daha önce yaptığın projelerden bahseder misin?',
@@ -754,11 +754,11 @@ class _ProjectCard extends StatelessWidget {
               children: [
                 if (project.title.isNotEmpty)
                   Text(project.title,
-                      style: _display(size: 15 * s, weight: FontWeight.w600, color: _kInk)),
+                      style: _display(size: 19 * s, weight: FontWeight.w600, color: _kInk)),
                 if (project.jobType.isNotEmpty) ...[
                   SizedBox(height: 2 * s),
                   Text(project.jobType,
-                      style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
+                      style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2)),
                 ],
                 if (project.description.isNotEmpty) ...[
                   SizedBox(height: 6 * s),
@@ -853,7 +853,7 @@ class _AddProjectSheetState extends State<_AddProjectSheet> {
           children: [
             Center(child: _bottomSheetHandle(s)),
             SizedBox(height: 14 * s),
-            Text('Proje Ekle', style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+            Text('Proje Ekle', style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 16 * s),
             _LabeledField(label: 'Proje Başlığı', controller: _titleCtrl, hint: 'Migros'),
             SizedBox(height: 14 * s),

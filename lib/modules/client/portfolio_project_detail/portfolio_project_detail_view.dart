@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/theme/app_fonts.dart';
 
+import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/portfolio_project_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../../routes/app_routes.dart';
 import 'portfolio_project_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
@@ -15,7 +19,7 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000);
 const _kDivider = Color(0x12000000);
-const _kCardBorder = Color(0x14000000);
+const _kDark = Color(0xFF141219);
 const _kThumbTop = Color(0xFF262430);
 const _kThumbBot = Color(0xFF141219);
 
@@ -24,13 +28,12 @@ TextStyle _display({
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-  bool italic = false,
 }) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
-  fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+  decoration: TextDecoration.none,
 );
 
 TextStyle _ui({
@@ -45,6 +48,7 @@ TextStyle _ui({
   color: color,
   letterSpacing: spacing,
   height: height,
+  decoration: TextDecoration.none,
 );
 
 const _kThumbGradient = DecoratedBox(
@@ -57,6 +61,64 @@ const _kThumbGradient = DecoratedBox(
   ),
 );
 
+// Aşama başlığı → gün sayısı. Model'de süreç aşamalarının süresi
+// tutulmadığı için (bkz. PortfolioProcessStage) gösterimlik sabit bir
+// süre tablosu kullanılıyor — bilinmeyen bir etiket 3 gün varsayar.
+const _kStageDurations = <String, int>{
+  'Brief & Analiz': 4,
+  'Pre-Prodüksiyon': 5,
+  'Prodüksiyon': 7,
+  'Post-Prodüksiyon': 8,
+  'Teslim': 4,
+};
+
+int _stageDuration(String label) => _kStageDurations[label] ?? 3;
+
+String _stageCaption(String label) {
+  switch (label) {
+    case 'Brief & Analiz':
+      return 'Hedefler, referanslar ve görsel dil netleştirildi.';
+    case 'Pre-Prodüksiyon':
+      return 'Storyboard, lokasyon ve çekim takvimi hazırlandı.';
+    case 'Prodüksiyon':
+      return 'İstanbul\'da üç lokasyonda çekimler yapıldı.';
+    case 'Post-Prodüksiyon':
+      return 'Renk, ses ve kurgu tek anlatıda birleştirildi.';
+    case 'Teslim':
+      return 'Tüm formatlar hazırlanıp teslim edildi.';
+    default:
+      return 'Bu aşama özenle yürütüldü.';
+  }
+}
+
+// "SONUÇ" bölümü — gerçek kampanya sonuçları henüz backend'de bir alan
+// olarak tutulmadığı için yalnızca elimizde gerçek vaka metni olan
+// projeler (şu an sadece Mercedes) için gösterilir.
+class _CaseResult {
+  const _CaseResult({
+    required this.viewsLabel,
+    required this.targetLabel,
+    required this.earlyLabel,
+    required this.quote,
+    required this.clientLabel,
+  });
+  final String viewsLabel;
+  final String targetLabel;
+  final String earlyLabel;
+  final String quote;
+  final String clientLabel;
+}
+
+const _kCaseResults = <String, _CaseResult>{
+  'w1': _CaseResult(
+    viewsLabel: '4.2M',
+    targetLabel: '%180',
+    earlyLabel: '12 GÜN',
+    quote: 'Ekip, ilk kurguyu planlanandan on iki gün önce teslim etti.',
+    clientLabel: 'MERCEDES-BENZ TÜRK · PAZARLAMA DİREKTÖRÜ',
+  ),
+};
+
 class PortfolioProjectDetailView extends StatelessWidget {
   const PortfolioProjectDetailView({super.key});
 
@@ -67,40 +129,44 @@ class PortfolioProjectDetailView extends StatelessWidget {
     final double s = (MediaQuery.sizeOf(context).width / 390)
         .clamp(0.85, 1.15)
         .toDouble();
+    final result = _kCaseResults[project.id];
 
     return MediaQuery.withNoTextScaling(
       key: ValueKey('portfolio-detail-${project.id}'),
       child: Scaffold(
         backgroundColor: _kCream,
-        body: SafeArea(
-          bottom: false,
+        body: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 40 * s),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _TopBar(scale: s),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(20 * s, 6 * s, 20 * s, 40 * s),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _HeroCard(scale: s, project: project),
-                      SizedBox(height: 22 * s),
-                      _TabBar(scale: s, controller: controller),
-                      SizedBox(height: 22 * s),
-                      Obx(() {
-                        switch (controller.activeTab.value) {
-                          case PortfolioDetailTab.overview:
-                            return _OverviewTab(scale: s, project: project);
-                          case PortfolioDetailTab.team:
-                            return _TeamTab(scale: s, project: project);
-                          case PortfolioDetailTab.process:
-                            return _ProcessTab(scale: s, project: project);
-                        }
-                      }),
-                    ],
-                  ),
+              _Hero(scale: s, project: project),
+              SizedBox(height: 20 * s),
+              _StatsRow(scale: s, project: project),
+              SizedBox(height: 20 * s),
+              Container(height: 1, color: _kDivider),
+              SizedBox(height: 22 * s),
+              _SectionLabel(scale: s, label: 'BRIEF'),
+              SizedBox(height: 12 * s),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 22 * s),
+                child: Text(
+                  project.description,
+                  style: _ui(size: 14 * s, color: _kBlack, spacing: 0.2, height: 1.6),
                 ),
               ),
+              SizedBox(height: 28 * s),
+              if (result != null) ...[
+                _ResultSection(scale: s, result: result),
+                SizedBox(height: 28 * s),
+              ],
+              _SectionLabel(scale: s, label: 'EKİP'),
+              SizedBox(height: 8 * s),
+              _TeamList(scale: s, project: project),
+              SizedBox(height: 28 * s),
+              _SectionLabel(scale: s, label: 'SÜREÇ'),
+              SizedBox(height: 8 * s),
+              _ProcessSection(scale: s, project: project),
             ],
           ),
         ),
@@ -110,248 +176,201 @@ class PortfolioProjectDetailView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// TOP BAR
+// HERO — kapak fotoğrafı + video'dan oluşan carousel. Video asset'i
+// henüz tanımlanmadığı için ikinci sayfa şimdilik yer tutucu gösterir;
+// asset eklendiğinde sadece _heroVideoAsset doldurulması yeterli.
 // ─────────────────────────────────────────────────────────────────
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(8 * s, 8 * s, 8 * s, 8 * s),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back<void>(),
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: EdgeInsets.all(8 * s),
-              child: Icon(Icons.arrow_back_rounded, size: 22 * s, color: _kInk),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              'PROJE DETAYI',
-              textAlign: TextAlign.center,
-              style: _ui(
-                size: 10 * s,
-                weight: FontWeight.w700,
-                color: _kBlack,
-                spacing: 1.6,
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(8 * s),
-            child: Icon(Icons.more_vert_rounded, size: 20 * s, color: _kInk),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// HERO CARD
-// ─────────────────────────────────────────────────────────────────
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.scale, required this.project});
+class _Hero extends StatefulWidget {
+  const _Hero({required this.scale, required this.project});
   final double scale;
   final PortfolioProjectModel project;
 
   @override
+  State<_Hero> createState() => _HeroState();
+}
+
+// Proje id'sine göre hero videosu — henüz yalnızca Mercedes Campaign
+// için gerçek bir video dosyası var; diğer projelerde ikinci sayfa
+// yer tutucu olarak kalır.
+const _kHeroVideos = <String, String>{
+  'w1': 'assets/videos/mercedescampaign.mp4',
+};
+
+class _HeroState extends State<_Hero> {
+  String? get _heroVideoAsset => _kHeroVideos[widget.project.id];
+
+  bool _didPrecache = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Video sayfasından geri dönüşte fotoğrafın anında görünmesi için
+    // kapak ve galeri görsellerini önceden decode edip önbelleğe alıyoruz.
+    if (_didPrecache) return;
+    _didPrecache = true;
+    final project = widget.project;
+    if (project.coverImageUrl != null) {
+      precacheImage(AssetImage(project.coverImageUrl!), context);
+    }
+    if (project.galleryImageUrls.isNotEmpty) {
+      precacheImage(AssetImage(project.galleryImageUrls.first), context);
+    }
+  }
+
+  late final PageController _pageController = PageController();
+  int _activeIndex = 0;
+  bool _muted = true;
+
+  static const int _pageCount = 3;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final s = scale;
-    // RepaintBoundary + proje bazlı key: bu kartın katmanları farklı
-    // projeler arasında veya rebuild'ler sırasında başka widget'ların
-    // render katmanlarıyla karışmasın diye izole ediyoruz.
+    final s = widget.scale;
+    final project = widget.project;
     return RepaintBoundary(
-      key: ValueKey('hero-card-${project.id}'),
-      child: ClipRRect(
-      borderRadius: BorderRadius.circular(18 * s),
+      key: ValueKey('hero-${project.id}'),
       child: AspectRatio(
-        // Gerçek kapak görseli genelde geniş/sinematik bir kadrajla geliyor
-        // (ör. mercedes_bg.png, ~1.93:1); kartı yeteri kadar dikeyde büyük
-        // tutup hem görseli hem "ÖNE ÇIKAN PROJE" etiketine, başlığa ve alt
-        // bilgilere üst üste binmeden yer açıyoruz. Görsel yoksa (yer
-        // tutucu) daha dikey bir kart kullanıyoruz.
-        aspectRatio: project.coverImageUrl != null ? 3 / 2 : 4 / 5,
+        aspectRatio: 1,
         child: Stack(
-          key: ValueKey('hero-${project.id}'),
           fit: StackFit.expand,
           children: [
-            if (project.coverImageUrl != null)
-              Image.asset(
-                project.coverImageUrl!,
-                key: const ValueKey('hero-cover'),
-                fit: BoxFit.cover,
-              )
-            else
-              ColoredBox(
-                key: const ValueKey('hero-placeholder'),
-                color: Colors.transparent,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _kThumbGradient,
-                    Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 40 * s,
-                        color: Colors.white.withValues(alpha: 0.12),
-                      ),
-                    ),
-                  ],
+            PageView(
+              controller: _pageController,
+              onPageChanged: (i) => setState(() => _activeIndex = i),
+              children: [
+                _HeroImagePage(project: project),
+                _HeroVideoPage(
+                  scale: s,
+                  videoAsset: _heroVideoAsset,
+                  isActive: _activeIndex == 1,
+                  muted: _muted,
                 ),
-              ),
-            // scrim
-            Positioned.fill(
-              key: const ValueKey('hero-scrim'),
+                _HeroGalleryPage(project: project),
+              ],
+            ),
+            IgnorePointer(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0),
                       Colors.black.withValues(alpha: 0.75),
                     ],
-                    stops: const [0.3, 1.0],
+                    stops: const [0.45, 1],
                   ),
                 ),
               ),
             ),
-            // brand mark placeholder (top-right) — yalnızca gerçek görsel
-            // yokken gösterilir; sağlanan fotoğraflarda marka logosu zaten
-            // görselin içinde geliyor.
-            if (project.coverImageUrl == null)
-              Positioned(
-                key: const ValueKey('hero-brand-mark'),
-                top: 18 * s,
-                right: 18 * s,
-                child: Container(
-                  width: 40 * s,
-                  height: 40 * s,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.10),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.workspace_premium_outlined,
-                    size: 18 * s,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            // featured tag (top-left) — kartın büyümüş boyu sayesinde artık
-            // başlıkla üst üste binmiyor.
-            if (project.isFeatured)
-              Positioned(
-                key: const ValueKey('hero-featured-tag'),
-                top: 18 * s,
-                left: 20 * s,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 5 * s,
-                      height: 5 * s,
-                      decoration: const BoxDecoration(
-                        color: _kGold,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: 6 * s),
-                    Text(
-                      'ÖNE ÇIKAN PROJE',
-                      style: _ui(
-                        size: 8 * s,
-                        weight: FontWeight.w700,
-                        color: _kGold,
-                        spacing: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            // bottom content
             Positioned(
-              key: const ValueKey('hero-bottom-content'),
-              left: 20 * s,
-              right: 20 * s,
-              bottom: 18 * s,
+              top: 10 * s,
+              left: 6 * s,
+              child: SafeArea(
+                bottom: false,
+                child: GestureDetector(
+                  onTap: () => Get.back<void>(),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: EdgeInsets.all(10 * s),
+                    child: Icon(
+                      Icons.arrow_back_rounded,
+                      size: 22 * s,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Instagram tarzı transparan "1/2" sayfa göstergesi
+            Positioned(
+              top: 10 * s,
+              right: 12 * s,
+              child: SafeArea(
+                bottom: false,
+                child: _PagePill(
+                  scale: s,
+                  text: '${_activeIndex + 1}/$_pageCount',
+                ),
+              ),
+            ),
+            // Instagram tarzı transparan ses aç/kapa — tüm sayfalarda görünür
+            Positioned(
+              right: 14 * s,
+              bottom: 14 * s,
+              child: GestureDetector(
+                onTap: () => setState(() => _muted = !_muted),
+                behavior: HitTestBehavior.opaque,
+                child: _PagePill(
+                  scale: s,
+                  icon: _muted
+                      ? Icons.volume_off_rounded
+                      : Icons.volume_up_rounded,
+                  square: true,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 22 * s,
+              right: 22 * s,
+              bottom: 22 * s,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    project.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: _display(
-                      size: 26 * s,
-                      weight: FontWeight.w600,
-                      color: Colors.white,
-                      height: 1.05,
+                    '${project.status.label} · ${project.year}',
+                    style: _ui(
+                      size: 11 * s,
+                      weight: FontWeight.w700,
+                      color: _kGold,
+                      spacing: 1.2,
                     ),
                   ),
                   SizedBox(height: 6 * s),
-                  Text(
-                    project.subtitle,
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: project.title,
+                          style: _display(
+                            size: 34 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.02,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '.',
+                          style: _display(
+                            size: 34 * s,
+                            weight: FontWeight.w700,
+                            color: _kGold,
+                            height: 1.02,
+                          ),
+                        ),
+                      ],
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(
-                      size: 9 * s,
-                      color: Colors.white.withValues(alpha: 0.75),
-                      spacing: 0.3,
-                    ),
                   ),
                   SizedBox(height: 14 * s),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10 * s,
-                      vertical: 5 * s,
+                  SmoothPageIndicator(
+                    controller: _pageController,
+                    count: _pageCount,
+                    effect: WormEffect(
+                      dotWidth: 6 * s,
+                      dotHeight: 6 * s,
+                      activeDotColor: _kGold,
+                      dotColor: Colors.white.withValues(alpha: 0.4),
+                      spacing: 7 * s,
                     ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
-                      borderRadius: BorderRadius.circular(3 * s),
-                    ),
-                    child: Text(
-                      project.tagLabel,
-                      style: _ui(
-                        size: 8 * s,
-                        weight: FontWeight.w700,
-                        color: Colors.white,
-                        spacing: 1,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16 * s),
-                  Row(
-                    children: [
-                      _HeroMeta(scale: s, label: 'YIL', value: project.year),
-                      _HeroMetaDivider(scale: s),
-                      _HeroMeta(
-                        scale: s,
-                        label: 'SÜRE',
-                        value: project.durationLabel,
-                      ),
-                      _HeroMetaDivider(scale: s),
-                      _HeroMeta(
-                        scale: s,
-                        label: 'DURUM',
-                        value: project.status.label,
-                        icon: project.status == PortfolioStatus.completed
-                            ? Icons.check_circle_rounded
-                            : null,
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -359,296 +378,310 @@ class _HeroCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HeroImagePage extends StatelessWidget {
+  const _HeroImagePage({required this.project});
+  final PortfolioProjectModel project;
+
+  @override
+  Widget build(BuildContext context) {
+    return project.coverImageUrl != null
+        ? Image.asset(
+            project.coverImageUrl!,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+          )
+        : const Stack(fit: StackFit.expand, children: [_kThumbGradient]);
+  }
+}
+
+// Üçüncü sayfa — proje galerisinden bir kare (kapaktan farklı bir kadraj
+// göstermek için ilk galeri görseli kullanılır).
+class _HeroGalleryPage extends StatelessWidget {
+  const _HeroGalleryPage({required this.project});
+  final PortfolioProjectModel project;
+
+  @override
+  Widget build(BuildContext context) {
+    final images = project.galleryImageUrls;
+    return images.isNotEmpty
+        ? Image.asset(images.first, fit: BoxFit.cover, gaplessPlayback: true)
+        : const Stack(fit: StackFit.expand, children: [_kThumbGradient]);
+  }
+}
+
+// Video sayfası — sessiz döngüde oynar. Asset henüz sağlanmadıysa
+// kapak fotoğrafını soluk bir zeminle gösterip oynatıcıyı hiç kurmaz.
+class _HeroVideoPage extends StatefulWidget {
+  const _HeroVideoPage({
+    required this.scale,
+    required this.videoAsset,
+    required this.isActive,
+    required this.muted,
+  });
+
+  final double scale;
+  final String? videoAsset;
+  final bool isActive;
+  final bool muted;
+
+  @override
+  State<_HeroVideoPage> createState() => _HeroVideoPageState();
+}
+
+class _HeroVideoPageState extends State<_HeroVideoPage> {
+  VideoPlayerController? _controller;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setUpController();
+  }
+
+  void _setUpController() {
+    final asset = widget.videoAsset;
+    if (asset == null) return;
+    _hasError = false;
+    _controller = VideoPlayerController.asset(asset)
+      ..setLooping(true)
+      ..setVolume(widget.muted ? 0 : 1)
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() {});
+        if (widget.isActive) _controller?.play();
+      }).catchError((Object e) {
+        if (!mounted) return;
+        setState(() => _hasError = true);
+      });
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroVideoPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.videoAsset != oldWidget.videoAsset) {
+      _controller?.dispose();
+      _controller = null;
+      _setUpController();
+      return;
+    }
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    if (widget.isActive != oldWidget.isActive) {
+      widget.isActive ? controller.play() : controller.pause();
+    }
+    if (widget.muted != oldWidget.muted) {
+      controller.setVolume(widget.muted ? 0 : 1);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      // Video henüz tanımlanmadı/yükleniyor/başarısız oldu — yer tutucu.
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          const Stack(fit: StackFit.expand, children: [_kThumbGradient]),
+          Center(
+            child: _hasError
+                ? Icon(
+                    Icons.error_outline_rounded,
+                    size: 36 * widget.scale,
+                    color: Colors.white.withValues(alpha: 0.35),
+                  )
+                : Icon(
+                    Icons.play_circle_outline_rounded,
+                    size: 40 * widget.scale,
+                    color: Colors.white.withValues(alpha: 0.35),
+                  ),
+          ),
+        ],
+      );
+    }
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: SizedBox(
+        width: controller.value.size.width,
+        height: controller.value.size.height,
+        child: VideoPlayer(controller),
       ),
     );
   }
 }
 
-class _HeroMeta extends StatelessWidget {
-  const _HeroMeta({
+// Instagram tarzı transparan pill/rozet — sayfa sayacı ve ses düğmesi
+// için ortak görünüm.
+class _PagePill extends StatelessWidget {
+  const _PagePill({
     required this.scale,
-    required this.label,
-    required this.value,
+    this.text,
     this.icon,
+    this.square = false,
   });
+
   final double scale;
-  final String label;
-  final String value;
+  final String? text;
   final IconData? icon;
+  final bool square;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: _ui(
-            size: 7 * s,
-            color: Colors.white.withValues(alpha: 0.55),
-            spacing: 1,
-          ),
-        ),
-        SizedBox(height: 3 * s),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
+    return Container(
+      width: square ? 30 * s : null,
+      height: square ? 30 * s : null,
+      padding: square
+          ? null
+          : EdgeInsets.symmetric(horizontal: 9 * s, vertical: 5 * s),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(square ? 15 * s : 20 * s),
+      ),
+      child: icon != null
+          ? Icon(icon, size: 15 * s, color: Colors.white)
+          : Text(
+              text ?? '',
               style: _ui(
                 size: 9 * s,
                 weight: FontWeight.w700,
                 color: Colors.white,
-                spacing: 0.3,
+                spacing: 0.4,
               ),
             ),
-            if (icon != null) ...[
-              SizedBox(width: 4 * s),
-              Icon(icon, size: 11 * s, color: _kGold),
-            ],
-          ],
-        ),
-      ],
     );
   }
 }
 
-class _HeroMetaDivider extends StatelessWidget {
-  const _HeroMetaDivider({required this.scale});
+// ─────────────────────────────────────────────────────────────────
+// STAT ROW — KİŞİ / SÜRE / BÜTÇE / TESLİM
+// ─────────────────────────────────────────────────────────────────
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({required this.scale, required this.project});
   final double scale;
+  final PortfolioProjectModel project;
+
+  static const _kUnitAbbr = {
+    'HAFTA': 'HFT',
+    'GÜN': 'GÜN',
+    'AY': 'AY',
+    'SAAT': 'SAAT',
+  };
+
+  // "4 HAFTA" -> "4 HFT" — dar sütuna sığması için kısaltılır.
+  String get _compactDuration {
+    final raw = project.durationLabel.trim();
+    final parts = raw.split(RegExp(r'\s+'));
+    if (parts.length < 2) return raw;
+    final unitRaw = parts.sublist(1).join(' ').toUpperCaseTr();
+    final abbr = _kUnitAbbr[unitRaw] ??
+        (unitRaw.length > 3 ? unitRaw.substring(0, 3) : unitRaw);
+    return '${parts[0]} $abbr';
+  }
+
+  // "250K - 500K ₺" -> "500B" — tek değer, ₺ işareti olmadan.
+  String get _compactBudget {
+    final raw = project.budgetRangeLabel;
+    final matches = RegExp(r'\d[\d.]*[KM]?')
+        .allMatches(raw)
+        .map((m) => m.group(0)!)
+        .toList();
+    if (matches.isEmpty) return raw;
+    final last = matches.last;
+    return last.endsWith('K')
+        ? '${last.substring(0, last.length - 1)}B'
+        : last;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final stats = [
+      (project.team.length.toString(), 'KİŞİ'),
+      (_compactDuration, 'SÜRE'),
+      (_compactBudget, 'BÜTÇE'),
+      (project.galleryImageUrls.length.toString(), 'TESLİM'),
+    ];
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20 * s),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < stats.length; i++) ...[
+            if (i > 0)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10 * s),
+                child: Container(width: 1, height: 34 * s, color: _kDivider),
+              ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    stats[i].$1,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _display(
+                      size: 19 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                      height: 1.05,
+                    ),
+                  ),
+                  SizedBox(height: 4 * s),
+                  Text(
+                    stats[i].$2,
+                    textAlign: TextAlign.center,
+                    style: _ui(size: 8 * s, color: _kTaupe, spacing: 0.8),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SECTION LABEL — küçük altın çizgi + başlık
+// ─────────────────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.scale, required this.label});
+  final double scale;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14 * s),
-      child: Container(
-        width: 1,
-        height: 22 * s,
-        color: Colors.white.withValues(alpha: 0.18),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// TAB BAR
-// ─────────────────────────────────────────────────────────────────
-class _TabBar extends StatelessWidget {
-  const _TabBar({required this.scale, required this.controller});
-  final double scale;
-  final PortfolioProjectDetailController controller;
-
-  static const _tabs = [
-    (PortfolioDetailTab.overview, 'GENEL BAKIŞ'),
-    (PortfolioDetailTab.team, 'KİMLER ÇALIŞTI'),
-    (PortfolioDetailTab.process, 'SÜREÇ'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Obx(() {
-      final active = controller.activeTab.value;
-      return SizedBox(
-        height: 30 * s,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: _tabs.length,
-          separatorBuilder: (_, _) => SizedBox(width: 22 * s),
-          itemBuilder: (_, i) {
-            final (tab, label) = _tabs[i];
-            final selected = tab == active;
-            return GestureDetector(
-              onTap: () => controller.selectTab(tab),
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: _ui(
-                      size: 9 * s,
-                      weight: selected ? FontWeight.w700 : FontWeight.w400,
-                      color: selected ? _kGold : _kTaupe,
-                      spacing: 1,
-                    ),
-                  ),
-                  SizedBox(height: 6 * s),
-                  Container(
-                    height: 2 * s,
-                    width: 18 * s,
-                    color: selected ? _kGold : Colors.transparent,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
-    });
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// OVERVIEW TAB
-// ─────────────────────────────────────────────────────────────────
-class _OverviewTab extends StatelessWidget {
-  const _OverviewTab({required this.scale, required this.project});
-  final double scale;
-  final PortfolioProjectModel project;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Proje Hakkında',
-          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
-        ),
-        SizedBox(height: 10 * s),
-        Text(
-          project.description,
-          style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.7),
-        ),
-        SizedBox(height: 18 * s),
-        // Sayfa geneli 20*s yatay boşlukla kaydırılıyor; ilk (Kategori) ve
-        // son (Yer) kartın ekranın kenarlarına kadar uzaması için burada
-        // OverflowBox ile tam ekran genişliği veriyoruz (negatif padding
-        // Flutter'da assertion hatası verdiğinden kullanılmıyor). IntrinsicHeight,
-        // OverflowBox'a Column'dan gelen sınırsız (infinite) yükseklik yerine
-        // sonlu bir yükseklik kısıtı sağlar — aksi halde OverflowBox kendi
-        // boyutunu Infinity raporlayıp içerik ortalanırken NaN üretir.
-        IntrinsicHeight(
-          child: OverflowBox(
-          maxWidth: MediaQuery.sizeOf(context).width,
-          minWidth: MediaQuery.sizeOf(context).width,
-          alignment: Alignment.center,
-          child: Row(
-            children: [
-              Expanded(
-                child: _InfoChip(
-                  scale: s,
-                  icon: Icons.videocam_outlined,
-                  label: 'KATEGORİ',
-                  value: project.category,
-                  edgeInset: 20 * s,
-                  flushLeft: true,
-                ),
-              ),
-              SizedBox(width: 10 * s),
-              Expanded(
-                child: _InfoChip(
-                  scale: s,
-                  icon: Icons.sell_outlined,
-                  label: 'BÜTÇE ARALIĞI',
-                  value: project.budgetRangeLabel,
-                ),
-              ),
-              SizedBox(width: 10 * s),
-              Expanded(
-                child: _InfoChip(
-                  scale: s,
-                  icon: Icons.location_on_outlined,
-                  label: 'YER',
-                  value: project.location,
-                  edgeInset: 20 * s,
-                  flushRight: true,
-                ),
-              ),
-            ],
-          ),
-          ),
-        ),
-        SizedBox(height: 26 * s),
-        _SectionHeader(
-          scale: s,
-          title: 'Proje Görselleri',
-          actionLabel: 'Tümünü Gör',
-          onAction: () {},
-        ),
-        SizedBox(height: 12 * s),
-        _GalleryRow(scale: s, project: project),
-        SizedBox(height: 26 * s),
-        _SectionHeader(
-          scale: s,
-          title: 'Kimler Çalıştı?',
-          actionLabel: 'Tüm Ekibi Gör',
-          onAction: () {},
-        ),
-        SizedBox(height: 14 * s),
-        _TeamRow(scale: s, project: project),
-      ],
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.scale,
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.edgeInset = 0,
-    this.flushLeft = false,
-    this.flushRight = false,
-  });
-  final double scale;
-  final IconData icon;
-  final String label;
-  final String value;
-  // Ekran kenarına taşan (flush) kartlarda dış tarafta normal sayfa
-  // boşluğunu koruyup yalnızca ekran kenarına bakan köşeyi köşeli yapıyoruz.
-  final double edgeInset;
-  final bool flushLeft;
-  final bool flushRight;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    final radius = BorderRadius.circular(10 * s);
-    return Container(
-      padding: EdgeInsets.only(
-        left: flushLeft ? edgeInset : 10 * s,
-        right: flushRight ? edgeInset : 10 * s,
-        top: 8 * s,
-        bottom: 8 * s,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: _kCardBorder),
-        borderRadius: BorderRadius.only(
-          topLeft: flushLeft ? Radius.zero : radius.topLeft,
-          bottomLeft: flushLeft ? Radius.zero : radius.bottomLeft,
-          topRight: flushRight ? Radius.zero : radius.topRight,
-          bottomRight: flushRight ? Radius.zero : radius.bottomRight,
-        ),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 22 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13 * s, color: _kGold),
-          SizedBox(height: 5 * s),
+          Container(width: 24 * s, height: 1.5, color: _kGold),
+          SizedBox(height: 10 * s),
           Text(
             label,
-            style: _ui(size: 6.5 * s, color: _kTaupe, spacing: 0.8),
-          ),
-          SizedBox(height: 2 * s),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: _ui(
-              size: 8.5 * s,
+              size: 9 * s,
               weight: FontWeight.w700,
-              color: _kBlack,
-              spacing: 0.2,
+              color: _kGold,
+              spacing: 1.6,
             ),
           ),
         ],
@@ -657,320 +690,75 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.scale,
-    required this.title,
-    required this.actionLabel,
-    required this.onAction,
-  });
+// ─────────────────────────────────────────────────────────────────
+// SONUÇ — koyu vaka çalışması bölümü (yalnızca gerçek metni olan
+// projelerde gösterilir)
+// ─────────────────────────────────────────────────────────────────
+class _ResultSection extends StatelessWidget {
+  const _ResultSection({required this.scale, required this.result});
   final double scale;
-  final String title;
-  final String actionLabel;
-  final VoidCallback onAction;
+  final _CaseResult result;
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk),
-          ),
-        ),
-        GestureDetector(
-          onTap: onAction,
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                actionLabel,
-                style: _ui(
-                  size: 8 * s,
-                  weight: FontWeight.w700,
-                  color: _kGold,
-                  spacing: 0.5,
-                ),
-              ),
-              SizedBox(width: 3 * s),
-              Icon(Icons.arrow_forward_rounded, size: 12 * s, color: _kGold),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GalleryRow extends StatelessWidget {
-  const _GalleryRow({required this.scale, required this.project});
-  final double scale;
-  final PortfolioProjectModel project;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    final images = project.galleryImageUrls;
-    final count = images.isEmpty ? 4 : images.length;
-    return SizedBox(
-      height: 88 * s,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: count,
-        separatorBuilder: (_, _) => SizedBox(width: 10 * s),
-        itemBuilder: (_, i) {
-          final url = images.isEmpty ? null : images[i];
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(10 * s),
-            child: SizedBox(
-              width: 88 * s,
-              height: 88 * s,
-              child: url != null
-                  ? Image.asset(url, fit: BoxFit.cover)
-                  : Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        _kThumbGradient,
-                        Center(
-                          child: Icon(
-                            Icons.crop_original_rounded,
-                            size: 22 * s,
-                            color: Colors.white.withValues(alpha: 0.18),
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _TeamRow extends StatelessWidget {
-  const _TeamRow({required this.scale, required this.project});
-  final double scale;
-  final PortfolioProjectModel project;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    if (project.team.isEmpty) {
-      return Text(
-        'Ekip bilgisi henüz eklenmedi.',
-        style: _ui(size: 9 * s, color: _kTaupe, spacing: 0.2),
-      );
-    }
-    return SizedBox(
-      height: 78 * s,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: project.team.length,
-        separatorBuilder: (_, _) => SizedBox(width: 18 * s),
-        itemBuilder: (_, i) => _TeamAvatar(scale: s, member: project.team[i]),
-      ),
-    );
-  }
-}
-
-class _TeamAvatar extends StatelessWidget {
-  const _TeamAvatar({required this.scale, required this.member});
-  final double scale;
-  final PortfolioTeamMember member;
-
-  String get _initials {
-    final parts = member.name.trim().split(RegExp(r'\s+'));
-    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-      return (parts[0][0] + parts[1][0]).toUpperCaseTr();
-    }
-    return member.name.isNotEmpty ? member.name[0].toUpperCaseTr() : '?';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return SizedBox(
-      width: 60 * s,
+    final stats = [
+      (result.viewsLabel, 'İZLENME'),
+      (result.targetLabel, 'HEDEF ÜSTÜ'),
+      (result.earlyLabel, 'ERKEN TESLİM'),
+    ];
+    return Container(
+      width: double.infinity,
+      color: _kDark,
+      padding: EdgeInsets.fromLTRB(22 * s, 22 * s, 22 * s, 22 * s),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48 * s,
-            height: 48 * s,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _kGold.withValues(alpha: 0.10),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
-              image: member.avatarUrl != null
-                  ? DecorationImage(
-                      image: AssetImage(member.avatarUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            alignment: Alignment.center,
-            child: member.avatarUrl == null
-                ? Text(
-                    _initials,
-                    style: _ui(
-                      size: 11 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 0.3,
-                    ),
-                  )
-                : null,
-          ),
-          SizedBox(height: 6 * s),
           Text(
-            member.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            'SONUÇ',
             style: _ui(
-              size: 8 * s,
+              size: 9 * s,
               weight: FontWeight.w700,
-              color: _kBlack,
-              spacing: 0.2,
+              color: _kGold,
+              spacing: 1.6,
             ),
           ),
-          SizedBox(height: 2 * s),
-          Text(
-            member.role,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: _ui(size: 6.5 * s, color: _kGold, spacing: 0.5),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// TEAM TAB (full list)
-// ─────────────────────────────────────────────────────────────────
-class _TeamTab extends StatelessWidget {
-  const _TeamTab({required this.scale, required this.project});
-  final double scale;
-  final PortfolioProjectModel project;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    if (project.team.isEmpty) {
-      return const _EmptyTab(
-        icon: Icons.groups_outlined,
-        text: 'Ekip bilgisi henüz eklenmedi.',
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Kimler Çalıştı?',
-          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
-        ),
-        SizedBox(height: 16 * s),
-        // Sayfa geneli 20*s yatay boşlukla kaydırılıyor; kartların ekranın
-        // sağına/soluna kadar uzaması için OverflowBox ile tam ekran
-        // genişliği veriyoruz (negatif padding Flutter'da assertion hatası
-        // verdiğinden kullanılmıyor). Kartın kendi iç dolgusunu (20*s)
-        // artırarak içerik hizasını korumuş oluyoruz. IntrinsicHeight,
-        // OverflowBox'a sonlu bir yükseklik kısıtı sağlayıp Infinity/NaN
-        // hatasını önlüyor.
-        IntrinsicHeight(
-          child: OverflowBox(
-          maxWidth: MediaQuery.sizeOf(context).width,
-          minWidth: MediaQuery.sizeOf(context).width,
-          alignment: Alignment.center,
-          child: Column(
+          SizedBox(height: 14 * s),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final member in project.team) ...[
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20 * s,
-                    vertical: 12 * s,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    border: Border.symmetric(
-                      horizontal: BorderSide(color: _kCardBorder),
+              for (var i = 0; i < stats.length; i++) ...[
+                if (i > 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14 * s),
+                    child: Container(
+                      width: 1,
+                      height: 34 * s,
+                      color: Colors.white.withValues(alpha: 0.14),
                     ),
                   ),
-                  child: Row(
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _TeamAvatarSmall(scale: s, member: member),
-                      SizedBox(width: 12 * s),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              member.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: _display(
-                                size: 14 * s,
-                                weight: FontWeight.w600,
-                                color: _kInk,
-                              ),
-                            ),
-                            SizedBox(height: 2 * s),
-                            Text(
-                              member.role,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: _ui(
-                                size: 8 * s,
-                                color: _kGold,
-                                spacing: 0.8,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        stats[i].$1,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _display(
+                          size: 22 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
-                      SizedBox(width: 8 * s),
-                      GestureDetector(
-                        onTap: () => Get.toNamed(
-                          AppRoutes.portfolioTeamProfile,
-                          arguments: {'member': member},
-                        ),
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10 * s,
-                            vertical: 6 * s,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: _kGold.withValues(alpha: 0.6),
-                            ),
-                            borderRadius: BorderRadius.circular(20 * s),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Profili Gör',
-                                style: _ui(
-                                  size: 7.5 * s,
-                                  weight: FontWeight.w700,
-                                  color: _kGold,
-                                  spacing: 0.3,
-                                ),
-                              ),
-                              SizedBox(width: 3 * s),
-                              Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 11 * s,
-                                color: _kGold,
-                              ),
-                            ],
-                          ),
+                      SizedBox(height: 3 * s),
+                      Text(
+                        stats[i].$2,
+                        style: _ui(
+                          size: 8 * s,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          spacing: 0.8,
                         ),
                       ),
                     ],
@@ -979,16 +767,73 @@ class _TeamTab extends StatelessWidget {
               ],
             ],
           ),
+          SizedBox(height: 18 * s),
+          Divider(height: 1, color: Colors.white.withValues(alpha: 0.14)),
+          SizedBox(height: 16 * s),
+          Text(
+            result.quote,
+            style: _ui(
+              size: 12.5 * s,
+              color: Colors.white.withValues(alpha: 0.85),
+              spacing: 0.2,
+              height: 1.5,
+            ),
           ),
+          SizedBox(height: 10 * s),
+          Text(
+            result.clientLabel,
+            style: _ui(
+              size: 9 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// EKİP — numaralı satır listesi
+// ─────────────────────────────────────────────────────────────────
+class _TeamList extends StatelessWidget {
+  const _TeamList({required this.scale, required this.project});
+  final double scale;
+  final PortfolioProjectModel project;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    if (project.team.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 22 * s, vertical: 14 * s),
+        child: Text(
+          'Ekip bilgisi henüz eklenmedi.',
+          style: _ui(size: 12 * s, color: _kTaupe, spacing: 0.2),
         ),
+      );
+    }
+    return Column(
+      children: [
+        for (var i = 0; i < project.team.length; i++) ...[
+          _TeamListRow(scale: s, index: i + 1, member: project.team[i]),
+          Divider(height: 1, color: _kDivider),
+        ],
       ],
     );
   }
 }
 
-class _TeamAvatarSmall extends StatelessWidget {
-  const _TeamAvatarSmall({required this.scale, required this.member});
+class _TeamListRow extends StatelessWidget {
+  const _TeamListRow({
+    required this.scale,
+    required this.index,
+    required this.member,
+  });
   final double scale;
+  final int index;
   final PortfolioTeamMember member;
 
   String get _initials {
@@ -1002,60 +847,131 @@ class _TeamAvatarSmall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return Container(
-      width: 44 * s,
-      height: 44 * s,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _kGold.withValues(alpha: 0.10),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
-        image: member.avatarUrl != null
-            ? DecorationImage(
-                image: AssetImage(member.avatarUrl!),
-                fit: BoxFit.cover,
-              )
-            : null,
-      ),
-      alignment: Alignment.center,
-      child: member.avatarUrl == null
-          ? Text(
-              _initials,
+    return GestureDetector(
+      onTap: () {
+        final parts = member.name.trim().split(RegExp(r'\s+'));
+        final firstName = parts.isNotEmpty ? parts.first : member.name;
+        final surname = parts.length > 1 ? parts.sublist(1).join(' ') : null;
+        final user = UserModel(
+          id: 'team-${member.name}',
+          name: firstName,
+          surname: surname,
+          email: '',
+          role: UserRole.freelancer,
+          avatarUrl: member.avatarUrl,
+          createdAt: DateTime.now(),
+        );
+        final freelancer = FreelancerModel(
+          userId: user.id,
+          name: firstName,
+          surname: surname,
+          categories: const [],
+          bio: '',
+          experience: 3,
+          location: '',
+          rating: 0,
+          profileImageUrl: member.avatarUrl,
+        );
+        Get.toNamed(
+          AppRoutes.freelancerDetail,
+          arguments: {'freelancer': freelancer, 'user': user},
+        );
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 22 * s, vertical: 12 * s),
+        child: Row(
+          children: [
+            Text(
+              index.toString().padLeft(2, '0'),
               style: _ui(
-                size: 11 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
-                color: _kBlack,
-                spacing: 0.3,
+                color: _kGold,
+                spacing: 0.5,
               ),
-            )
-          : null,
+            ),
+            SizedBox(width: 14 * s),
+            Container(
+              width: 44 * s,
+              height: 56 * s,
+              decoration: BoxDecoration(
+                color: _kGold.withValues(alpha: 0.10),
+                image: member.avatarUrl != null
+                    ? DecorationImage(
+                        image: AssetImage(member.avatarUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: member.avatarUrl == null
+                  ? Text(
+                      _initials,
+                      style: _ui(
+                        size: 12 * s,
+                        weight: FontWeight.w700,
+                        color: _kBlack,
+                        spacing: 0.3,
+                      ),
+                    )
+                  : null,
+            ),
+            SizedBox(width: 14 * s),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    member.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _display(
+                      size: 18 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                    ),
+                  ),
+                  SizedBox(height: 2 * s),
+                  Text(
+                    member.role,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _ui(size: 11 * s, color: _kTaupe, spacing: 0.3),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8 * s),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'PROFİL',
+                  style: _ui(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kGold,
+                    spacing: 1,
+                  ),
+                ),
+                SizedBox(width: 3 * s),
+                Icon(Icons.arrow_forward_rounded, size: 12 * s, color: _kGold),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PROCESS TAB (full vertical list)
+// SÜREÇ — gün aralıklı zaman çizelgesi
 // ─────────────────────────────────────────────────────────────────
-// Aşama başlıklarına eşlik eden kısa, karizmatik yorum satırları.
-// Bilinmeyen bir etiket gelirse jenerik bir metne düşer.
-String _stageCaption(String label) {
-  switch (label) {
-    case 'Brief & Analiz':
-      return 'Vizyon netleşti, yol haritası çizildi.';
-    case 'Pre-Prodüksiyon':
-      return 'Set kurulmadan önce her ayrıntı planlandı.';
-    case 'Prodüksiyon':
-      return 'Kamera arkası enerji, kadraj önünde hikaye.';
-    case 'Post-Prodüksiyon':
-      return 'Ham görüntüden anlatıya doğru ince işçilik.';
-    case 'Teslim':
-      return 'Vizyon, ekrana taşınmaya hazır.';
-    default:
-      return 'Bu aşama özenle yürütüldü.';
-  }
-}
-
-class _ProcessTab extends StatelessWidget {
-  const _ProcessTab({required this.scale, required this.project});
+class _ProcessSection extends StatelessWidget {
+  const _ProcessSection({required this.scale, required this.project});
   final double scale;
   final PortfolioProjectModel project;
 
@@ -1064,113 +980,96 @@ class _ProcessTab extends StatelessWidget {
     final s = scale;
     final stages = project.processStages;
     if (stages.isEmpty) {
-      return const _EmptyTab(
-        icon: Icons.timeline_outlined,
-        text: 'Süreç bilgisi henüz eklenmedi.',
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 22 * s, vertical: 14 * s),
+        child: Text(
+          'Süreç bilgisi henüz eklenmedi.',
+          style: _ui(size: 12 * s, color: _kTaupe, spacing: 0.2),
+        ),
       );
     }
+    final durations = stages.map((st) => _stageDuration(st.label)).toList();
+    final totalDays = durations.fold<int>(0, (a, b) => a + b);
+    var dayCursor = 1;
+    final ranges = <String>[];
+    for (final d in durations) {
+      final end = dayCursor + d - 1;
+      ranges.add(
+        '${dayCursor.toString().padLeft(2, '0')}–${end.toString().padLeft(2, '0')}',
+      );
+      dayCursor = end + 1;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Süreç Aşamaları',
-          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
-        ),
-        SizedBox(height: 18 * s),
-        for (var i = 0; i < stages.length; i++) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 26 * s,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: stages[i].done
-                      ? Icon(Icons.check_rounded, size: 20 * s, color: _kGold)
-                      : Text(
-                          '${i + 1}'.padLeft(2, '0'),
-                          style: _ui(
-                            size: 9 * s,
-                            weight: FontWeight.w700,
-                            color: _kMuted,
-                          ),
-                        ),
-                ),
-              ),
-              SizedBox(width: 14 * s),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      stages[i].label,
-                      style: _ui(
-                        size: 11 * s,
-                        weight: FontWeight.w700,
-                        color: _kBlack,
-                        spacing: 0.2,
-                      ),
-                    ),
-                    SizedBox(height: 4 * s),
-                    Text(
-                      _stageCaption(stages[i].label),
-                      style: _ui(
-                        size: 9 * s,
-                        weight: FontWeight.w400,
-                        color: _kBlack,
-                        spacing: 0.2,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 22 * s),
+          child: Text(
+            '$totalDays günde teslim.',
+            style: _display(size: 24 * s, weight: FontWeight.w700, color: _kInk),
           ),
-          if (i < stages.length - 1)
-            Padding(
-              // Üstte/altta boşluk bırakarak çizginin tik/rakam işaretlerine
-              // değmemesini sağlıyoruz.
-              padding: EdgeInsets.only(left: 12.3 * s, top: 6 * s, bottom: 6 * s),
-              child: Container(
-                width: 1.4 * s,
-                height: 16 * s,
-                color: stages[i].done
-                    ? _kGold.withValues(alpha: 0.5)
-                    : _kDivider,
-              ),
+        ),
+        SizedBox(height: 16 * s),
+        for (var i = 0; i < stages.length; i++) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 22 * s, vertical: 12 * s),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 62 * s,
+                  child: Text(
+                    ranges[i],
+                    style: _display(
+                      size: 18 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        stages[i].label,
+                        style: _ui(
+                          size: 14 * s,
+                          weight: FontWeight.w700,
+                          color: _kInk,
+                          spacing: 0.2,
+                        ),
+                      ),
+                      SizedBox(height: 3 * s),
+                      Text(
+                        _stageCaption(stages[i].label),
+                        style: _ui(
+                          size: 11 * s,
+                          color: _kTaupe,
+                          spacing: 0.2,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8 * s),
+                Text(
+                  '${durations[i]} GÜN',
+                  style: _ui(
+                    size: 9 * s,
+                    weight: FontWeight.w700,
+                    color: _kMuted,
+                    spacing: 0.6,
+                  ),
+                ),
+              ],
             ),
+          ),
+          if (i < stages.length - 1) Divider(height: 1, color: _kDivider),
         ],
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// EMPTY TAB
-// ─────────────────────────────────────────────────────────────────
-class _EmptyTab extends StatelessWidget {
-  const _EmptyTab({required this.icon, required this.text});
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 32, color: _kMuted),
-            const SizedBox(height: 10),
-            Text(
-              text,
-              style: _ui(size: 9, color: _kTaupe, spacing: 0.2),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

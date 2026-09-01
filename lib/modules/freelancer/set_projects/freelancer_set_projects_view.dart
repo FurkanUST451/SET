@@ -169,7 +169,7 @@ class _FreelancerSetProjectsViewState
                       Text(
                         'PROJE / 01',
                         style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kGold,
                           spacing: 1.4,
@@ -182,7 +182,7 @@ class _FreelancerSetProjectsViewState
                       SizedBox(width: 10 * s),
                       Text(
                         'DOSYA NO · SH-2405-118',
-                        style: _ui(size: 8 * s, color: _kTaupe, spacing: 1),
+                        style: _ui(size: 10 * s, color: _kTaupe, spacing: 1),
                       ),
                     ],
                   ),
@@ -195,7 +195,7 @@ class _FreelancerSetProjectsViewState
                   Text(
                     'Cafe Tanıtım\nFilmi',
                     style: _display(
-                      size: 40 * s,
+                      size: 32 * s,
                       weight: FontWeight.w600,
                       color: _kInk,
                     ),
@@ -217,7 +217,7 @@ class _FreelancerSetProjectsViewState
                       Text(
                         'EKİP KURULUYOR',
                         style: _ui(
-                          size: 9 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
                           spacing: 1.4,
@@ -250,7 +250,7 @@ class _FreelancerSetProjectsViewState
                         child: Text(
                           'SÜREÇ ADIMLARI',
                           style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
                             spacing: 1.5,
@@ -291,7 +291,7 @@ class _FreelancerSetProjectsViewState
                   s,
                   Text(
                     'GÜNCELLEME',
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 1.5),
+                    style: _ui(size: 10 * s, color: _kBlack, spacing: 1.5),
                   ),
                 ),
                 SizedBox(height: 14 * s),
@@ -325,7 +325,7 @@ class _FreelancerSetProjectsViewState
                       'bir atmosfer hedefleniyor; mekan çekimleri ve müşteri '
                       'anları öne çıkarılacak.',
                       style: _ui(
-                        size: 10 * s,
+                        size: 15 * s,
                         color: _kBlack,
                         spacing: 0.2,
                         height: 1.6,
@@ -407,7 +407,7 @@ class _FreelancerSetProjectsViewState
                       Text(
                         'Süreç Adımlarını Yönet',
                         style: _display(
-                          size: 22 * s,
+                          size: 24 * s,
                           weight: FontWeight.w600,
                           color: _kInk,
                         ),
@@ -621,7 +621,7 @@ class _FreelancerSetProjectsViewState
                   Text(
                     existing == null ? 'Yeni Aşama' : 'Aşamayı Düzenle',
                     style: _display(
-                      size: 22 * s,
+                      size: 24 * s,
                       weight: FontWeight.w600,
                       color: _kInk,
                     ),
@@ -630,7 +630,7 @@ class _FreelancerSetProjectsViewState
                   Text(
                     'BAŞLIK',
                     style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1.2,
@@ -646,7 +646,7 @@ class _FreelancerSetProjectsViewState
                   Text(
                     'TARİH / ETİKET (opsiyonel)',
                     style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1.2,
@@ -662,7 +662,7 @@ class _FreelancerSetProjectsViewState
                   Text(
                     'İÇERİK',
                     style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1.2,
@@ -913,7 +913,7 @@ class _ManagerCard extends StatelessWidget {
                     Text(
                       'Selin A.',
                       style: _display(
-                        size: 22 * s,
+                        size: 24 * s,
                         weight: FontWeight.w600,
                         color: _kInk,
                       ),
@@ -922,7 +922,7 @@ class _ManagerCard extends StatelessWidget {
                     Text(
                       'PROJE SORUMLUSU',
                       style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1,
@@ -942,7 +942,7 @@ class _ManagerCard extends StatelessWidget {
                         SizedBox(width: 5 * s),
                         Text(
                           'ŞU AN ONLINE',
-                          style: _ui(size: 8 * s, color: _kTaupe, spacing: 0.8),
+                          style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.8),
                         ),
                       ],
                     ),
@@ -1001,7 +1001,7 @@ class _ManagerCard extends StatelessWidget {
                         Text(
                           'MESAJ GÖNDER',
                           style: _ui(
-                            size: 9 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: Colors.white,
                             spacing: 1,
@@ -1351,13 +1351,13 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+          style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
         ),
         const Spacer(),
         Text(
           'TÜMÜNÜ GÖR',
           style: _ui(
-            size: 8 * s,
+            size: 10 * s,
             weight: FontWeight.w700,
             color: _kGold,
             spacing: 1,
@@ -1512,7 +1512,7 @@ class _ProjectDetailsHeaderCard extends StatelessWidget {
                 Text(
                   'EKİP KURULUYOR',
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kGold,
                     spacing: 1.2,
@@ -1532,7 +1532,7 @@ class _ProjectDetailsHeaderCard extends StatelessWidget {
                 SizedBox(height: 2 * s),
                 Text(
                   'Video Prodüksiyon',
-                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -1580,7 +1580,7 @@ class _InfoSection extends StatelessWidget {
                 child: Text(
                   label,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.4,
@@ -1671,7 +1671,7 @@ class _GridCell extends StatelessWidget {
                 label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],

@@ -189,7 +189,7 @@ class _LabeledField extends StatelessWidget {
         Text(
           label.toUpperCaseTr(),
           style: _ui(
-              size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
+              size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
         ),
         SizedBox(height: 7 * s),
         TextField(
@@ -571,7 +571,7 @@ class _ToggleRow extends StatelessWidget {
                   children: [
                     Text(label,
                         style: _display(
-                            size: 15 * s,
+                            size: 17 * s,
                             weight: FontWeight.w600,
                             color: _kInk)),
                     if (sub != null) ...[
@@ -642,7 +642,7 @@ class _LanguageRegionScreenState extends State<LanguageRegionScreen> {
                           child: Text(
                             _languages[i],
                             style: _display(
-                                size: 16 * s,
+                                size: 17 * s,
                                 weight: _selected == _languages[i]
                                     ? FontWeight.w700
                                     : FontWeight.w500,
@@ -715,7 +715,7 @@ class HelpCenterScreen extends StatelessWidget {
                     title: Text(
                       item[0],
                       style: _display(
-                          size: 16 * s, weight: FontWeight.w600, color: _kInk),
+                          size: 17 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                     children: [
                       Align(
@@ -1100,7 +1100,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
               Center(
                 child: Text(
                   name,
-                  style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                  style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
                 ),
               ),
               if (email.isNotEmpty) ...[
@@ -1187,7 +1187,7 @@ class _ProfileMenuRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label, style: _display(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
+                  Text(label, style: _display(size: 17 * s, weight: FontWeight.w500, color: _kInk)),
                   SizedBox(height: 3 * s),
                   Text(sub, style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2)),
                 ],
@@ -1416,7 +1416,7 @@ class _FreelancerPortfolioEditScreenState
                               child: Text(
                                 cat,
                                 style: _ui(
-                                  size: 9.5 * s,
+                                  size: 11 * s,
                                   weight: selected ? FontWeight.w700 : FontWeight.w400,
                                   color: selected ? _kGold : _kBlack,
                                   spacing: 0.3,
@@ -1726,7 +1726,7 @@ class _PortfolioSettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label, style: _display(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
+                  Text(label, style: _display(size: 17 * s, weight: FontWeight.w500, color: _kInk)),
                   if (sub != null) ...[
                     SizedBox(height: 3 * s),
                     Text(
@@ -1951,7 +1951,7 @@ class _ProjectManagerRow extends StatelessWidget {
                   project.title.isNotEmpty ? project.title : 'İsimsiz proje',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: _display(size: 14 * s, weight: FontWeight.w600, color: _kInk),
+                  style: _display(size: 17 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 if (project.jobType.isNotEmpty) ...[
                   SizedBox(height: 2 * s),

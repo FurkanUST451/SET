@@ -171,7 +171,7 @@ class _ClientDiscoverTabState extends State<ClientDiscoverTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · KEŞFET',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -235,7 +235,7 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20 * s),
           Text(
             'SETTEKİLERİN SON İŞLERİ',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ],
       ),
@@ -261,7 +261,7 @@ class _EmptyState extends StatelessWidget {
         children: [
           Text(
             'HENÜZ PAYLAŞIM YOK',
-            style: _ui(size: 9 * s, color: _kBlack, spacing: 1.5),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 1.5),
           ),
           SizedBox(height: 10 * s),
           Text(
@@ -302,8 +302,11 @@ class _FilterBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return ColoredBox(
-      color: _kCream,
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _kCream,
+        border: Border(bottom: BorderSide(color: _kDivider)),
+      ),
       child: _FilterBar(scale: scale, selected: selected, onSelect: onSelect),
     );
   }
@@ -397,7 +400,7 @@ class _FilterTab extends StatelessWidget {
             Text(
               label,
               style: _ui(
-                size: 9 * s,
+                size: 11 * s,
                 weight: selected ? FontWeight.w700 : FontWeight.w400,
                 color: _kBlack,
                 spacing: 1.2,
@@ -456,7 +459,7 @@ class _WorkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: _display(
-                        size: 14 * s,
+                        size: 19 * s,
                         weight: FontWeight.w600,
                         color: _kInk,
                       ),
@@ -467,7 +470,7 @@ class _WorkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1,
@@ -604,7 +607,7 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
               child: Text(
                 'DEVAMINI OKU',
                 style: _ui(
-                  size: 8 * s,
+                  size: 10 * s,
                   weight: FontWeight.w700,
                   color: _kGold,
                   spacing: 1,
@@ -719,7 +722,7 @@ class _WorkMenuButton extends StatelessWidget {
           child: Text(
             'GÖNDERİYİ BİLDİR',
             style: _ui(
-              size: 9,
+              size: 10,
               weight: FontWeight.w600,
               color: _kInk,
               spacing: 1,
@@ -733,7 +736,7 @@ class _WorkMenuButton extends StatelessWidget {
             child: Text(
               'SİL',
               style: _ui(
-                size: 9,
+                size: 10,
                 weight: FontWeight.w600,
                 color: _kDanger,
                 spacing: 1,
@@ -888,7 +891,7 @@ class _EditorialDialog extends StatelessWidget {
             Text(
               title,
               style: _ui(
-                size: 9,
+                size: 10,
                 weight: FontWeight.w700,
                 color: _kBlack,
                 spacing: 1.5,
@@ -916,7 +919,7 @@ class _EditorialDialog extends StatelessWidget {
                       child: Text(
                         action.label,
                         style: _ui(
-                          size: 9,
+                          size: 10,
                           weight: FontWeight.w700,
                           color: action.color,
                           spacing: 1.2,
@@ -1003,7 +1006,7 @@ class _CoverPlaceholder extends StatelessWidget {
                     Text(
                       'ÖNİZLEME YOK',
                       style: _ui(
-                        size: 7 * s,
+                        size: 10 * s,
                         color: Colors.white.withValues(alpha: 0.22),
                         spacing: 2,
                       ),

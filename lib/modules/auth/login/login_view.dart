@@ -204,7 +204,7 @@ class _LoginViewState extends State<LoginView>
                               Text(
                                 'KREATİVİTENİN MERKEZİ',
                                 style: _ui(
-                                  size: 9 * s,
+                                  size: 10 * s,
                                   weight: FontWeight.w700,
                                   color: _kInk,
                                   spacing: 1.6,
@@ -229,7 +229,7 @@ class _LoginViewState extends State<LoginView>
                               Text(
                                 'GİRİŞ / 01',
                                 style: _ui(
-                                  size: 9 * s,
+                                  size: 10 * s,
                                   weight: FontWeight.w700,
                                   color: _kGold,
                                   spacing: 1.5,
@@ -280,7 +280,7 @@ class _LoginViewState extends State<LoginView>
                                 TextSpan(
                                   text: 'hoş ',
                                   style: _display(
-                                    size: 30 * s,
+                                    size: 32 * s,
                                     weight: FontWeight.w700,
                                     color: _kInk,
                                     height: 1.1,
@@ -289,7 +289,7 @@ class _LoginViewState extends State<LoginView>
                                 TextSpan(
                                   text: 'geldin.',
                                   style: _display(
-                                    size: 30 * s,
+                                    size: 32 * s,
                                     weight: FontWeight.w700,
                                     color: _kGold,
                                     height: 1.1,
@@ -329,7 +329,7 @@ class _LoginViewState extends State<LoginView>
                                           Text(
                                             'E-POSTA',
                                             style: _ui(
-                                              size: 8 * s,
+                                              size: 10 * s,
                                               weight: FontWeight.w700,
                                               color: _kBlack,
                                               spacing: 1.1,
@@ -412,7 +412,7 @@ class _LoginViewState extends State<LoginView>
                                                 child: Text(
                                                   'ŞİFREMİ UNUTTUM',
                                                   style: _ui(
-                                                    size: 8.5 * s,
+                                                    size: 10 * s,
                                                     weight: FontWeight.w700,
                                                     color: _kTaupe,
                                                     spacing: 0.8,
@@ -445,7 +445,7 @@ class _LoginViewState extends State<LoginView>
                                                   AppStrings.dontHaveAccount
                                                       .toUpperCaseTr(),
                                                   style: _ui(
-                                                    size: 9 * s,
+                                                    size: 10 * s,
                                                     color: _kTaupe,
                                                     spacing: 0.3,
                                                   ),
@@ -464,7 +464,7 @@ class _LoginViewState extends State<LoginView>
                                                       AppStrings.register
                                                           .toUpperCaseTr(),
                                                       style: _ui(
-                                                        size: 9 * s,
+                                                        size: 10 * s,
                                                         weight:
                                                             FontWeight.w700,
                                                         color: _kGold,
@@ -499,7 +499,7 @@ class _LoginViewState extends State<LoginView>
                                               child: Text(
                                                 'VEYA',
                                                 style: _ui(
-                                                  size: 9 * s,
+                                                  size: 10 * s,
                                                   weight: FontWeight.w700,
                                                   color: _kTaupe,
                                                   spacing: 1.5,
@@ -619,7 +619,7 @@ class _PasswordField extends StatelessWidget {
         Text(
           'ŞİFRE',
           style: _ui(
-            size: 8 * s,
+            size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
             spacing: 1.1,
@@ -802,7 +802,7 @@ class _AuthIconButton extends StatelessWidget {
             Text(
               label,
               style: _ui(
-                size: 8 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kInk,
                 spacing: 0.8,
@@ -888,7 +888,7 @@ void _showForgotPasswordSheet(
           children: [
             Text(
               'Şifreni sıfırla',
-              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
             ),
             SizedBox(height: 6 * s),
             Text(

@@ -10,8 +10,16 @@ class RoleSelectionController extends GetxController {
   final UserRepository _userRepo = Get.find<UserRepository>();
 
   final RxBool isLoading = false.obs;
+  final Rx<UserRole?> selectedRole = Rx<UserRole?>(null);
 
-  Future<void> select(UserRole role) async {
+  void selectRole(UserRole role) {
+    selectedRole.value = role;
+  }
+
+  Future<void> confirm() async {
+    final role = selectedRole.value;
+    if (role == null || isLoading.value) return;
+
     isLoading.value = true;
     try {
       _user.updateRole(role);

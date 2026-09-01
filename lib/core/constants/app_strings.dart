@@ -16,13 +16,18 @@ class AppStrings {
   static const String alreadyHaveAccount = 'Zaten hesabın var mı?';
 
   // Roles
-  static const String roleSelectionTitle = 'Nasıl başlamak istersin?';
+  static const String roleSelectionEyebrow = 'SET · BAŞLANGIÇ';
+  static const String roleSelectionTitle = 'Sen ne yapmak için buradasın?';
   static const String roleClient = 'Hizmet Al';
-  static const String roleClientDesc =
-      'Projen için doğru freelancer\'ı keşfet ve teklif gönder.';
+  static const String roleClientDesc = 'Brief\'ini bırak, ekibini SET kursun.';
+  static const String roleClientCategory = 'MÜŞTERİ';
+  static const String roleClientArchive = 'ARŞİV NO · 01 — TELEFON';
   static const String roleFreelancer = 'Hizmet Ver';
   static const String roleFreelancerDesc =
-      'Yeteneklerini sergile, projeler al.';
+      'Portfolyonu yayınla, projelerde yer al.';
+  static const String roleFreelancerCategory = 'SETTEKİ';
+  static const String roleFreelancerArchive = 'ARŞİV NO · 02 — KAMERA';
+  static const String roleContinue = 'DEVAM ET';
 
   // Tabs
   static const String tabDiscover = 'Keşfet';

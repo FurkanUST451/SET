@@ -88,7 +88,7 @@ class RegisterView extends GetView<RegisterController> {
                       Text(
                         'KAYIT / 02',
                         style: _ui(
-                          size: 9 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kTaupe,
                           spacing: 1.5,
@@ -102,7 +102,7 @@ class RegisterView extends GetView<RegisterController> {
                       Text(
                         'SET · v1.0',
                         style: _ui(
-                          size: 9 * s,
+                          size: 10 * s,
                           color: _kTaupe,
                           spacing: 0.5,
                         ),
@@ -317,7 +317,7 @@ class RegisterView extends GetView<RegisterController> {
                                   Text(
                                     'ZATEN HESABIN VAR MI?',
                                     style: _ui(
-                                      size: 9 * s,
+                                      size: 10 * s,
                                       color: _kTaupe,
                                       spacing: 0.3,
                                     ),
@@ -332,7 +332,7 @@ class RegisterView extends GetView<RegisterController> {
                                       child: Text(
                                         AppStrings.login.toUpperCaseTr(),
                                         style: _ui(
-                                          size: 9 * s,
+                                          size: 10 * s,
                                           weight: FontWeight.w700,
                                           color: _kGold,
                                           spacing: 0.3,
@@ -358,7 +358,7 @@ class RegisterView extends GetView<RegisterController> {
                                     child: Text(
                                       'VEYA',
                                       style: _ui(
-                                        size: 9 * s,
+                                        size: 10 * s,
                                         weight: FontWeight.w700,
                                         color: _kTaupe,
                                         spacing: 1.5,
@@ -477,7 +477,7 @@ class _LabeledField extends StatelessWidget {
         Text(
           label,
           style: _ui(
-            size: 8 * s,
+            size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
             spacing: 1.1,
@@ -537,7 +537,7 @@ class _GenderSelector extends StatelessWidget {
         Text(
           'CİNSİYET',
           style: _ui(
-            size: 8 * s,
+            size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
             spacing: 1.1,
@@ -610,7 +610,7 @@ class _GenderChip extends StatelessWidget {
         child: Text(
           label,
           style: _ui(
-            size: 8 * s,
+            size: 10 * s,
             weight: FontWeight.w700,
             color: selected ? Colors.white : _kInk,
             spacing: 0.3,
@@ -656,7 +656,7 @@ class _AuthIconButton extends StatelessWidget {
             Text(
               label,
               style: _ui(
-                size: 8 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kInk,
                 spacing: 0.8,

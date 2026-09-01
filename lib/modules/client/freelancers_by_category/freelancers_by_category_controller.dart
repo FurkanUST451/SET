@@ -40,6 +40,8 @@ class FreelancersByCategoryController extends GetxController {
       isLoading.value = true;
       errorMsg.value = '';
       final list = await _freelancerRepo.filterByCategory(category);
+      // Varsayılan sıralama: puana göre yüksekten düşüğe ("SIRALA · PUAN").
+      list.sort((a, b) => b.rating.compareTo(a.rating));
       for (final f in list) {
         try {
           final user = await _userRepo.fetchUser(f.userId);
@@ -65,6 +67,20 @@ class FreelancersByCategoryController extends GetxController {
       );
 
   bool isSelected(FreelancerModel f) => selectedIds.contains(f.userId);
+
+  // Seçim sırasına göre (rozet numaralarıyla eşleşsin diye) seçilenler.
+  List<FreelancerModel> get selectedFreelancers {
+    final result = <FreelancerModel>[];
+    for (final id in selectedIds) {
+      for (final f in freelancers) {
+        if (f.userId == id) {
+          result.add(f);
+          break;
+        }
+      }
+    }
+    return result;
+  }
 
   void toggleSelect(FreelancerModel f) {
     if (isSelected(f)) {

@@ -297,7 +297,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                                 child: Text(
                                   'SET · v1.0.0',
                                   style: _ui(
-                                    size: 8 * s,
+                                    size: 10 * s,
                                     color: _kBlack,
                                     spacing: 2,
                                   ),
@@ -327,7 +327,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROFİL',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -439,7 +439,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                     child: Text(
                       'MÜŞTERİ',
                       style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1.2,
@@ -518,7 +518,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 Text(
                   'PROJELERİM',
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.8,
@@ -536,7 +536,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                       Text(
                         'TÜMÜNÜ GÖR',
                         style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w600,
                           color: _kBlack.withValues(alpha: 0.55),
                           spacing: 1,
@@ -613,7 +613,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 Text(
                   title,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.8,
@@ -663,13 +663,13 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: _display(size: 26 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 4 * s),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
           ),
         ],
       ),

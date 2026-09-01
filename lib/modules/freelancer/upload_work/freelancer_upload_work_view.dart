@@ -92,7 +92,7 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
 
   Widget _sectionLabel(double s, String text) => Text(
         text,
-        style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.6),
+        style: _ui(size: 10 * s, weight: FontWeight.w700, color: _kMuted, spacing: 1.6),
       );
 
   Widget _buildTopBar(double s) {
@@ -116,7 +116,7 @@ class FreelancerUploadWorkView extends GetView<FreelancerUploadWorkController> {
             ),
             SizedBox(width: 4 * s),
             Text('Proje Yükle',
-                style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
           ],
         ),
       ),
@@ -150,7 +150,7 @@ class _CategoryChips extends StatelessWidget {
                 child: Text(
                   t.label.toUpperCaseTr(),
                   style: _ui(
-                    size: 9 * s,
+                    size: 11 * s,
                     weight: FontWeight.w700,
                     color: selected ? _kGold : _kTaupe,
                     spacing: 1,
@@ -198,7 +198,7 @@ class _MediaPicker extends StatelessWidget {
                             SizedBox(height: 8 * s),
                             Text('HENÜZ MEDYA SEÇİLMEDİ',
                                 style: _ui(
-                                    size: 7.5 * s,
+                                    size: 10 * s,
                                     color: Colors.white.withValues(alpha: 0.3),
                                     spacing: 1.5)),
                           ],
@@ -219,7 +219,7 @@ class _MediaPicker extends StatelessWidget {
                                   SizedBox(height: 8 * s),
                                   Text('VİDEO SEÇİLDİ',
                                       style: _ui(
-                                          size: 7.5 * s,
+                                          size: 10 * s,
                                           color: Colors.white.withValues(alpha: 0.85),
                                           spacing: 1.5)),
                                 ],
@@ -305,7 +305,7 @@ class _MediaPickButton extends StatelessWidget {
           children: [
             Icon(icon, size: 16 * s, color: _kInk),
             SizedBox(width: 8 * s),
-            Text(label, style: _ui(size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.4)),
+            Text(label, style: _ui(size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 0.4)),
           ],
         ),
       ),

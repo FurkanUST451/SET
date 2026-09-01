@@ -150,7 +150,6 @@ Cihaz / emülatör seçili olmalı. İlk açılışta dev davranışı: onboardi
 - **Backend yok:** Auth, freelancer listesi, teklif vb. işlemler `lib/data/dummy/dummy_data.dart`'tan besleniyor. `auth_repository.dart` mock yanıt üretiyor.
 - **Hizmet Ver tarafı:** `lib/modules/freelancer/` altındaki dosyalar iskelet düzeyinde. Tasarım ve içerik üzerine henüz çalışılmadı.
 - **Kategoriler:** İngilizce — `Videographer`, `Sound Design`, `Video Edit`, `AI/CGI`, `Drone`, `Photographer`. Freelancer ve kategori filtreleri bu string'lerle eşleşiyor.
-- **Splash görselleri:** `assets/images/splash_screens/` altında 3 adet (splashsayfa1.png, splash_screen2.png, splash_screen3.png).
 - **Keşfet kart görselleri:** Henüz konulmadı — `WorkModel.coverImage` `null` ise koyu gradient + tipine göre dekoratif ikon + play butonu placeholder gösteriliyor.
 
 ---

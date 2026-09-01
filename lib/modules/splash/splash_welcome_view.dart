@@ -46,23 +46,25 @@ class _SplashWelcomeScreenState extends State<SplashWelcomeScreen>
     duration: const Duration(milliseconds: _totalMs),
   );
 
-  // Başlık: fade-in + translateY (aşağıdan yukarıya), ease-out.
+  // Başlık: soldan hızla kayarak gelir + fade-in, hızlı başlayıp yavaşça
+  // yerine oturur (easeOutExpo).
   late final Animation<double> _titleAnim = CurvedAnimation(
     parent: _intro,
     curve: Interval(
       _titleDelayMs / _totalMs,
       (_titleDelayMs + _titleDurationMs) / _totalMs,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutExpo,
     ),
   );
 
-  // Alt yazı: yalnızca fade-in, ease-out.
+  // Alt yazı: başlıkla aynı soldan kayma efekti, kendi gecikmesiyle art
+  // arda gelir.
   late final Animation<double> _subtitleAnim = CurvedAnimation(
     parent: _intro,
     curve: Interval(
       _subtitleDelayMs / _totalMs,
       (_subtitleDelayMs + _subtitleDurationMs) / _totalMs,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutExpo,
     ),
   );
 
@@ -157,7 +159,7 @@ class _SplashWelcomeScreenState extends State<SplashWelcomeScreen>
           // Başlık + alt yazı — devam et butonunun hemen üstünde. Her biri
           // kendi gecikme/süresiyle ayrı ayrı belirir (staggered).
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 26 * s),
+            padding: EdgeInsets.only(left: 16 * s, right: 26 * s),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -165,7 +167,7 @@ class _SplashWelcomeScreenState extends State<SplashWelcomeScreen>
                   animation: _titleAnim,
                   builder: (context, child) {
                     return Transform.translate(
-                      offset: Offset(0, (1 - _titleAnim.value) * 9 * s),
+                      offset: Offset((1 - _titleAnim.value) * -70 * s, 0),
                       child: Opacity(opacity: _titleAnim.value, child: child),
                     );
                   },
@@ -180,8 +182,17 @@ class _SplashWelcomeScreenState extends State<SplashWelcomeScreen>
                   ),
                 ),
                 SizedBox(height: 10 * s),
-                FadeTransition(
-                  opacity: _subtitleAnim,
+                AnimatedBuilder(
+                  animation: _subtitleAnim,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset((1 - _subtitleAnim.value) * -70 * s, 0),
+                      child: Opacity(
+                        opacity: _subtitleAnim.value,
+                        child: child,
+                      ),
+                    );
+                  },
                   child: Text(
                     'SET — yaratıcı işler platformu',
                     style: AppFonts.ui(

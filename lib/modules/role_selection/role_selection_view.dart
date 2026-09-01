@@ -7,113 +7,217 @@ import '../../core/theme/app_text_styles.dart';
 import '../../data/models/user_model.dart';
 import 'role_selection_controller.dart';
 
+// Uygulama genelinde "DEVAM ET" butonunun kullandığı renk — bkz.
+// splash_continue_button.dart, category_picker_view.dart.
+const Color _kGold = Color(0xFFD9A84E);
+const Color _kCream = Color(0xFFF4EFE4);
+const Color _kInk = Color(0xFF1A1A1A);
+const Color _kMuted = Color(0xFF8B8377);
+const Color _kDivider = Color(0x1F1A1A1A);
+
 class RoleSelectionView extends GetView<RoleSelectionController> {
   const RoleSelectionView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(AppAssets.choosePageBg, fit: BoxFit.cover, cacheWidth: 1080),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      backgroundColor: _kCream,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppStrings.appName,
-                    style: AppTextStyles.wordmark.copyWith(
-                      color: Colors.black87,
-                      letterSpacing: 2,
-                    ),
+                    AppStrings.roleSelectionEyebrow,
+                    style: AppTextStyles.microLabel.copyWith(color: _kMuted),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Nasıl devam etmek istersin?',
-                    style: AppTextStyles.body2.copyWith(color: Colors.black54),
-                  ),
-                  const SizedBox(height: 24),
-                  Expanded(
-                    child: _RoleCard(
-                      label: 'Hizmet Al',
-                      dark: false,
-                      onTap: () => controller.select(UserRole.client),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: _RoleCard(
-                      label: 'Hizmet Ver',
-                      dark: true,
-                      onTap: () => controller.select(UserRole.freelancer),
+                  const SizedBox(height: 18),
+                  RichText(
+                    text: TextSpan(
+                      style: AppTextStyles.editorialDisplay.copyWith(
+                        fontSize: 34,
+                        color: _kInk,
+                      ),
+                      children: const [
+                        TextSpan(text: 'Sen '),
+                        TextSpan(
+                          text: 'ne yapmak',
+                          style: TextStyle(color: _kGold),
+                        ),
+                        TextSpan(text: ' için buradasın?'),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Expanded(
+              child: Obx(
+                () => Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: _RoleRow(
+                        number: '01',
+                        category: AppStrings.roleClientCategory,
+                        title: AppStrings.roleClient,
+                        description: AppStrings.roleClientDesc,
+                        archiveLabel: AppStrings.roleClientArchive,
+                        image: AppAssets.roleTelephone,
+                        selected: controller.selectedRole.value == UserRole.client,
+                        onTap: () => controller.selectRole(UserRole.client),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Divider(color: _kDivider, height: 1),
+                    ),
+                    Expanded(
+                      child: _RoleRow(
+                        number: '02',
+                        category: AppStrings.roleFreelancerCategory,
+                        title: AppStrings.roleFreelancer,
+                        description: AppStrings.roleFreelancerDesc,
+                        archiveLabel: AppStrings.roleFreelancerArchive,
+                        image: AppAssets.roleCamera,
+                        selected:
+                            controller.selectedRole.value == UserRole.freelancer,
+                        onTap: () => controller.selectRole(UserRole.freelancer),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Obx(
+              () => AnimatedOpacity(
+                duration: const Duration(milliseconds: 150),
+                opacity: controller.selectedRole.value == null ? 0.4 : 1,
+                child: GestureDetector(
+                  onTap: controller.selectedRole.value == null
+                      ? null
+                      : controller.confirm,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: double.infinity,
+                    height: 54,
+                    color: _kGold,
+                    alignment: Alignment.center,
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                AppStrings.roleContinue,
+                                style: AppTextStyles.eyebrow.copyWith(
+                                  color: Colors.white,
+                                  letterSpacing: 1.8,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({
-    required this.label,
-    required this.dark,
+class _RoleRow extends StatelessWidget {
+  const _RoleRow({
+    required this.number,
+    required this.category,
+    required this.title,
+    required this.description,
+    required this.archiveLabel,
+    required this.image,
+    required this.selected,
     required this.onTap,
   });
 
-  final String label;
-  final bool dark;
+  final String number;
+  final String category;
+  final String title;
+  final String description;
+  final String archiveLabel;
+  final String image;
+  final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final bg = dark ? const Color(0xFF1A1A1A) : Colors.white.withValues(alpha: 0.88);
-    final labelColor = dark ? const Color(0xFFE8B84B) : Colors.black87;
-    final arrowBg = dark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08);
-    final arrowColor = dark ? Colors.white : Colors.black87;
-
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: dark ? 0.35 : 0.12),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              label,
-              style: AppTextStyles.displayXL.copyWith(
-                color: labelColor,
-                fontSize: 42,
-                height: 1.1,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$number · $category',
+                    style: AppTextStyles.eyebrow.copyWith(color: _kGold),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    title,
+                    style: AppTextStyles.heading1.copyWith(color: _kInk),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: AppTextStyles.body2.copyWith(color: _kMuted),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(width: 48, height: 2, color: _kGold),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text(
+                        archiveLabel,
+                        style: AppTextStyles.microLabel.copyWith(color: _kMuted),
+                      ),
+                      if (selected) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.check_circle, size: 14, color: _kGold),
+                      ],
+                    ],
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: arrowBg,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_forward, color: arrowColor, size: 22),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Image.asset(image, fit: BoxFit.contain),
             ),
           ],
         ),

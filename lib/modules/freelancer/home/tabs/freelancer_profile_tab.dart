@@ -273,7 +273,7 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
               ),
               Text(
                 'HESABIM',
-                style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
               ),
             ],
           ),
@@ -346,7 +346,7 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                     child: Text(
                       'FREELANCER',
                       style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1.2,
@@ -369,7 +369,7 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                     email,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                   ),
                   SizedBox(height: 10 * s),
                   Text(
@@ -430,7 +430,7 @@ class _FreelancerProfileTabState extends State<FreelancerProfileTab>
                 Text(
                   title,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.8,
@@ -533,7 +533,7 @@ class _SettingsRow extends StatelessWidget {
                   Text(
                     label,
                     style: _display(
-                      size: 12 * s,
+                      size: 17 * s,
                       weight: FontWeight.w600,
                       color: titleColor,
                     ),
@@ -542,7 +542,7 @@ class _SettingsRow extends StatelessWidget {
                     SizedBox(height: 3 * s),
                     Text(
                       sub!,
-                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                      style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ],
                 ],

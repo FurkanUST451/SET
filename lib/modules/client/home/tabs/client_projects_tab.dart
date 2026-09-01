@@ -189,7 +189,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROJELERİM',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -211,7 +211,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                 Text(
                   'Projelerim',
                   style: _display(
-                      size: 40 * s, weight: FontWeight.w600, color: _kInk),
+                      size: 32 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 SizedBox(height: 6 * s),
                 Obx(() {
@@ -219,7 +219,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                       _activeProjects(controller).length;
                   return Text(
                     '$count proje görüntüleniyor',
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
                   );
                 }),
               ],
@@ -261,7 +261,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                   Text(
                     _filterLabels[i],
                     style: _ui(
-                      size: 9 * s,
+                      size: 11 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: _kBlack,
                       spacing: 1,
@@ -406,7 +406,7 @@ class _ProjectCard extends StatelessWidget {
                   Text(
                     'ONAYLI PROJE',
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
                         spacing: 1.4),
@@ -450,7 +450,7 @@ class _ProjectCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                                size: 20 * s,
+                                size: 24 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
@@ -461,7 +461,7 @@ class _ProjectCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1),
+                                  size: 13 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
                         ],
@@ -491,7 +491,7 @@ class _ProjectCard extends StatelessWidget {
                     Expanded(
                       child: _MetaCell(
                         scale: s,
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label: 'BÜTÇE',
                         value: _compactBudget,
                       ),
@@ -516,7 +516,7 @@ class _ProjectCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_outlined,
+                    Icon(Icons.location_on_rounded,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
@@ -540,19 +540,22 @@ class _ProjectCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (project.notes != null && project.notes!.isNotEmpty) ...[
-                    Icon(Icons.chat_bubble_outline_rounded,
+                    Icon(Icons.chat_bubble_rounded,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
-                      child: Text(
-                        project.notes!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: _ui(
-                            size: 9 * s,
-                            weight: FontWeight.w700,
-                            color: _kInk,
-                            spacing: 0.2),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 3 * s),
+                        child: Text(
+                          project.notes!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ui(
+                              size: 9 * s,
+                              weight: FontWeight.w700,
+                              color: _kInk,
+                              spacing: 0.2),
+                        ),
                       ),
                     ),
                     SizedBox(width: 8 * s),
@@ -561,7 +564,7 @@ class _ProjectCard extends StatelessWidget {
                   Text(
                     'DETAY',
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1.2),
@@ -669,7 +672,7 @@ class _SetProjectCard extends StatelessWidget {
                       Text(
                         'SET HALLEDİYOR',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
                             spacing: 1.4),
@@ -713,7 +716,7 @@ class _SetProjectCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: _display(
-                                    size: 20 * s,
+                                    size: 24 * s,
                                     weight: FontWeight.w600,
                                     color: _kInk),
                               ),
@@ -724,7 +727,7 @@ class _SetProjectCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: _ui(
-                                      size: 8 * s, color: _kBlack, spacing: 1),
+                                      size: 13 * s, color: _kBlack, spacing: 1),
                                 ),
                               ],
                             ],
@@ -755,7 +758,7 @@ class _SetProjectCard extends StatelessWidget {
                         Expanded(
                           child: _MetaCell(
                             scale: s,
-                            icon: Icons.payments_outlined,
+                            icon: Icons.payments_rounded,
                             label: 'BÜTÇE',
                             value: _compactBudget,
                           ),
@@ -781,7 +784,7 @@ class _SetProjectCard extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 42 * s),
                     child: Row(
                       children: [
-                        Icon(Icons.location_on_outlined,
+                        Icon(Icons.location_on_rounded,
                             size: 13 * s, color: _kTaupe),
                         SizedBox(width: 5 * s),
                         Expanded(
@@ -807,19 +810,22 @@ class _SetProjectCard extends StatelessWidget {
                     children: [
                       if (project.notes != null &&
                           project.notes!.isNotEmpty) ...[
-                        Icon(Icons.chat_bubble_outline_rounded,
+                        Icon(Icons.chat_bubble_rounded,
                             size: 13 * s, color: _kTaupe),
                         SizedBox(width: 5 * s),
                         Expanded(
-                          child: Text(
-                            project.notes!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: _ui(
-                                size: 9 * s,
-                                weight: FontWeight.w700,
-                                color: _kInk,
-                                spacing: 0.2),
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 3 * s),
+                            child: Text(
+                              project.notes!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: _ui(
+                                  size: 9 * s,
+                                  weight: FontWeight.w700,
+                                  color: _kInk,
+                                  spacing: 0.2),
+                            ),
                           ),
                         ),
                         SizedBox(width: 8 * s),
@@ -828,7 +834,7 @@ class _SetProjectCard extends StatelessWidget {
                       Text(
                         'DETAY',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
                             spacing: 1.2),
@@ -969,7 +975,7 @@ class _BriefCard extends StatelessWidget {
                   Text(
                     _statusLabel,
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
                         spacing: 1.4),
@@ -1013,7 +1019,7 @@ class _BriefCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                                size: 20 * s,
+                                size: 24 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
@@ -1024,7 +1030,7 @@ class _BriefCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1),
+                                  size: 13 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
                         ],
@@ -1036,7 +1042,7 @@ class _BriefCard extends StatelessWidget {
                     Text(
                       '${brief.sentToIds.length}',
                       style: _display(
-                          size: 25 * s,
+                          size: 22 * s,
                           weight: FontWeight.w700,
                           color: _kGold),
                     ),
@@ -1066,7 +1072,7 @@ class _BriefCard extends StatelessWidget {
                     Expanded(
                       child: _MetaCell(
                         scale: s,
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label: 'BÜTÇE',
                         value: brief.answers.budget != null
                             ? _compactBudget(brief.answers.budget!)
@@ -1094,7 +1100,7 @@ class _BriefCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_outlined,
+                    Icon(Icons.location_on_rounded,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
@@ -1123,26 +1129,29 @@ class _BriefCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.chat_bubble_outline_rounded,
+                      Icon(Icons.chat_bubble_rounded,
                           size: 13 * s, color: _kTaupe),
                       SizedBox(width: 5 * s),
                       Expanded(
-                        child: Text(
-                          brief.answers.notes!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: _ui(
-                              size: 9 * s,
-                              weight: FontWeight.w700,
-                              color: _kInk,
-                              spacing: 0.2),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 3 * s),
+                          child: Text(
+                            brief.answers.notes!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w700,
+                                color: _kInk,
+                                spacing: 0.2),
+                          ),
                         ),
                       ),
                       SizedBox(width: 8 * s),
                       Text(
                         'REVİZE ET',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
                             spacing: 1.2),
@@ -1169,7 +1178,7 @@ class _BriefCard extends StatelessWidget {
                       Text(
                         'REVİZE ET',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
                             spacing: 1.2),
@@ -1215,7 +1224,11 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
+              style: _ui(
+                  size: 10 * s,
+                  weight: FontWeight.w700,
+                  color: _kBlack,
+                  spacing: 1),
             ),
           ],
         ),
@@ -1256,7 +1269,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
@@ -1284,7 +1297,7 @@ class _ErrorView extends StatelessWidget {
         children: [
           Text(
             'Projeler yüklenemedi',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 12 * s),
           GestureDetector(
@@ -1298,7 +1311,7 @@ class _ErrorView extends StatelessWidget {
               child: Text(
                 'TEKRAR DENE',
                 style: _ui(
-                    size: 9 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: Colors.white,
                     spacing: 1),

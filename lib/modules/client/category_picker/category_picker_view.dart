@@ -272,7 +272,7 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
             SizedBox(width: 5 * s),
             Text(
               'Seçimin gizli tutulur ve güvenle saklanır.',
-              style: _ui(size: 8 * s, color: _kMuted, spacing: 0.2),
+              style: _ui(size: 8 * s, color: _kInk, spacing: 0.2),
             ),
           ],
         ),
@@ -337,7 +337,7 @@ class _CategoryCard extends StatelessWidget {
                           Text(
                             'HİZMET · ${(index + 1).toString().padLeft(2, '0')}',
                             style: _ui(
-                                size: 8.5 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w700,
                                 color: _kMuted,
                                 spacing: 1.6),
@@ -399,7 +399,7 @@ class _CategoryCard extends StatelessWidget {
                           Text(
                             '${(index + 1).toString().padLeft(2, '0')} / ${total.toString().padLeft(2, '0')}',
                             style: _ui(
-                                size: 9 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w600,
                                 color: _kMuted,
                                 spacing: 1.2),
@@ -410,14 +410,14 @@ class _CategoryCard extends StatelessWidget {
                               TextSpan(
                                 text: firstWord,
                                 style: _display(
-                                    size: 30 * s,
+                                    size: 24 * s,
                                     weight: FontWeight.w600,
                                     color: _kInk),
                               ),
                               TextSpan(
                                 text: restWord,
                                 style: _display(
-                                    size: 30 * s,
+                                    size: 24 * s,
                                     weight: FontWeight.w600,
                                     color: _kGold),
                               ),
@@ -427,7 +427,7 @@ class _CategoryCard extends StatelessWidget {
                           Text(
                             _kCategoryTags[label] ?? '',
                             style: _ui(
-                                size: 9.5 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w700,
                                 color: _kInk,
                                 spacing: 0.6),
@@ -436,7 +436,7 @@ class _CategoryCard extends StatelessWidget {
                           Text(
                             've daha fazlası...',
                             style: _display(
-                                size: 13 * s,
+                                size: 15 * s,
                                 weight: FontWeight.w500,
                                 color: _kInk,
                                 italic: true),

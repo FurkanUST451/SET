@@ -112,7 +112,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                       : 'Video Çekim')
                                   .toUpperCaseTr(),
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1.5),
+                                  size: 10 * s, color: _kBlack, spacing: 1.5),
                             ),
                             SizedBox(height: 8 * s),
                             Text.rich(
@@ -196,7 +196,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                 Obx(() => Text(
                                     '${controller.charCount.value} / 2000',
                                     style: _ui(
-                                        size: 8 * s,
+                                        size: 10 * s,
                                         color: _kBlack,
                                         spacing: 0.5))),
                               ],

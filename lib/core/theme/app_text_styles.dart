@@ -9,7 +9,91 @@ import 'app_fonts.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  // ── Display / Hero — Bricolage Grotesque 800 ────────────────────────────
+  // ── Yeni ölçek token'ları (2026-08-31 spec: dev rakam / ekran başlığı / vb.)
+  // Bricolage Grotesque ExtraBold katmanı — negatif tracking şart, yoksa
+  // başlıklar dağınık durur. Değişken font değil; google_fonts her ağırlık
+  // için ayrı statik kesim indirir, bu yüzden sahte-bold riski yok.
+
+  /// Dev rakam — ana sayfa sayaç (07, 03). height 0.88 olmazsa üstte
+  /// gereksiz boşluk kalır.
+  static TextStyle get counterXL => AppFonts.display(
+        fontSize: 104,
+        fontWeight: FontWeight.w800,
+        height: 0.88,
+        letterSpacing: -3,
+      );
+
+  /// Ekran başlığı.
+  static TextStyle get screenTitle => AppFonts.display(
+        fontSize: 32,
+        fontWeight: FontWeight.w800,
+        height: 1.05,
+        letterSpacing: -0.8,
+      );
+
+  /// Bölüm başlığı / isim (proje adı, kişi adı).
+  static TextStyle get sectionTitle => AppFonts.display(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        height: 1.15,
+        letterSpacing: -0.4,
+      );
+
+  /// Liste ismi (freelancer satırı).
+  static TextStyle get listName => AppFonts.display(
+        fontSize: 19,
+        fontWeight: FontWeight.w800,
+        height: 1.2,
+        letterSpacing: -0.2,
+      );
+
+  /// Rakam (istatistik) — puan, bütçe, süre.
+  static TextStyle get statFigure => AppFonts.display(
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        height: 1.0,
+        letterSpacing: -0.3,
+      );
+
+  /// Liste satırı (tek satırlık) — teslim edilenler.
+  static TextStyle get listRow => AppFonts.display(
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+        height: 1.2,
+        letterSpacing: -0.2,
+      );
+
+  /// Gövde metni — bio, açıklama.
+  static TextStyle get bodyText => AppFonts.ui(
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+      );
+
+  /// Alt satır / meta — grey, isim altı.
+  static TextStyle get metaText => AppFonts.ui(
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        height: 1.4,
+      );
+
+  /// Mikro etiket — UPPERCASE, letterSpacing px cinsinde (0.22em ≈ 2.2px @10px).
+  static TextStyle get microLabel => AppFonts.ui(
+        fontSize: 10,
+        fontWeight: FontWeight.w500,
+        height: 1.2,
+        letterSpacing: 2.2,
+      );
+
+  /// Filtre / sekme — UPPERCASE.
+  static TextStyle get tabLabel => AppFonts.ui(
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        height: 1.2,
+        letterSpacing: 1.6,
+      );
+
+  // ── Mevcut ölçek (dokunulmadı — set_* widget'ları ve tema bunlara bağlı) ─
   static TextStyle get displayXL => AppFonts.display(
         fontSize: 48,
         fontWeight: FontWeight.w700, // → w800

@@ -8,18 +8,19 @@ import '../../../routes/app_routes.dart';
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
-const _kInk = Color(0xFF23212B);
-const _kTextInk = Color(0xFF35333F);
-const _kTaupe = Color(0xFF9B8E7B);
-const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
-const _kCardBorder = Color(0x14000000);
+const _kInk = Color(0xFF1A1A1F);
+const _kTextInk = Color(0xFF1F1D26);
+const _kTaupe = Color(0xFF8E8778);
+const _kLabelBrown = Color(0xFF8A7C68);
+const _kStepGrey = Color(0xFF5F5B54);
+const _kHairLight = Color(0x0F000000);
+const _kHairDark = Color(0x1AFFFFFF);
 
 TextStyle _display({
   required double size,
-  FontWeight weight = FontWeight.w500,
+  FontWeight weight = FontWeight.w600,
   required Color color,
-  double height = 1.05,
+  double height = 1.02,
 }) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
@@ -31,8 +32,8 @@ TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
-  double spacing = 0.5,
-  double height = 1.4,
+  double spacing = 0.2,
+  double height = 1.35,
 }) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
@@ -41,47 +42,14 @@ TextStyle _ui({
   height: height,
 );
 
-Widget _wordmark(double s) => RichText(
-  text: TextSpan(
-    children: [
-      TextSpan(
-        text: 'SE',
-        style: AppFonts.display(
-          fontSize: 18 * s,
-          fontWeight: FontWeight.w700,
-          color: _kTextInk,
-          letterSpacing: 2.5,
-        ),
-      ),
-      TextSpan(
-        text: 'T',
-        style: AppFonts.display(
-          fontSize: 18 * s,
-          fontWeight: FontWeight.w800,
-          color: _kGold,
-          letterSpacing: 2.5,
-        ),
-      ),
-    ],
-  ),
-);
-
-class ProjectModeView extends StatefulWidget {
+class ProjectModeView extends StatelessWidget {
   const ProjectModeView({super.key});
 
-  @override
-  State<ProjectModeView> createState() => _ProjectModeViewState();
-}
-
-class _ProjectModeViewState extends State<ProjectModeView> {
-  String? _selected; // 'freelancer' | 'set'
-
-  void _proceed() {
-    if (_selected == null) return;
+  void _choose(String mode) {
     final args = Get.arguments as Map<String, dynamic>?;
     final category = (args?['category'] as String?) ?? '';
     final briefId = (args?['briefId'] as String?) ?? '';
-    if (_selected == 'set') {
+    if (mode == 'set') {
       // Atanmış operasyon ekibiyle doğrudan sohbet ekranına git.
       Get.toNamed(
         AppRoutes.chatDetail,
@@ -100,6 +68,7 @@ class _ProjectModeViewState extends State<ProjectModeView> {
     final double s = (MediaQuery.sizeOf(context).width / 390)
         .clamp(0.85, 1.15)
         .toDouble();
+    final pad = EdgeInsets.symmetric(horizontal: 20 * s);
 
     return Scaffold(
       backgroundColor: _kCream,
@@ -107,152 +76,168 @@ class _ProjectModeViewState extends State<ProjectModeView> {
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(
-                height: 48 * s,
-                child: Stack(
-                  alignment: Alignment.center,
+              // ── Üst bar: geri + adım göstergesi ──────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(20 * s, 8 * s, 20 * s, 12 * s),
+                child: Row(
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => Get.back<void>(),
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: EdgeInsets.all(12 * s),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 22 * s,
-                            color: _kTextInk,
-                          ),
-                        ),
+                    GestureDetector(
+                      onTap: () => Get.back<void>(),
+                      behavior: HitTestBehavior.opaque,
+                      child: Icon(
+                        Icons.arrow_back,
+                        size: 21 * s,
+                        color: _kTextInk,
                       ),
                     ),
-                    _wordmark(s),
+                    const Spacer(),
+                    Text(
+                      'ADIM 3 / 3',
+                      style: _ui(
+                        size: 11 * s,
+                        weight: FontWeight.w600,
+                        color: _kStepGrey,
+                        spacing: 1.1,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(24 * s, 8 * s, 24 * s, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Projene en uygun üretim sürecini seç.',
-                      style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
-                    ),
-                    SizedBox(height: 6 * s),
-                    Text.rich(
-                      TextSpan(children: [
-                        TextSpan(
-                          text: 'Nasıl\n',
-                          style: _display(
-                            size: 36 * s,
-                            weight: FontWeight.w600,
-                            color: _kTextInk,
-                            height: 1.0,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'ilerleyelim?',
-                          style: _display(
-                            size: 36 * s,
-                            weight: FontWeight.w600,
-                            color: _kGold,
-                            height: 1.0,
-                          ),
-                        ),
-                      ]),
-                    ),
-                  ],
-                ),
+                padding: pad,
+                child: Container(height: 1, color: _kHairLight),
               ),
-              SizedBox(height: 20 * s),
+
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: _ModeCard(
+                      SizedBox(height: 12 * s),
+
+                      // ── Başlık ─────────────────────────────────────────
+                      Padding(
+                        padding: pad,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: 'İki yol var',
+                                  style: _display(
+                                    size: 32 * s,
+                                    weight: FontWeight.w700,
+                                    color: _kTextInk,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '.',
+                                  style: _display(
+                                    size: 32 * s,
+                                    weight: FontWeight.w700,
+                                    color: _kGold,
+                                  ),
+                                ),
+                              ]),
+                            ),
+                            SizedBox(height: 6 * s),
+                            Text(
+                              'Aynı brief, iki farklı yürütme biçimi.',
+                              style: _ui(size: 13.5 * s, color: _kTaupe),
+                            ),
+                            SizedBox(height: 13 * s),
+                            _VideoPreviewBar(scale: s),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 20 * s),
+
+                      // ── 01 · Freelancer ile ─────────────────────────────
+                      Padding(
+                        padding: pad,
+                        child: _PathSection(
                           scale: s,
-                          selected: _selected == 'freelancer',
                           dark: false,
-                          onTap: () =>
-                              setState(() => _selected = 'freelancer'),
-                          child: _FreelancerCard(scale: s),
+                          onTap: () => _choose('freelancer'),
+                          stepLabel: '01 · KENDİN SEÇ',
+                          title: 'Freelancer ile',
+                          subtitle: 'Pazaryerinden kendi ekibini kurarsın.',
+                          image: AppAssets.projectModeFreelancerBox,
+                          imageWidth: 108 * s,
+                          imageHeight: 86 * s,
+                          bullets: const [
+                            '5 kişiye kadar brief gönderirsin',
+                            'Fiyat ve takvimi doğrudan konuşursun',
+                            'Süreci sen yönetirsin',
+                            'Ödeme SET güvencesinde tutulur',
+                          ],
+                          stats: const [
+                            ('24 SA', 'İLK YANIT'),
+                            ('128', 'SETTEKİ'),
+                            ('%5', 'KOMİSYON'),
+                          ],
                         ),
                       ),
-                      SizedBox(width: 12 * s),
-                      Expanded(
-                        child: _ModeCard(
+
+                      SizedBox(height: 30 * s),
+
+                      // ── 02 · SET ekibi ile (tam genişlik koyu blok) ─────
+                      Container(
+                        width: double.infinity,
+                        color: _kInk,
+                        padding: EdgeInsets.fromLTRB(
+                          20 * s,
+                          16 * s,
+                          20 * s,
+                          14 * s,
+                        ),
+                        child: _PathSection(
                           scale: s,
-                          selected: _selected == 'set',
                           dark: true,
-                          onTap: () => setState(() => _selected = 'set'),
-                          child: _SetCard(scale: s),
+                          onTap: () => _choose('set'),
+                          stepLabel: '02 · SET HALLETSİN',
+                          badge: 'PREMIUM',
+                          title: 'SET ekibi ile',
+                          subtitle:
+                              'Tek muhatap, kurulmuş ekip, yönetilen süreç.',
+                          image: AppAssets.projectModeSetRing,
+                          imageWidth: 100 * s,
+                          imageHeight: 80 * s,
+                          bullets: const [
+                            'Operasyon sorumlusuyla tek görüşme',
+                            'İşin ölçeğine göre ekip biz kurarız',
+                            'Süreci baştan sona biz yönetiriz',
+                            'Teslim ve revizyon SET güvencesinde',
+                          ],
+                          stats: const [
+                            ('2 SA', 'İLK YANIT'),
+                            ('TEK', 'MUHATAP'),
+                            ('%100', 'TESLİM'),
+                          ],
                         ),
                       ),
+
+                      SizedBox(height: 13 * s),
+                      Center(
+                        child: Text(
+                          'Kararını sonra da değiştirebilirsin.',
+                          style: _ui(
+                            size: 11.5 * s,
+                            weight: FontWeight.w500,
+                            color: _kStepGrey,
+                          ).copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationColor: _kStepGrey,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 11 * s),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 12 * s),
-              // Alt sabit bölüm
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 8 * s, 0, 6 * s),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: _proceed,
-                      behavior: HitTestBehavior.opaque,
-                      child: AnimatedOpacity(
-                        opacity: _selected != null ? 1.0 : 0.45,
-                        duration: const Duration(milliseconds: 200),
-                        child: Container(
-                          width: double.infinity,
-                          height: 50 * s,
-                          color: _kGold,
-                          alignment: Alignment.center,
-                          child: Text(
-                            'DEVAM ET  →',
-                            style: _ui(
-                              size: 11 * s,
-                              weight: FontWeight.w700,
-                              color: Colors.white,
-                              spacing: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10 * s),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24 * s),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.lock_outline,
-                            size: 11 * s,
-                            color: _kMuted,
-                          ),
-                          SizedBox(width: 5 * s),
-                          Text(
-                            'Seçimin daha sonra değiştirilebilir.',
-                            style: _ui(
-                              size: 8 * s,
-                              color: _kBlack,
-                              spacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 8 * s),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -261,398 +246,289 @@ class _ProjectModeViewState extends State<ProjectModeView> {
   }
 }
 
-// ─── Kart sarmalayıcı ─────────────────────────────────────────────────────────
-class _ModeCard extends StatelessWidget {
-  const _ModeCard({
-    required this.scale,
-    required this.selected,
-    required this.dark,
-    required this.onTap,
-    required this.child,
-  });
-
+// ─── "Farkı 40 saniyede izle" video önizleme çubuğu ────────────────────────────
+class _VideoPreviewBar extends StatelessWidget {
+  const _VideoPreviewBar({required this.scale});
   final double scale;
-  final bool selected;
-  final bool dark;
-  final VoidCallback onTap;
-  final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final s = scale;
+    return Container(
+      height: 41 * s,
+      padding: EdgeInsets.symmetric(horizontal: 11 * s),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0x1A000000)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 25 * s,
+            height: 25 * s,
+            decoration: BoxDecoration(
+              color: _kGold,
+              borderRadius: BorderRadius.circular(3 * s),
+            ),
+            child: Icon(Icons.play_arrow_rounded, size: 16 * s, color: _kInk),
+          ),
+          SizedBox(width: 11 * s),
+          Expanded(
+            child: Text(
+              'Farkı 40 saniyede izle',
+              style: _ui(size: 13 * s, color: _kTextInk),
+            ),
+          ),
+          Text('0:40', style: _ui(size: 12 * s, color: _kTaupe)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Yol bölümü (01 Freelancer / 02 SET) ──────────────────────────────────────
+class _PathSection extends StatelessWidget {
+  const _PathSection({
+    required this.scale,
+    required this.dark,
+    required this.onTap,
+    required this.stepLabel,
+    required this.title,
+    required this.subtitle,
+    required this.image,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.bullets,
+    required this.stats,
+    this.badge,
+  });
+
+  final double scale;
+  final bool dark;
+  final VoidCallback onTap;
+  final String stepLabel;
+  final String? badge;
+  final String title;
+  final String subtitle;
+  final String image;
+  final double imageWidth;
+  final double imageHeight;
+  final List<String> bullets;
+  final List<(String, String)> stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    final Color titleColor = dark ? Colors.white : _kTextInk;
+    final Color bodyColor = dark
+        ? Colors.white.withValues(alpha: 0.92)
+        : _kTextInk;
+    final Color subColor = dark
+        ? Colors.white.withValues(alpha: 0.55)
+        : _kTaupe;
+    final Color hair = dark ? _kHairDark : _kHairLight;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: dark ? _kInk : Colors.white,
-          border: Border.all(
-            color: selected
-                ? _kGold
-                : (dark ? Colors.transparent : _kCardBorder),
-            width: 1.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Etiket bloğu + sağda illüstrasyon
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(right: imageWidth + 8 * s),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(width: 26 * s, height: 3 * s, color: _kGold),
+                    SizedBox(height: 11 * s),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            stepLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.visible,
+                            style: _ui(
+                              size: 10.5 * s,
+                              weight: FontWeight.w700,
+                              color: dark ? _kGold : _kLabelBrown,
+                              spacing: 0.9,
+                            ),
+                          ),
+                        ),
+                        if (badge != null) ...[
+                          SizedBox(width: 9 * s),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 7 * s,
+                              vertical: 3 * s,
+                            ),
+                            color: _kGold,
+                            child: Text(
+                              badge!,
+                              style: _ui(
+                                size: 8.5 * s,
+                                weight: FontWeight.w700,
+                                color: _kInk,
+                                spacing: 0.6,
+                                height: 1.1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 5 * s),
+                    Text(
+                      title,
+                      style: _display(
+                        size: 25 * s,
+                        weight: FontWeight.w700,
+                        color: titleColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                right: 0,
+                top: -8 * s,
+                child: Image.asset(
+                  image,
+                  width: imageWidth,
+                  height: imageHeight,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
           ),
-        ),
-        child: child,
+          SizedBox(height: 5 * s),
+          Text(
+            subtitle,
+            style: _ui(size: 13.5 * s, color: subColor, height: 1.3),
+          ),
+          SizedBox(height: 12 * s),
+
+          // Maddeler — her satırın altında ince ayraç
+          for (final bullet in bullets) ...[
+            Padding(
+              padding: EdgeInsets.only(bottom: 3 * s),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 5 * s),
+                    child: Container(
+                      width: 5 * s,
+                      height: 5 * s,
+                      color: _kGold,
+                    ),
+                  ),
+                  SizedBox(width: 11 * s),
+                  Expanded(
+                    child: Text(
+                      bullet,
+                      style: _ui(
+                        size: 11.5 * s,
+                        color: bodyColor,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(height: 1, color: hair),
+            SizedBox(height: 3 * s),
+          ],
+
+          SizedBox(height: 3 * s),
+          _StatsRow(
+            scale: s,
+            stats: stats,
+            valueColor: titleColor,
+            labelColor: dark ? Colors.white.withValues(alpha: 0.45) : _kTaupe,
+            dividerColor: hair,
+          ),
+          SizedBox(height: 10 * s),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'DEVAM ET  →',
+              style: _ui(
+                size: 11.5 * s,
+                weight: FontWeight.w700,
+                color: _kGold,
+                spacing: 0.6,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ─── Ana görsel + gölgesi (aynı kadrajda üst üste bindirilir) ─────────────────
-class _CardIllustration extends StatelessWidget {
-  const _CardIllustration({
-    required this.image,
-    required this.shadow,
-    required this.height,
-    this.width,
-    this.shadowOpacity = 0.35,
+// ─── İstatistik satırı (3 sütun, aralarında dikey ayraç) ──────────────────────
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({
+    required this.scale,
+    required this.stats,
+    required this.valueColor,
+    required this.labelColor,
+    required this.dividerColor,
   });
 
-  final String image;
-  final String shadow;
-  final double height;
-  final double? width;
-  final double shadowOpacity;
+  final double scale;
+  final List<(String, String)> stats;
+  final Color valueColor;
+  final Color labelColor;
+  final Color dividerColor;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: width ?? double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
+    final s = scale;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Gölge, ana görselle birebir aynı kadrajda konumlandığı için
-          // ikisini de aynı alana yerleştirmek gölgeyi doğru yere oturtur.
-          Opacity(
-            opacity: shadowOpacity,
-            child: Image.asset(shadow, fit: BoxFit.contain),
-          ),
-          Image.asset(image, fit: BoxFit.contain),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Üst üste binen avatar dizisi ─────────────────────────────────────────────
-class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.scale, required this.dark});
-  final double scale;
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    final photos = [
-      ...AppAssets.profilePhotosMale,
-      ...AppAssets.profilePhotosFemale,
-    ];
-    const highlightIndex = 3;
-    const count = 8;
-    final baseSize = 28.0 * s;
-    final step = baseSize * 0.62;
-
-    // Merkezdeki (sarı çizgili) fotoğraf en büyük; kenara gittikçe küçülür.
-    double scaleFor(int i) =>
-        (1.3 - 0.1 * (i - highlightIndex).abs()).clamp(0.85, 1.3);
-
-    final maxSize = baseSize * scaleFor(highlightIndex);
-    final rowHeight = maxSize + 8 * s;
-    final totalWidth = step * (count - 1) + baseSize + 22 * s;
-
-    Widget avatar(int i) {
-      final isHighlight = i == highlightIndex;
-      final size = baseSize * scaleFor(i);
-      return Positioned(
-        left: step * i,
-        top: (rowHeight - size) / 2,
-        child: Container(
-          width: size,
-          height: size,
-          padding: EdgeInsets.all(isHighlight ? 2 * s : 0),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: dark ? _kInk : Colors.white,
-            border: isHighlight
-                ? Border.all(color: _kGold, width: 1.6 * s)
-                : null,
-          ),
-          child: ClipOval(
-            child: Image.asset(photos[i % photos.length], fit: BoxFit.cover),
-          ),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: rowHeight,
-      width: totalWidth,
-      child: Stack(
-        children: [
-          // Merkezdeki fotoğraf önplana çıkması için en son (en üstte) çizilir.
-          for (int i = 0; i < count; i++)
-            if (i != highlightIndex) avatar(i),
-          avatar(highlightIndex),
-          Positioned(
-            left: step * (count - 1) + baseSize + 4 * s,
-            top: (rowHeight - 16 * s) / 2,
-            child: Icon(Icons.star_rounded, size: 16 * s, color: _kGold),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Alt ikon satırı (ayraç üstü) ─────────────────────────────────────────────
-class _BottomIconsRow extends StatelessWidget {
-  const _BottomIconsRow({required this.scale, required this.icons});
-  final double scale;
-  final List<IconData> icons;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < icons.length; i++) ...[
-          if (i != 0) SizedBox(width: 22 * s),
-          Icon(icons[i], size: 17 * s, color: _kTaupe),
-        ],
-      ],
-    );
-  }
-}
-
-// ─── Sol sütun kartı ──────────────────────────────────────────────────────────
-class _FreelancerCard extends StatelessWidget {
-  const _FreelancerCard({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Padding(
-      padding: EdgeInsets.all(14 * s),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            'KENDİ EKİBİNİ SEÇ',
-            style: _ui(
-              size: 8 * s,
-              weight: FontWeight.w700,
-              color: _kGold,
-              spacing: 1,
-            ),
-          ),
-          SizedBox(height: 6 * s),
-          Text(
-            'Freelancer Bul',
-            style: _display(
-              size: 19 * s,
-              weight: FontWeight.w600,
-              color: _kTextInk,
-              height: 1.05,
-            ),
-          ),
-          SizedBox(height: 5 * s),
-          Text(
-            'Binlerce yetenek arasından seç.',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2, height: 1.3),
-          ),
-          SizedBox(height: 12 * s),
-          Center(
-            child: _CardIllustration(
-              image: AppAssets.briefFreelancerIllustration,
-              shadow: AppAssets.briefFreelancerIllustrationShadow,
-              height: 140 * s,
-              width: 158 * s,
-            ),
-          ),
-          const Spacer(),
-          SizedBox(height: 12 * s),
-          Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: _AvatarStack(scale: s, dark: false),
-            ),
-          ),
-          SizedBox(height: 14 * s),
-          Divider(height: 1, color: Colors.black.withValues(alpha: 0.1)),
-          SizedBox(height: 10 * s),
-          _BottomIconsRow(
-            scale: s,
-            icons: const [
-              Icons.search_rounded,
-              Icons.pan_tool_outlined,
-              Icons.bolt_rounded,
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Süreç adımları (Ekip → Plan → Üretim → Teslim) ───────────────────────────
-class _ProcessSteps extends StatelessWidget {
-  const _ProcessSteps({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    const steps = [
-      ('Ekip', Icons.people_alt_outlined, true),
-      ('Plan', Icons.calendar_today_outlined, true),
-      ('Üretim', Icons.movie_creation_outlined, true),
-      ('Teslim', Icons.local_shipping_outlined, false),
-    ];
-    final circleSize = 30.0 * s;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 0; i < steps.length; i++) ...[
-          if (i != 0)
-            Padding(
-              padding: EdgeInsets.only(top: circleSize / 2),
-              child: Container(
-                width: 12 * s,
-                height: 1,
-                color: steps[i - 1].$3
-                    ? _kGold.withValues(alpha: 0.5)
-                    : Colors.white.withValues(alpha: 0.15),
+          for (int i = 0; i < stats.length; i++) ...[
+            if (i != 0)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14 * s),
+                child: Container(width: 1, color: dividerColor),
               ),
-            ),
-          Column(
-            children: [
-              Container(
-                width: circleSize,
-                height: circleSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: steps[i].$3
-                      ? _kGold.withValues(alpha: 0.12)
-                      : Colors.transparent,
-                  border: Border.all(
-                    color: steps[i].$3
-                        ? _kGold
-                        : Colors.white.withValues(alpha: 0.25),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    stats[i].$1,
+                    style: _display(
+                      size: 17 * s,
+                      weight: FontWeight.w700,
+                      color: valueColor,
+                      height: 1.1,
+                    ),
                   ),
-                ),
-                child: Icon(
-                  steps[i].$2,
-                  size: 13 * s,
-                  color: steps[i].$3
-                      ? _kGold
-                      : Colors.white.withValues(alpha: 0.35),
-                ),
-              ),
-              SizedBox(height: 5 * s),
-              Text(
-                steps[i].$1,
-                style: _ui(
-                  size: 7 * s,
-                  color: steps[i].$3
-                      ? Colors.white.withValues(alpha: 0.75)
-                      : Colors.white.withValues(alpha: 0.35),
-                  spacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ─── Sağ sütun kartı (koyu) ───────────────────────────────────────────────────
-class _SetCard extends StatelessWidget {
-  const _SetCard({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Padding(
-      padding: EdgeInsets.all(14 * s),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            'BİZ YÖNETELİM',
-            style: _ui(
-              size: 8 * s,
-              weight: FontWeight.w700,
-              color: _kGold,
-              spacing: 1,
-            ),
-          ),
-          SizedBox(height: 6 * s),
-          Text(
-            'SET Halletsin',
-            style: _display(
-              size: 19 * s,
-              weight: FontWeight.w600,
-              color: Colors.white,
-              height: 1.05,
-            ),
-          ),
-          SizedBox(height: 5 * s),
-          Text(
-            'Sen sonuca odaklan.',
-            style: _ui(
-              size: 8 * s,
-              color: Colors.white.withValues(alpha: 0.55),
-              spacing: 0.2,
-              height: 1.3,
-            ),
-          ),
-          SizedBox(height: 12 * s),
-          Center(
-            child: _CardIllustration(
-              image: AppAssets.briefSetIllustration,
-              shadow: AppAssets.briefSetIllustrationShadow,
-              height: 140 * s,
-              width: 158 * s,
-              shadowOpacity: 0.5,
-            ),
-          ),
-          const Spacer(),
-          SizedBox(height: 12 * s),
-          Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: _ProcessSteps(scale: s),
-            ),
-          ),
-          SizedBox(height: 14 * s),
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
-          SizedBox(height: 10 * s),
-          Row(
-            children: [
-              Icon(Icons.access_time_rounded, size: 13 * s, color: _kGold),
-              SizedBox(width: 6 * s),
-              Expanded(
-                child: Text(
-                  'Zaman kazandırır, stressiz ilerlersin.',
-                  style: _ui(
-                    size: 8 * s,
-                    color: Colors.white.withValues(alpha: 0.5),
-                    spacing: 0.2,
-                    height: 1.3,
+                  SizedBox(height: 2 * s),
+                  Text(
+                    stats[i].$2,
+                    style: _ui(
+                      size: 9 * s,
+                      weight: FontWeight.w600,
+                      color: labelColor,
+                      spacing: 0.7,
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
