@@ -16,6 +16,13 @@ class RoleSelectionController extends GetxController {
     selectedRole.value = role;
   }
 
+  /// Kart tek dokunuşla seçilir ve akış devam eder — ayrı "DEVAM ET" butonu yok.
+  Future<void> selectAndContinue(UserRole role) async {
+    if (isLoading.value) return;
+    selectRole(role);
+    await confirm();
+  }
+
   Future<void> confirm() async {
     final role = selectedRole.value;
     if (role == null || isLoading.value) return;

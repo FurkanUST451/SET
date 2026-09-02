@@ -6,6 +6,7 @@ import '../../../../core/constants/app_assets.dart';
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../routes/app_routes.dart';
+import '../../../app/user_controller.dart';
 import '../client_home_controller.dart';
 import '../client_projects_controller.dart';
 
@@ -68,6 +69,88 @@ const _kMockQuotes = [
   _MockQuote(price: '48.000 ₺', name: 'SELİN D.'),
   _MockQuote(price: '61.000 ₺', name: 'KAAN A.'),
 ];
+
+// Karşılama hâli normalde yalnızca hiç brief/proje yokken açılır. Dolu bir
+// hesapla tasarımı gözden geçirebilmek için bu bayrak geçici olarak true
+// yapılabilir; teslimde false kalmalı.
+const bool _kPreviewWelcomeState = true;
+
+// ─── Karşılama (ilk kullanım) hâlinin içeriği ─────────────────────────────────
+
+class _HowItWorksStep {
+  const _HowItWorksStep({required this.title, required this.detail});
+  final String title;
+  final String detail;
+}
+
+const _kHowItWorksSteps = [
+  _HowItWorksStep(
+    title: 'Brief\'ini anlat',
+    detail: 'Ne istediğini birkaç adımda tarif et.',
+  ),
+  _HowItWorksStep(
+    title: 'Yolunu seç',
+    detail: 'Freelancer\'ları sen seç ya da SET halletsin.',
+  ),
+  _HowItWorksStep(
+    title: 'Süreci izle',
+    detail: 'Teklifler, takvim ve teslim tek ekranda.',
+  ),
+];
+
+// "Nereden başlasam?" listesi — brief'e hızlı giriş için hazır başlıklar.
+// [category] doğrudan brief akışına (send-offer) taşınır.
+class _StarterService {
+  const _StarterService({
+    required this.title,
+    required this.detail,
+    required this.category,
+  });
+  final String title;
+  final String detail;
+  final String category;
+}
+
+const _kStarterServices = [
+  _StarterService(
+    title: 'Tanıtım filmi',
+    detail: 'Marka ya da mekân tanıtımı · 3–7 gün',
+    category: 'Video Çekim',
+  ),
+  _StarterService(
+    title: 'Reklam filmi',
+    detail: 'Ürün ya da kampanya filmi · 2–4 hafta',
+    category: 'Video Çekim',
+  ),
+  _StarterService(
+    title: 'Sosyal medya paketi',
+    detail: 'Dikey kurgu seti · 1–2 hafta',
+    category: 'Sosyal Medya Yönetimi',
+  ),
+  _StarterService(
+    title: 'Fotoğraf çekimi',
+    detail: 'Ürün, mekân ya da portre · 1–3 gün',
+    category: 'Fotoğraf',
+  ),
+];
+
+// "Settekiler" şeridi — havuzdaki freelancer'ların vitrini. Gerçek liste
+// Keşfet sekmesinden geldiği için burada yer tutucu portreler kullanılır.
+final _kCrewAvatars = [
+  AppAssets.profilePhotosMale[0],
+  AppAssets.profilePhotosMale[1],
+  AppAssets.profilePhotosFemale[0],
+  AppAssets.profilePhotosMale[2],
+  AppAssets.profilePhotosFemale[1],
+  AppAssets.profilePhotosMale[3],
+  AppAssets.profilePhotosFemale[2],
+  AppAssets.profilePhotosMale[4],
+  AppAssets.profilePhotosFemale[3],
+];
+
+// Havuzdaki freelancer sayısı henüz sayaç olarak backend'den gelmediği için
+// gösterimlik sabit tutulur.
+const _kCrewCount = 128;
 
 TextStyle _display({
   required double size,
@@ -156,55 +239,478 @@ class ClientHomeTab extends StatelessWidget {
               children: [
                 _buildTopStrip(s),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(bottom: 130 * s),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 34 * s),
-                        Obx(() {
-                          final controller =
-                              Get.find<ClientProjectsController>();
-                          BriefModel? openBrief;
-                          for (final b in controller.briefs) {
-                            if (b.status == 'offer_sent') {
-                              openBrief = b;
-                              break;
-                            }
-                          }
-                          return _buildResponseSection(s, openBrief);
-                        }),
-                        SizedBox(height: 34 * s),
-                        Obx(() {
-                          final controller =
-                              Get.find<ClientProjectsController>();
-                          ProjectModel? active;
-                          for (final p in controller.projects) {
-                            if (p.status == ProjectStatus.active) {
-                              active = p;
-                              break;
-                            }
-                          }
-                          if (active == null) return const SizedBox.shrink();
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildOngoingSection(s, active),
-                              SizedBox(height: 30 * s),
-                            ],
-                          );
-                        }),
-                        _buildNewBriefBanner(s),
-                        SizedBox(height: 34 * s),
-                        _buildArchiveSection(s),
-                      ],
-                    ),
-                  ),
+                  child: Obx(() {
+                    final controller = Get.find<ClientProjectsController>();
+                    // Yükleme bitmeden karar verilirse karşılama ekranı bir an
+                    // görünüp dolu ekrana atlar; o yüzden boş bırakılır.
+                    if (controller.isLoading.value && !_kPreviewWelcomeState) {
+                      return const SizedBox.shrink();
+                    }
+                    final isFirstRun = _kPreviewWelcomeState ||
+                        (controller.briefs.isEmpty &&
+                            controller.projects.isEmpty);
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.only(bottom: 130 * s),
+                      child: isFirstRun
+                          ? _buildWelcomeBody(s)
+                          : _buildActiveBody(s, controller),
+                    );
+                  }),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Dolu hâl — açık brief, süren iş, yeni brief bandı, arşiv ───────
+  Widget _buildActiveBody(double s, ClientProjectsController controller) {
+    BriefModel? openBrief;
+    for (final b in controller.briefs) {
+      if (b.status == 'offer_sent') {
+        openBrief = b;
+        break;
+      }
+    }
+    ProjectModel? active;
+    for (final p in controller.projects) {
+      if (p.status == ProjectStatus.active) {
+        active = p;
+        break;
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 34 * s),
+        _buildResponseSection(s, openBrief),
+        SizedBox(height: 34 * s),
+        if (active != null) ...[
+          _buildOngoingSection(s, active),
+          SizedBox(height: 30 * s),
+        ],
+        _buildNewBriefBanner(s),
+        SizedBox(height: 34 * s),
+        _buildArchiveSection(s),
+      ],
+    );
+  }
+
+  // ── Karşılama hâli — hiç brief/proje yokken açılan ilk kullanım akışı ─
+  Widget _buildWelcomeBody(double s) {
+    final name = Get.find<UserController>().currentUser?.name.trim() ?? '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildWelcomeHero(s, name),
+        _buildHowItWorks(s),
+        SizedBox(height: 34 * s),
+        _buildStarterServices(s),
+        SizedBox(height: 40 * s),
+        _buildCrewSection(s),
+        SizedBox(height: 40 * s),
+        _buildArchiveSection(s),
+      ],
+    );
+  }
+
+  // Hoş geldin bloğu — sağda klaket görseli, solda isimli selamlama.
+  Widget _buildWelcomeHero(double s, String name) {
+    final greeting = name.isEmpty ? 'Hoş geldin' : 'Hoş geldin,\n$name';
+    return SizedBox(
+      height: 300 * s,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            right: 18 * s,
+            top: 30 * s,
+            child: Image.asset(
+              AppAssets.homeClapperboard,
+              width: 172 * s,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Positioned(
+            left: 26 * s,
+            top: 44 * s,
+            right: 176 * s,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: greeting),
+                      const TextSpan(
+                        text: '.',
+                        style: TextStyle(color: _kGold),
+                      ),
+                    ],
+                  ),
+                  style: _display(
+                    size: 36 * s,
+                    weight: FontWeight.w700,
+                    color: _kInk,
+                    height: 1.1,
+                  ),
+                ),
+                SizedBox(height: 14 * s),
+                Text(
+                  'İlk brief\'ini oluşturmaya hazır mısın?',
+                  style: _ui(
+                    size: 12.5 * s,
+                    color: _kTaupe,
+                    spacing: 0.1,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Nasıl işliyor — üç adımlık koyu blok + eylem düğmeleri ─────────
+  Widget _buildHowItWorks(double s) {
+    return Container(
+      width: double.infinity,
+      color: _kCardDark,
+      padding: EdgeInsets.fromLTRB(26 * s, 26 * s, 26 * s, 30 * s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'NASIL İŞLİYOR',
+            style: _ui(
+              size: 10 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1.8,
+            ),
+          ),
+          SizedBox(height: 12 * s),
+          Text(
+            'Üç adımda ekibin hazır.',
+            style: _display(
+              size: 26 * s,
+              weight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 24 * s),
+          for (var i = 0; i < _kHowItWorksSteps.length; i++) ...[
+            if (i > 0) ...[
+              SizedBox(height: 16 * s),
+              Divider(height: 1, color: Colors.white.withValues(alpha: 0.12)),
+              SizedBox(height: 16 * s),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 46 * s,
+                  child: Text(
+                    '0${i + 1}',
+                    style: _display(
+                      size: 24 * s,
+                      weight: FontWeight.w700,
+                      color: _kGold,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _kHowItWorksSteps[i].title,
+                        style: _display(
+                          size: 16.5 * s,
+                          weight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.0,
+                        ),
+                      ),
+                      SizedBox(height: 6 * s),
+                      Text(
+                        _kHowItWorksSteps[i].detail,
+                        style: _ui(
+                          size: 12 * s,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          spacing: 0.1,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          SizedBox(height: 28 * s),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.categoryPicker),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    height: 44 * s,
+                    color: _kGold,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'İLK BRIEF\'İNİ OLUŞTUR',
+                      style: _ui(
+                        size: 10 * s,
+                        weight: FontWeight.w700,
+                        color: _kBlack,
+                        spacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12 * s),
+              Expanded(
+                child: GestureDetector(
+                  // Ayrı bir "nasıl işliyor" videosu henüz assets'te yok;
+                  // vitrindeki iş videosu oynatılır.
+                  onTap: () => Get.toNamed(
+                    AppRoutes.portfolioProjectDetail,
+                    arguments: {
+                      'workId': 'w1',
+                      'title': 'Mercedes Campaign',
+                      'category': 'REKLAM',
+                    },
+                  ),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    height: 44 * s,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.play_arrow_rounded,
+                          size: 18 * s,
+                          color: _kGold,
+                        ),
+                        SizedBox(width: 10 * s),
+                        Text(
+                          'İZLE',
+                          style: _ui(
+                            size: 10 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                            spacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Nereden başlasam — hazır brief başlıkları ──────────────────────
+  Widget _buildStarterServices(double s) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 26 * s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(width: 24 * s, height: 1.5, color: _kGold),
+          SizedBox(height: 12 * s),
+          Text(
+            'NEREDEN BAŞLASAM?',
+            style: _ui(
+              size: 10 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1.6,
+            ),
+          ),
+          SizedBox(height: 12 * s),
+          Text(
+            'Sana ilham verecek başlıklar.',
+            style: _display(
+              size: 24 * s,
+              weight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+          SizedBox(height: 18 * s),
+          for (var i = 0; i < _kStarterServices.length; i++) ...[
+            if (i > 0) Container(height: 1, color: _kDivider),
+            _buildStarterRow(s, i, _kStarterServices[i]),
+          ],
+          SizedBox(height: 20 * s),
+          _buildGoldLink(
+            s,
+            'TÜM HİZMETLER',
+            () => Get.toNamed(AppRoutes.categoryPicker),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStarterRow(double s, int index, _StarterService service) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(
+        AppRoutes.sendOffer,
+        arguments: {'category': service.category},
+      ),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 15 * s),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 46 * s,
+              child: Padding(
+                padding: EdgeInsets.only(top: 2 * s),
+                child: Text(
+                  '0${index + 1}',
+                  style: _display(
+                    size: 14 * s,
+                    weight: FontWeight.w700,
+                    color: _kGold,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.title,
+                    style: _display(
+                      size: 17 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                      height: 1.0,
+                    ),
+                  ),
+                  SizedBox(height: 6 * s),
+                  Text(
+                    service.detail,
+                    style: _ui(
+                      size: 11.5 * s,
+                      color: _kTaupe,
+                      spacing: 0.1,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 2 * s),
+              child: Icon(Icons.chevron_right, size: 18 * s, color: _kMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Settekiler — havuzdaki freelancer vitrini ──────────────────────
+  Widget _buildCrewSection(double s) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 26 * s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(width: 24 * s, height: 1.5, color: _kGold),
+          SizedBox(height: 12 * s),
+          Text(
+            'SETTEKİLER',
+            style: _ui(
+              size: 10 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1.6,
+            ),
+          ),
+          SizedBox(height: 12 * s),
+          Text(
+            'Seni bekleyen $_kCrewCount kişi.',
+            style: _display(
+              size: 24 * s,
+              weight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+          SizedBox(height: 8 * s),
+          Text(
+            'Görüntü yönetiminden kurguya, doğrulanmış ekipler.',
+            style: _ui(size: 12 * s, color: _kTaupe, spacing: 0.1, height: 1.35),
+          ),
+          SizedBox(height: 18 * s),
+          Row(
+            children: [
+              for (var i = 0; i < _kCrewAvatars.length; i++) ...[
+                if (i > 0) SizedBox(width: 3 * s),
+                Expanded(
+                  child: SizedBox(
+                    height: 50 * s,
+                    child: Image.asset(_kCrewAvatars[i], fit: BoxFit.cover),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          SizedBox(height: 20 * s),
+          _buildGoldLink(
+            s,
+            'SETTEKİLERİ GEZ',
+            () => Get.find<ClientHomeController>().changeTab(0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Sağa yaslı altın eylem bağlantısı — "TÜM HİZMETLER →" gibi.
+  Widget _buildGoldLink(double s, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            label,
+            style: _ui(
+              size: 10 * s,
+              weight: FontWeight.w700,
+              color: _kGold,
+              spacing: 1,
+            ),
+          ),
+          SizedBox(width: 6 * s),
+          Icon(Icons.arrow_forward_rounded, size: 13 * s, color: _kGold),
+        ],
       ),
     );
   }

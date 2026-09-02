@@ -69,6 +69,9 @@ class AppAssets {
   // Splash — marka/karşılama ekranlarının ana görseli
   static const String splashHeroAtlas = '$_pageImages/atlas.png';
 
+  // Ana sayfa karşılama (ilk kullanım) hero görseli
+  static const String homeClapperboard = '$_pageImages/klaket.png';
+
   // Splash ekranı — sırayla değişen tanıtım görselleri
   static const List<String> splashPageImages = [
     '$_pageImages/apple.png',
