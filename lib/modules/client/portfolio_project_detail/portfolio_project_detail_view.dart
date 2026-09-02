@@ -199,26 +199,44 @@ const _kHeroVideos = <String, String>{
 class _HeroState extends State<_Hero> {
   String? get _heroVideoAsset => _kHeroVideos[widget.project.id];
 
+  // Video sayfasının altına serilen sabit kare. Doku (texture) kaydırma
+  // sırasında siyah basarsa bu görsel gizler; galeri sayfasıyla aynı
+  // kadraj olmasın diye ikinci galeri görseli tercih edilir.
+  String? get _videoPosterAsset {
+    final gallery = widget.project.galleryImageUrls;
+    if (gallery.length > 1) return gallery[1];
+    if (gallery.isNotEmpty) return gallery.first;
+    return widget.project.coverImageUrl;
+  }
+
   bool _didPrecache = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Video sayfasından geri dönüşte fotoğrafın anında görünmesi için
-    // kapak ve galeri görsellerini önceden decode edip önbelleğe alıyoruz.
+    // Sayfalar arası geçişte görselin anında görünmesi için hero'daki üç
+    // kareyi de önceden decode edip önbelleğe alıyoruz.
     if (_didPrecache) return;
     _didPrecache = true;
-    final project = widget.project;
-    if (project.coverImageUrl != null) {
-      precacheImage(AssetImage(project.coverImageUrl!), context);
-    }
-    if (project.galleryImageUrls.isNotEmpty) {
-      precacheImage(AssetImage(project.galleryImageUrls.first), context);
+    final width = MediaQuery.sizeOf(context).width;
+    final cacheWidth = (width * MediaQuery.devicePixelRatioOf(context)).round();
+    for (final asset in <String?>{
+      widget.project.coverImageUrl,
+      if (widget.project.galleryImageUrls.isNotEmpty)
+        widget.project.galleryImageUrls.first,
+      _videoPosterAsset,
+    }) {
+      if (asset == null) continue;
+      precacheImage(ResizeImage(AssetImage(asset), width: cacheWidth), context);
     }
   }
 
   late final PageController _pageController = PageController();
-  int _activeIndex = 0;
+
+  // Sayfa değişimi kaydırma sürerken tetiklendiği için setState yerine
+  // ValueNotifier kullanılıyor: yalnızca sayaç rozeti ve video sayfası
+  // yeniden çiziliyor, hero'nun tamamı değil.
+  final ValueNotifier<int> _activeIndex = ValueNotifier<int>(0);
   bool _muted = true;
 
   static const int _pageCount = 3;
@@ -226,6 +244,7 @@ class _HeroState extends State<_Hero> {
   @override
   void dispose() {
     _pageController.dispose();
+    _activeIndex.dispose();
     super.dispose();
   }
 
@@ -242,14 +261,18 @@ class _HeroState extends State<_Hero> {
           children: [
             PageView(
               controller: _pageController,
-              onPageChanged: (i) => setState(() => _activeIndex = i),
+              onPageChanged: (i) => _activeIndex.value = i,
               children: [
                 _HeroImagePage(project: project),
-                _HeroVideoPage(
-                  scale: s,
-                  videoAsset: _heroVideoAsset,
-                  isActive: _activeIndex == 1,
-                  muted: _muted,
+                ValueListenableBuilder<int>(
+                  valueListenable: _activeIndex,
+                  builder: (_, index, _) => _HeroVideoPage(
+                    scale: s,
+                    videoAsset: _heroVideoAsset,
+                    posterAsset: _videoPosterAsset,
+                    isActive: index == 1,
+                    muted: _muted,
+                  ),
                 ),
                 _HeroGalleryPage(project: project),
               ],
@@ -294,9 +317,12 @@ class _HeroState extends State<_Hero> {
               right: 12 * s,
               child: SafeArea(
                 bottom: false,
-                child: _PagePill(
-                  scale: s,
-                  text: '${_activeIndex + 1}/$_pageCount',
+                child: ValueListenableBuilder<int>(
+                  valueListenable: _activeIndex,
+                  builder: (_, index, _) => _PagePill(
+                    scale: s,
+                    text: '${index + 1}/$_pageCount',
+                  ),
                 ),
               ),
             ),
@@ -382,6 +408,26 @@ class _HeroState extends State<_Hero> {
   }
 }
 
+// Hero'daki tüm sabit kareler bu widget'tan geçer: asset'ler ~1750px
+// genişliğinde, ekran ise en fazla ~1200px basıyor — [cacheWidth] ile
+// ekran boyutunda decode edilip kaydırma sırasındaki takılma önlenir.
+class _HeroPhoto extends StatelessWidget {
+  const _HeroPhoto({required this.asset});
+  final String asset;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return Image.asset(
+      asset,
+      fit: BoxFit.cover,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.medium,
+      cacheWidth: (width * MediaQuery.devicePixelRatioOf(context)).round(),
+    );
+  }
+}
+
 class _HeroImagePage extends StatelessWidget {
   const _HeroImagePage({required this.project});
   final PortfolioProjectModel project;
@@ -389,11 +435,7 @@ class _HeroImagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return project.coverImageUrl != null
-        ? Image.asset(
-            project.coverImageUrl!,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-          )
+        ? _HeroPhoto(asset: project.coverImageUrl!)
         : const Stack(fit: StackFit.expand, children: [_kThumbGradient]);
   }
 }
@@ -408,7 +450,7 @@ class _HeroGalleryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final images = project.galleryImageUrls;
     return images.isNotEmpty
-        ? Image.asset(images.first, fit: BoxFit.cover, gaplessPlayback: true)
+        ? _HeroPhoto(asset: images.first)
         : const Stack(fit: StackFit.expand, children: [_kThumbGradient]);
   }
 }
@@ -419,12 +461,14 @@ class _HeroVideoPage extends StatefulWidget {
   const _HeroVideoPage({
     required this.scale,
     required this.videoAsset,
+    required this.posterAsset,
     required this.isActive,
     required this.muted,
   });
 
   final double scale;
   final String? videoAsset;
+  final String? posterAsset;
   final bool isActive;
   final bool muted;
 
@@ -487,35 +531,45 @@ class _HeroVideoPageState extends State<_HeroVideoPage> {
   @override
   Widget build(BuildContext context) {
     final controller = _controller;
-    if (controller == null || !controller.value.isInitialized) {
-      // Video henüz tanımlanmadı/yükleniyor/başarısız oldu — yer tutucu.
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          const Stack(fit: StackFit.expand, children: [_kThumbGradient]),
-          Center(
-            child: _hasError
-                ? Icon(
-                    Icons.error_outline_rounded,
-                    size: 36 * widget.scale,
-                    color: Colors.white.withValues(alpha: 0.35),
-                  )
-                : Icon(
-                    Icons.play_circle_outline_rounded,
-                    size: 40 * widget.scale,
-                    color: Colors.white.withValues(alpha: 0.35),
-                  ),
+    final isReady = controller != null && controller.value.isInitialized;
+    final poster = widget.posterAsset;
+
+    // Android'de video bir doku (texture) olarak basılıyor. Sayfa duraklatılıp
+    // PageView tarafından ötelenince bu doku — özellikle emülatörde — siyah
+    // kare veriyor. Çözüm iki parçalı:
+    //  1. Poster HER ZAMAN ağaçta ve videonun altında duruyor; böylece
+    //     decode edilmiş, boyanmaya hazır bir kare hep mevcut oluyor.
+    //  2. Sayfa aktif değilken VideoPlayer ağaçtan çıkarılıyor; ortada
+    //     kompozit edilecek bir doku kalmadığı için siyahlık da olmuyor,
+    //     kaydırma sırasındaki GPU yükü de düşüyor.
+    // Oynatıcının kendisi (controller) yaşamaya devam ettiği için geri
+    // dönüldüğünde doku anında yeniden bağlanıyor.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        poster != null
+            ? _HeroPhoto(asset: poster)
+            : const Stack(fit: StackFit.expand, children: [_kThumbGradient]),
+        if (isReady && widget.isActive)
+          FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: controller.value.size.width,
+              height: controller.value.size.height,
+              child: VideoPlayer(controller),
+            ),
           ),
-        ],
-      );
-    }
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: controller.value.size.width,
-        height: controller.value.size.height,
-        child: VideoPlayer(controller),
-      ),
+        if (!isReady)
+          Center(
+            child: Icon(
+              _hasError
+                  ? Icons.error_outline_rounded
+                  : Icons.play_circle_outline_rounded,
+              size: (_hasError ? 36 : 40) * widget.scale,
+              color: Colors.white.withValues(alpha: 0.35),
+            ),
+          ),
+      ],
     );
   }
 }

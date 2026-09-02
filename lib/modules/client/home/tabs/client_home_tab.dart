@@ -70,6 +70,13 @@ const _kMockQuotes = [
   _MockQuote(price: '61.000 ₺', name: 'KAAN A.'),
 ];
 
+// klaket.png 500×500'lük kare bir dosya ama klaket görseli kenarlara
+// dayanmıyor: opak alan y=29..476, x=80..423 arasında. Konumlandırma
+// görselin kutusuna değil bu opak alana göre yapılsın diye paylar oran
+// olarak tutulur (üst 29/500, sağ (500-424)/500).
+const double _kClapperTopPad = 0.058;
+const double _kClapperRightPad = 0.152;
+
 // Karşılama hâli normalde yalnızca hiç brief/proje yokken açılır. Dolu bir
 // hesapla tasarımı gözden geçirebilmek için bu bayrak geçici olarak true
 // yapılabilir; teslimde false kalmalı.
@@ -317,25 +324,55 @@ class ClientHomeTab extends StatelessWidget {
   }
 
   // Hoş geldin bloğu — sağda klaket görseli, solda isimli selamlama.
+  //
+  // Klaket'in GÖRÜNEN üst kenarı, başlığın ilk satırının cap çizgisiyle
+  // hizalanır ve onu aşmaz. İki pay birden hesaba katılır: PNG'nin
+  // üstündeki saydam boşluk ([_kClapperTopPad]) ve metnin baseline'ı ile
+  // cap çizgisi arasındaki fark.
   Widget _buildWelcomeHero(double s, String name) {
     final greeting = name.isEmpty ? 'Hoş geldin' : 'Hoş geldin,\n$name';
+
+    final titleSize = 36 * s;
+    final titleStyle = _display(
+      size: titleSize,
+      weight: FontWeight.w700,
+      color: _kInk,
+      height: 1.1,
+    );
+
+    final titlePainter = TextPainter(
+      text: TextSpan(text: greeting, style: titleStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final titleBaseline = titlePainter.computeLineMetrics().first.baseline;
+    // Sayaçtaki ile aynı oran — Bricolage'ın görünen harf yüksekliği.
+    const capRatio = 0.72;
+    final titleCapTop = titleBaseline - titleSize * capRatio;
+
+    final titleTop = 44 * s;
+    final clapperWidth = 205 * s;
+    // Görselin sağ kenarı değil, içeriğinin sağ kenarı metin marjına oturur.
+    final clapperRight = 26 * s - clapperWidth * _kClapperRightPad;
+    final clapperTop =
+        titleTop + titleCapTop - clapperWidth * _kClapperTopPad;
+
     return SizedBox(
       height: 300 * s,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            right: 18 * s,
-            top: 30 * s,
+            right: clapperRight,
+            top: clapperTop,
             child: Image.asset(
               AppAssets.homeClapperboard,
-              width: 172 * s,
+              width: clapperWidth,
               fit: BoxFit.contain,
             ),
           ),
           Positioned(
             left: 26 * s,
-            top: 44 * s,
+            top: titleTop,
             right: 176 * s,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,12 +387,7 @@ class ClientHomeTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  style: _display(
-                    size: 36 * s,
-                    weight: FontWeight.w700,
-                    color: _kInk,
-                    height: 1.1,
-                  ),
+                  style: titleStyle,
                 ),
                 SizedBox(height: 14 * s),
                 Text(
