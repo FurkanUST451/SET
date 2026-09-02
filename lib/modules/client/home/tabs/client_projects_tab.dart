@@ -439,11 +439,12 @@ class _ProjectCard extends StatelessWidget {
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: SizedBox(
-                      height: 48 * s,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 48 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _bigTitle,
@@ -516,7 +517,7 @@ class _ProjectCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_rounded,
+                    Icon(Icons.location_on_outlined,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
@@ -540,22 +541,19 @@ class _ProjectCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (project.notes != null && project.notes!.isNotEmpty) ...[
-                    Icon(Icons.chat_bubble_rounded,
+                    Icon(Icons.chat_bubble_outline_rounded,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 3 * s),
-                        child: Text(
-                          project.notes!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: _ui(
-                              size: 9 * s,
-                              weight: FontWeight.w700,
-                              color: _kInk,
-                              spacing: 0.2),
-                        ),
+                      child: Text(
+                        project.notes!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: _ui(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: _kInk,
+                            spacing: 0.2),
                       ),
                     ),
                     SizedBox(width: 8 * s),
@@ -705,11 +703,12 @@ class _SetProjectCard extends StatelessWidget {
                       ),
                       SizedBox(width: 14 * s),
                       Expanded(
-                        child: SizedBox(
-                          height: 48 * s,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: 48 * s),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 _bigTitle,
@@ -784,7 +783,7 @@ class _SetProjectCard extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 42 * s),
                     child: Row(
                       children: [
-                        Icon(Icons.location_on_rounded,
+                        Icon(Icons.location_on_outlined,
                             size: 13 * s, color: _kTaupe),
                         SizedBox(width: 5 * s),
                         Expanded(
@@ -810,22 +809,19 @@ class _SetProjectCard extends StatelessWidget {
                     children: [
                       if (project.notes != null &&
                           project.notes!.isNotEmpty) ...[
-                        Icon(Icons.chat_bubble_rounded,
+                        Icon(Icons.chat_bubble_outline_rounded,
                             size: 13 * s, color: _kTaupe),
                         SizedBox(width: 5 * s),
                         Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 3 * s),
-                            child: Text(
-                              project.notes!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: _ui(
-                                  size: 9 * s,
-                                  weight: FontWeight.w700,
-                                  color: _kInk,
-                                  spacing: 0.2),
-                            ),
+                          child: Text(
+                            project.notes!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w700,
+                                color: _kInk,
+                                spacing: 0.2),
                           ),
                         ),
                         SizedBox(width: 8 * s),
@@ -1008,11 +1004,12 @@ class _BriefCard extends StatelessWidget {
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: SizedBox(
-                      height: 48 * s,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 48 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _bigTitle,
@@ -1100,7 +1097,7 @@ class _BriefCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 42 * s),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_rounded,
+                    Icon(Icons.location_on_outlined,
                         size: 13 * s, color: _kTaupe),
                     SizedBox(width: 5 * s),
                     Expanded(
@@ -1129,22 +1126,19 @@ class _BriefCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.chat_bubble_rounded,
+                      Icon(Icons.chat_bubble_outline_rounded,
                           size: 13 * s, color: _kTaupe),
                       SizedBox(width: 5 * s),
                       Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 3 * s),
-                          child: Text(
-                            brief.answers.notes!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: _ui(
-                                size: 9 * s,
-                                weight: FontWeight.w700,
-                                color: _kInk,
-                                spacing: 0.2),
-                          ),
+                        child: Text(
+                          brief.answers.notes!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: _ui(
+                              size: 9 * s,
+                              weight: FontWeight.w700,
+                              color: _kInk,
+                              spacing: 0.2),
                         ),
                       ),
                       SizedBox(width: 8 * s),

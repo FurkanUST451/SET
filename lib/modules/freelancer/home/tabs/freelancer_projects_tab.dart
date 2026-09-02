@@ -362,11 +362,12 @@ class _SetHalletsinPreviewCard extends StatelessWidget {
                       ),
                       SizedBox(width: 14 * s),
                       Expanded(
-                        child: SizedBox(
-                          height: 48 * s,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: 48 * s),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 'Cafe Tanıtım Filmi',
@@ -666,11 +667,12 @@ class _ProjectCard extends StatelessWidget {
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: SizedBox(
-                      height: 48 * s,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 48 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _bigTitle,
