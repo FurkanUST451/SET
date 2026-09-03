@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../core/utils/avatar_image.dart';
 import '../../../../modules/app/user_controller.dart';
 import '../../../../routes/app_routes.dart';
 import '../freelancer_chats_controller.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
 
 const _monthsShort = [
@@ -85,7 +86,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                     Container(width: 18 * s, height: 2, color: _kGold),
                     SizedBox(width: 10 * s),
                     Text('SON SOHBETLER',
-                        style: _mono(
+                        style: _ui(
                             size: 8 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
@@ -157,7 +158,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
         Padding(
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text('SET · MESAJLAR',
-              style: _mono(size: 8 * s, color: _kBlack, spacing: 2)),
+              style: _ui(size: 8 * s, color: _kBlack, spacing: 2)),
         ),
         Container(height: 1, color: _kDivider),
       ],
@@ -171,7 +172,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Sohbetler',
-              style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 40 * s, weight: FontWeight.w600, color: _kInk)),
         ],
       ),
     );
@@ -196,7 +197,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _query = v),
                 cursorColor: _kGold,
-                style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
                 decoration: InputDecoration(
                   isCollapsed: true,
                   filled: false,
@@ -206,7 +207,7 @@ class _FreelancerChatTabState extends State<FreelancerChatTab> {
                   focusedBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                   hintText: 'Sohbet veya kişi ara',
-                  hintStyle: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
+                  hintStyle: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
                 ),
               ),
             ),
@@ -278,12 +279,12 @@ class _ChatRow extends StatelessWidget {
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: _serif(
+                          style: _display(
                               size: 18 * s, weight: FontWeight.w600, color: _kInk),
                         ),
                       ),
                       SizedBox(width: 8 * s),
-                      Text(time, style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5)),
+                      Text(time, style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5)),
                     ],
                   ),
                   SizedBox(height: 4 * s),
@@ -291,15 +292,15 @@ class _ChatRow extends StatelessWidget {
                     snippet,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 9.5 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 9.5 * s, color: _kBlack, spacing: 0.2),
                   ),
                   if (eyebrow.isNotEmpty) ...[
                     SizedBox(height: 5 * s),
                     Text(
-                      eyebrow.toUpperCase(),
+                      eyebrow.toUpperCaseTr(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 7 * s, color: _kBlack, spacing: 1.2),
+                      style: _ui(size: 7 * s, color: _kBlack, spacing: 1.2),
                     ),
                   ],
                 ],
@@ -338,7 +339,7 @@ class _EmptyState extends StatelessWidget {
             SizedBox(height: 16 * s),
             Text(
               hasQuery ? 'Sonuç bulunamadı' : 'Henüz mesajın yok',
-              style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
             ),
             SizedBox(height: 6 * s),
             Text(
@@ -346,7 +347,7 @@ class _EmptyState extends StatelessWidget {
                   ? 'Farklı bir arama dene.'
                   : 'Bir teklifi kabul ettiğinde sohbet burada başlar.',
               textAlign: TextAlign.center,
-              style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+              style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
             ),
           ],
         ),

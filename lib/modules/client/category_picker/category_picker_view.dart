@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
+import '../../../core/constants/app_assets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'category_picker_controller.dart';
@@ -32,14 +33,14 @@ const Map<String, String> _kCategoryTags = {
   'Sosyal Medya Yönetimi': 'İÇERİK · STRATEJİ · YÖNETİM',
 };
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
   bool italic = false,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -48,13 +49,13 @@ TextStyle _serif({
       decoration: TextDecoration.none,
     );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -62,26 +63,7 @@ TextStyle _mono({
       decoration: TextDecoration.none,
     );
 
-Widget _wordmark(double s) => RichText(
-      text: TextSpan(children: [
-        TextSpan(
-          text: 'SE',
-          style: GoogleFonts.spaceGrotesk(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w700,
-              color: _kInk,
-              letterSpacing: 2.5),
-        ),
-        TextSpan(
-          text: 'T',
-          style: GoogleFonts.spaceGrotesk(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w800,
-              color: _kGold,
-              letterSpacing: 2.5),
-        ),
-      ]),
-    );
+Widget _wordmark(double s) => Image.asset(AppAssets.loginLogo, height: 28 * s);
 
 class CategoryPickerView extends GetView<CategoryPickerController> {
   const CategoryPickerView({super.key});
@@ -128,7 +110,7 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                   children: [
                     Text(
                       'dilediğin hizmeti seç',
-                      style: _serif(
+                      style: _display(
                           size: 17 * s,
                           weight: FontWeight.w500,
                           color: _kInk,
@@ -139,14 +121,14 @@ class CategoryPickerView extends GetView<CategoryPickerController> {
                       TextSpan(children: [
                         TextSpan(
                           text: 'Biz ',
-                          style: _serif(
+                          style: _display(
                               size: 40 * s,
                               weight: FontWeight.w700,
                               color: _kInk),
                         ),
                         TextSpan(
                           text: 'üretelim!',
-                          style: _serif(
+                          style: _display(
                               size: 40 * s,
                               weight: FontWeight.w700,
                               color: _kGold),
@@ -231,6 +213,7 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
                   child: _CategoryCard(
                     scale: s,
                     index: i,
+                    total: widget.categories.length,
                     label: cat,
                     active: i == _activeIndex,
                   ),
@@ -268,7 +251,7 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
               children: [
                 Text(
                   'DEVAM ET',
-                  style: _mono(
+                  style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: Colors.white,
@@ -281,7 +264,19 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
             ),
           ),
         ),
-        SizedBox(height: 24 * s),
+        SizedBox(height: 10 * s),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_outline, size: 11 * s, color: _kMuted),
+            SizedBox(width: 5 * s),
+            Text(
+              'Seçimin gizli tutulur ve güvenle saklanır.',
+              style: _ui(size: 8 * s, color: _kMuted, spacing: 0.2),
+            ),
+          ],
+        ),
+        SizedBox(height: 18 * s),
       ],
     );
   }
@@ -291,12 +286,14 @@ class _CategoryCard extends StatelessWidget {
   const _CategoryCard({
     required this.scale,
     required this.index,
+    required this.total,
     required this.label,
     required this.active,
   });
 
   final double scale;
   final int index;
+  final int total;
   final String label;
   final bool active;
 
@@ -312,65 +309,216 @@ class _CategoryCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOut,
-      padding: EdgeInsets.fromLTRB(20 * s, 22 * s, 20 * s, 22 * s),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20 * s),
+        color: _kCream,
+        borderRadius: BorderRadius.circular(6 * s),
         border: Border.all(
           color: active ? _kInk : _kCardBorder,
           width: active ? 1.4 : 1,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.all(14 * s),
+        child: _FramedBlock(
+          scale: s,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Görsel alanı ─────────────────────────────────────────
+              Expanded(
+                flex: 5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(14 * s, 10 * s, 14 * s, 0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'HİZMET · ${(index + 1).toString().padLeft(2, '0')}',
+                            style: _ui(
+                                size: 8.5 * s,
+                                weight: FontWeight.w700,
+                                color: _kMuted,
+                                spacing: 1.6),
+                          ),
+                          SizedBox(width: 10 * s),
+                          Expanded(
+                            child: Container(height: 1, color: _kCardBorder),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            right: 22 * s,
+                            top: 14 * s,
+                            child: Icon(Icons.add,
+                                size: 12 * s,
+                                color: _kMuted.withValues(alpha: 0.7)),
+                          ),
+                          Center(
+                            child: Image.asset(
+                              _kCategoryIcons[label] ?? '',
+                              width: 160 * s,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // ── Orta ayraç: çizgi + altın kare ──────────────────────────
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 10 * s),
+                child: Row(
+                  children: [
+                    Expanded(child: Container(height: 1, color: _kCardBorder)),
+                    SizedBox(width: 8 * s),
+                    Container(width: 6 * s, height: 6 * s, color: _kGold),
+                    SizedBox(width: 8 * s),
+                    Expanded(child: Container(height: 1, color: _kCardBorder)),
+                  ],
+                ),
+              ),
+              // ── Alt metin bloğu + sağdaki ok ────────────────────────────
+              Expanded(
+                flex: 4,
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 14 * s, right: 30 * s),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${(index + 1).toString().padLeft(2, '0')} / ${total.toString().padLeft(2, '0')}',
+                            style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w600,
+                                color: _kMuted,
+                                spacing: 1.2),
+                          ),
+                          SizedBox(height: 8 * s),
+                          Text.rich(
+                            TextSpan(children: [
+                              TextSpan(
+                                text: firstWord,
+                                style: _display(
+                                    size: 30 * s,
+                                    weight: FontWeight.w600,
+                                    color: _kInk),
+                              ),
+                              TextSpan(
+                                text: restWord,
+                                style: _display(
+                                    size: 30 * s,
+                                    weight: FontWeight.w600,
+                                    color: _kGold),
+                              ),
+                            ]),
+                          ),
+                          SizedBox(height: 14 * s),
+                          Text(
+                            _kCategoryTags[label] ?? '',
+                            style: _ui(
+                                size: 9.5 * s,
+                                weight: FontWeight.w700,
+                                color: _kInk,
+                                spacing: 0.6),
+                          ),
+                          SizedBox(height: 16 * s),
+                          Text(
+                            've daha fazlası...',
+                            style: _display(
+                                size: 13 * s,
+                                weight: FontWeight.w500,
+                                color: _kInk,
+                                italic: true),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      right: 14 * s,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                                width: 1, height: 18 * s, color: _kCardBorder),
+                            SizedBox(height: 8 * s),
+                            Icon(Icons.arrow_forward_rounded,
+                                size: 16 * s, color: _kInk),
+                            SizedBox(height: 8 * s),
+                            Container(
+                                width: 1, height: 18 * s, color: _kCardBorder),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Köşe işaretli çerçeve ──────────────────────────────────────────────────
+class _FramedBlock extends StatelessWidget {
+  const _FramedBlock({required this.scale, required this.child});
+
+  final double scale;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        Positioned(top: 0, left: 0, child: _corner(s, 0)),
+        Positioned(top: 0, right: 0, child: _corner(s, 1)),
+        Positioned(bottom: 0, left: 0, child: _corner(s, 2)),
+        Positioned(bottom: 0, right: 0, child: _corner(s, 3)),
+      ],
+    );
+  }
+
+  // quadrant: 0 = top-left, 1 = top-right, 2 = bottom-left, 3 = bottom-right
+  Widget _corner(double s, int quadrant) {
+    final len = 12 * s;
+    final isLeft = quadrant == 0 || quadrant == 2;
+    final isTop = quadrant == 0 || quadrant == 1;
+    return SizedBox(
+      width: len,
+      height: len,
+      child: Stack(
         children: [
-          Text(
-            'HİZMET · ${(index + 1).toString().padLeft(2, '0')}',
-            style: _mono(
-                size: 9 * s,
-                weight: FontWeight.w700,
-                color: _kMuted,
-                spacing: 1.6),
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: len, height: 1.4, color: _kInk),
           ),
-          Expanded(
-            child: Center(
-              child: Image.asset(
-                _kCategoryIcons[label] ?? '',
-                width: 192 * s,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: firstWord,
-                style: _serif(size: 28 * s, weight: FontWeight.w600, color: _kInk),
-              ),
-              TextSpan(
-                text: restWord,
-                style:
-                    _serif(size: 28 * s, weight: FontWeight.w600, color: _kGold),
-              ),
-            ]),
-          ),
-          SizedBox(height: 6 * s),
-          Text(
-            _kCategoryTags[label] ?? '',
-            style: _mono(
-                size: 10.5 * s,
-                weight: FontWeight.w700,
-                color: _kInk,
-                spacing: 0.8),
-          ),
-          SizedBox(height: 4 * s),
-          Text(
-            've daha fazlası...',
-            style: _serif(
-                size: 15 * s,
-                weight: FontWeight.w500,
-                color: _kInk,
-                italic: true),
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: 1.4, height: len, color: _kInk),
           ),
         ],
       ),

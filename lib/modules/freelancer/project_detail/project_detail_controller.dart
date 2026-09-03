@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/models/progress_entry_model.dart';
 import '../../../data/models/project_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/chat_repository.dart';
+import '../../../data/repositories/progress_repository.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../app/user_controller.dart';
@@ -11,6 +15,7 @@ import '../../app/user_controller.dart';
 class FreelancerProjectDetailController extends GetxController {
   final UserRepository _userRepo = Get.find<UserRepository>();
   final ChatRepository _chatRepo = Get.find<ChatRepository>();
+  final ProgressRepository _progressRepo = Get.find<ProgressRepository>();
   final UserController _userController = Get.find<UserController>();
 
   late final ProjectModel project;
@@ -19,12 +24,92 @@ class FreelancerProjectDetailController extends GetxController {
   final RxBool loadingClient = false.obs;
   final RxBool isOpeningChat = false.obs;
 
+  final RxList<ProgressEntryModel> progressEntries =
+      <ProgressEntryModel>[].obs;
+  StreamSubscription<List<ProgressEntryModel>>? _progressSub;
+
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>;
     project = args['project'] as ProjectModel;
     _loadClient();
+    _progressSub = _progressRepo.watchByProject(project.id).listen((entries) {
+      progressEntries.assignAll(entries);
+    });
+  }
+
+  @override
+  void onClose() {
+    _progressSub?.cancel();
+    super.onClose();
+  }
+
+  Future<void> addProgress(String title, String description) async {
+    try {
+      final me = _userController.currentUser;
+      if (me == null) {
+        Get.snackbar(
+          'Hata',
+          'Oturum bilgisi bulunamadı, lütfen tekrar giriş yapın.',
+          backgroundColor: const Color(0xFFD32F2F),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 6),
+        );
+        return;
+      }
+      await _progressRepo.addEntry(
+        projectId: project.id,
+        freelancerId: me.id,
+        title: title,
+        description: description,
+      );
+    } catch (e, st) {
+      debugPrint('addProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme kaydedilemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
+  }
+
+  Future<void> updateProgress(
+    ProgressEntryModel entry,
+    String title,
+    String description,
+  ) async {
+    try {
+      await _progressRepo.updateEntry(
+        entry.copyWith(title: title, description: description),
+      );
+    } catch (e, st) {
+      debugPrint('updateProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme güncellenemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
+  }
+
+  Future<void> deleteProgress(ProgressEntryModel entry) async {
+    try {
+      await _progressRepo.deleteEntry(project.id, entry.id);
+    } catch (e, st) {
+      debugPrint('deleteProgress error: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'İlerleme silinemedi: $e',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+      );
+    }
   }
 
   Future<void> _loadClient() async {

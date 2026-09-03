@@ -6,34 +6,63 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Admin status comes ONLY from the Firebase Auth ID token's custom claim
+    // (`admin: true`), set exclusively by the setAdminRole Cloud Function via
+    // the Admin SDK — never from a Firestore field, which a client could
+    // otherwise attempt to spoof.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // ---------------------------------------------------------------------
+    // THIS FILE IS DUPLICATED IN TWO REPOS ("SET" mobile app and
+    // "SettPortal" admin panel) because both deploy to the SAME Firebase
+    // project (sett-451), and `firebase deploy --only firestore:rules`
+    // always replaces the ENTIRE ruleset — there is no per-repo partial
+    // deploy. If the two files ever diverge, whichever repo deploys LAST
+    // silently wins and erases the other's rules (this already broke the
+    // freelancer progress-save feature once, via a missing `progress`
+    // subcollection block, and the admin panel once, via missing
+    // `isAdmin()` bypasses).
+    //
+    // RULE: any change here must be copied to the other repo's
+    // firestore.rules byte-for-byte BEFORE either one is deployed.
+    // ---------------------------------------------------------------------
+
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null || isAdmin();
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /briefs/{briefId} {
       allow create: if request.auth != null;
-      allow read, update, delete: if request.auth != null
+      allow read, update: if request.auth != null
         && (
           request.auth.uid == resource.data.ownerId
           || request.auth.uid in resource.data.sentToIds
-        );
+        )
+        || isAdmin();
+      // Brief'ler asla kalıcı silinmez — müşteri "silme" işlemi status'u
+      // 'cancelled' yapar (bkz. BriefRepository.cancelBrief), doküman
+      // Firestore'da kalır. Admin panelinde de aynı şekilde hard-delete yok.
+      allow delete: if false;
     }
 
     match /freelancers/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null || isAdmin();
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /chats/{chatId} {
-      allow get: if request.auth != null;
+      allow get: if request.auth != null || isAdmin();
 
       // Parantezler doğru — && operatörü || 'den önce gelir
       allow list: if request.auth != null
         && (
           request.auth.uid == resource.data.clientId
           || request.auth.uid == resource.data.freelancerId
-        );
+        )
+        || isAdmin();
 
       allow create: if request.auth != null
         && (
@@ -54,7 +83,8 @@ service cloud.firestore {
           && (
             get(/databases/$(database)/documents/chats/$(chatId)).data.clientId == request.auth.uid
             || get(/databases/$(database)/documents/chats/$(chatId)).data.freelancerId == request.auth.uid
-          );
+          )
+          || isAdmin();
 
         allow create: if request.auth != null
           && request.auth.uid == request.resource.data.senderId
@@ -72,7 +102,8 @@ service cloud.firestore {
         && (
           request.auth.uid == resource.data.senderId
           || request.auth.uid == resource.data.receiverId
-        );
+        )
+        || isAdmin();
 
       allow create: if request.auth != null
         && request.auth.uid == request.resource.data.senderId
@@ -85,7 +116,8 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in ['accepted', 'rejected'];
 
-      allow list, delete: if false;
+      allow list: if isAdmin();
+      allow delete: if false;
     }
 
     match /projects/{projectId} {
@@ -93,13 +125,15 @@ service cloud.firestore {
         && (
           request.auth.uid == resource.data.clientId
           || request.auth.uid == resource.data.freelancerId
-        );
+        )
+        || isAdmin();
 
       allow list: if request.auth != null
         && (
           request.auth.uid == resource.data.clientId
           || request.auth.uid == resource.data.freelancerId
-        );
+        )
+        || isAdmin();
 
       allow create: if request.auth != null
         && (
@@ -108,12 +142,51 @@ service cloud.firestore {
         );
 
       allow update, delete: if false;
+
+      // Freelancer'ın projeye girdiği ilerleme kayıtları. İlk "Brief Onayı"
+      // girdisi client tarafında projects.createdAt'ten türetilip burada
+      // saklanmaz — bu koleksiyon yalnızca freelancer'ın elle eklediği
+      // gerçek ilerleme güncellemelerini tutar.
+      match /progress/{entryId} {
+        allow read: if request.auth != null
+          && (
+            get(/databases/$(database)/documents/projects/$(projectId)).data.clientId == request.auth.uid
+            || get(/databases/$(database)/documents/projects/$(projectId)).data.freelancerId == request.auth.uid
+          )
+          || isAdmin();
+
+        allow create: if request.auth != null
+          && request.auth.uid == request.resource.data.freelancerId
+          && get(/databases/$(database)/documents/projects/$(projectId)).data.freelancerId == request.auth.uid
+          && request.resource.data.projectId == projectId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500
+          && request.resource.data.createdAt is string
+          && request.resource.data.createdAt.size() > 0;
+
+        allow update: if request.auth != null
+          && resource.data.freelancerId == request.auth.uid
+          && request.resource.data.freelancerId == resource.data.freelancerId
+          && request.resource.data.projectId == resource.data.projectId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500;
+
+        allow delete: if request.auth != null && resource.data.freelancerId == request.auth.uid;
+      }
     }
 
     // ---- Keşfet (Discover) ----
     // "works" = keşfette gösterilen post/video kartları.
     match /works/{workId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() || isAdmin();
 
       allow create: if isSignedIn()
         && request.resource.data.id == workId
@@ -135,7 +208,8 @@ service cloud.firestore {
       // Sahibi sadece başlık/imza/açıklama gibi düzenlenebilir alanları değiştirebilir.
       // likes/comments sayaçları buradan değil, yalnızca Admin SDK (Cloud Functions,
       // bkz. functions/index.js — onWorkLikeCreated/Deleted, onWorkCommentCreated/Deleted)
-      // üzerinden güncellenir.
+      // üzerinden güncellenir. Admin panelinin flagWork/unflagWork/deleteWork Cloud
+      // Function'ları da Admin SDK ile çalıştığından bu client kuralını bypass eder.
       allow update: if isSignedIn()
         && resource.data.freelancerId == request.auth.uid
         && request.resource.data.freelancerId == resource.data.freelancerId
@@ -151,7 +225,7 @@ service cloud.firestore {
       // Bir kullanıcının bir post'u yalnızca bir kez beğenebilmesi için
       // like doküman id'si = kullanıcının uid'i (alt koleksiyon zaten postId'ye göre scope'lu).
       match /likes/{likeId} {
-        allow read: if isSignedIn();
+        allow read: if isSignedIn() || isAdmin();
 
         allow create: if isSignedIn()
           && likeId == request.auth.uid
@@ -166,7 +240,7 @@ service cloud.firestore {
       }
 
       match /comments/{commentId} {
-        allow read: if isSignedIn();
+        allow read: if isSignedIn() || isAdmin();
 
         allow create: if isSignedIn()
           && request.resource.data.authorId == request.auth.uid
@@ -196,8 +270,9 @@ service cloud.firestore {
 
     // İçerik şikayetleri (ör. Keşfet gönderisi, ileride sohbet mesajı vb.).
     // Client sadece kendi adına, tek bir şikayet dokümanı oluşturabilir;
-    // moderasyon incelemesi (admin panel) yalnızca Admin SDK üzerinden
-    // yapıldığından read/update/delete client'a tamamen kapalı.
+    // moderasyon incelemesi (admin panel) admin claim'i olan hesaplara açık,
+    // update/delete client'a tamamen kapalı (durum değişikliği ileride bir
+    // Cloud Function üzerinden yapılacak).
     match /reports/{reportId} {
       allow create: if isSignedIn()
         && request.resource.data.reporter.userId == request.auth.uid
@@ -212,7 +287,20 @@ service cloud.firestore {
         && request.resource.data.reporter is map
         && request.resource.data.target is map;
 
-      allow read, update, delete: if false;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------------
+    // Admin panel only. Append-only audit trail: an admin can log their OWN
+    // actions (adminUid must match the caller), but no one — including
+    // admins — can edit or delete an entry once written, from the client.
+    // ---------------------------------------------------------------------
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.adminUid == request.auth.uid;
+      allow update, delete: if false;
     }
 
   }

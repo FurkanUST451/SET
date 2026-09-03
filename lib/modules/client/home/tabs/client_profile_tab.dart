@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/utils/avatar_image.dart';
@@ -15,41 +15,40 @@ import '../../../app/user_controller.dart';
 import '../client_home_controller.dart';
 import '../client_projects_controller.dart';
 import 'profile_screens.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB); // arka plan
 const _kGold = Color(0xFFD9A84E); // kritik / vurgu altın tonu
 const _kInk = Color(0xFF35333F);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDanger = Color(0xFFBE6A5A);
 const _kDivider = Color(0x12000000);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) =>
-    GoogleFonts.cormorantGaramond(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-      height: height,
-    );
+}) => AppFonts.display(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
-}) =>
-    GoogleFonts.spaceMono(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-      letterSpacing: spacing,
-    );
+}) => AppFonts.ui(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  letterSpacing: spacing,
+);
 
 class ClientProfileTab extends StatefulWidget {
   const ClientProfileTab({super.key});
@@ -86,8 +85,10 @@ class _ClientProfileTabState extends State<ClientProfileTab>
     if (picked == null) return;
     setState(() => _uploadingAvatar = true);
     try {
-      final ref =
-          FirebaseStorage.instance.ref().child('profile_images').child('${u.id}.jpg');
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child('${u.id}.jpg');
       await ref.putFile(File(picked.path));
       final url = await ref.getDownloadURL();
       final updated = u.copyWith(avatarUrl: url);
@@ -151,153 +152,163 @@ class _ClientProfileTabState extends State<ClientProfileTab>
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _StaggeredItem(
-                  controller: _staggerController,
-                  index: 0,
-                  count: _staggerCount,
-                  child: _buildHeader(user, s),
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(26 * s, 0, 26 * s, 130 * s),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 1,
-                      count: _staggerCount,
-                      child: _buildStatsSection(s),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 2,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'HESAP', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.person_outline_rounded,
-                          label: 'Profili Düzenle',
-                          sub: 'Ad, bio, konum, dil',
-                          onTap: () =>
-                              Get.to<void>(() => const ProfileEditScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.mail_outline_rounded,
-                          label: 'E-posta & Telefon',
-                          sub: 'İletişim bilgilerini güncelle',
-                          onTap: () =>
-                              Get.to<void>(() => const ContactInfoScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.lock_outline_rounded,
-                          label: 'Şifre Değiştir',
-                          sub: 'Güvenlik & oturum anahtarları',
-                          onTap: () =>
-                              Get.to<void>(() => const PasswordChangeScreen()),
-                        ),
-                      ]),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 3,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'TERCİHLER', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.notifications_none_rounded,
-                          label: 'Bildirimler',
-                          sub: 'Push, e-posta tercihleri',
-                          onTap: () => Get.to<void>(
-                              () => const NotificationSettingsScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.language_outlined,
-                          label: 'Dil & Bölge',
-                          sub: 'Türkçe',
-                          onTap: () =>
-                              Get.to<void>(() => const LanguageRegionScreen()),
-                        ),
-                      ]),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 4,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'DESTEK', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.help_outline_rounded,
-                          label: 'Yardım Merkezi',
-                          onTap: () =>
-                              Get.to<void>(() => const HelpCenterScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.chat_bubble_outline_rounded,
-                          label: 'Bize Ulaş',
-                          onTap: () =>
-                              Get.to<void>(() => const ContactUsScreen()),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.description_outlined,
-                          label: 'Kullanım Koşulları',
-                          onTap: () => Get.to<void>(() => const TermsScreen()),
-                        ),
-                      ]),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 5,
-                      count: _staggerCount,
-                      child: _buildSection(s, 'OTURUM', [
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.swap_horiz_rounded,
-                          label: 'Rolümü Değiştir',
-                          onTap: () => Get.offAllNamed(AppRoutes.roleSelection),
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.logout_rounded,
-                          label: 'Çıkış Yap',
-                          danger: true,
-                          onTap: () async {
-                            await auth.logout();
-                            Get.offAllNamed(AppRoutes.login);
-                          },
-                        ),
-                        _SettingsRow(
-                          scale: s,
-                          icon: Icons.delete_outline_rounded,
-                          label: 'Hesabı Sil',
-                          danger: true,
-                          onTap: () =>
-                              Get.to<void>(() => const DeleteAccountScreen()),
-                        ),
-                      ]),
-                    ),
-                    _StaggeredItem(
-                      controller: _staggerController,
-                      index: 6,
-                      count: _staggerCount,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 60 * s),
-                        child: Center(
-                          child: Text(
-                            'SET · v1.0.0',
-                            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
-                          ),
-                        ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopStrip(s),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _StaggeredItem(
+                        controller: _staggerController,
+                        index: 0,
+                        count: _staggerCount,
+                        child: _buildAvatarSection(user, s),
                       ),
                     ),
-                  ]),
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(26 * s, 0, 26 * s, 130 * s),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 1,
+                            count: _staggerCount,
+                            child: _buildStatsSection(s),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 2,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'HESAP', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Profili Düzenle',
+                                sub: 'Ad, bio, konum, dil',
+                                onTap: () => Get.to<void>(
+                                  () => const ProfileEditScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'E-posta & Telefon',
+                                sub: 'İletişim bilgilerini güncelle',
+                                onTap: () => Get.to<void>(
+                                  () => const ContactInfoScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Şifre Değiştir',
+                                sub: 'Güvenlik & oturum anahtarları',
+                                onTap: () => Get.to<void>(
+                                  () => const PasswordChangeScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 3,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'TERCİHLER', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Bildirimler',
+                                sub: 'Push, e-posta tercihleri',
+                                onTap: () => Get.to<void>(
+                                  () => const NotificationSettingsScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Dil & Bölge',
+                                sub: 'Türkçe',
+                                onTap: () => Get.to<void>(
+                                  () => const LanguageRegionScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 4,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'DESTEK', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Yardım Merkezi',
+                                onTap: () => Get.to<void>(
+                                  () => const HelpCenterScreen(),
+                                ),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Bize Ulaş',
+                                onTap: () =>
+                                    Get.to<void>(() => const ContactUsScreen()),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Kullanım Koşulları',
+                                onTap: () =>
+                                    Get.to<void>(() => const TermsScreen()),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 5,
+                            count: _staggerCount,
+                            child: _buildSection(s, 'OTURUM', [
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Rolümü Değiştir',
+                                onTap: () =>
+                                    Get.offAllNamed(AppRoutes.roleSelection),
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Çıkış Yap',
+                                danger: true,
+                                onTap: () async {
+                                  await auth.logout();
+                                  Get.offAllNamed(AppRoutes.login);
+                                },
+                              ),
+                              _SettingsRow(
+                                scale: s,
+                                label: 'Hesabı Sil',
+                                danger: true,
+                                onTap: () => Get.to<void>(
+                                  () => const DeleteAccountScreen(),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          _StaggeredItem(
+                            controller: _staggerController,
+                            index: 6,
+                            count: _staggerCount,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 60 * s),
+                              child: Center(
+                                child: Text(
+                                  'SET · v1.0.0',
+                                  style: _ui(
+                                    size: 8 * s,
+                                    color: _kBlack,
+                                    spacing: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -307,8 +318,8 @@ class _ClientProfileTabState extends State<ClientProfileTab>
     );
   }
 
-  // ─── Sayfa tepesi: SET · PROFİL + tam genişlik ayraç ─────────────────────
-  Widget _buildHeader(UserController user, double s) {
+  // ─── Sayfa tepesi: SET · PROFİL + tam genişlik ayraç (sabit, kaymaz) ─────
+  Widget _buildTopStrip(double s) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -316,126 +327,178 @@ class _ClientProfileTabState extends State<ClientProfileTab>
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROFİL',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
-        Padding(
-          padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
-          child: Obx(() {
-            final u = user.currentUser;
-            final name = u?.name ?? 'Misafir';
-            final email = u?.email ?? '';
-            final initial =
-                name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
-            final avatarUrl = (u?.avatarUrl?.isNotEmpty ?? false)
-                ? u!.avatarUrl!
-                : placeholderAvatarFor(u?.gender, u?.id ?? name);
-            return Row(
+      ],
+    );
+  }
+
+  // ─── Avatar + kimlik bilgisi ─────────────────────────────────────────────
+  Widget _buildAvatarSection(UserController user, double s) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
+      child: Obx(() {
+        final u = user.currentUser;
+        final name = u?.name ?? 'Misafir';
+        final email = u?.email ?? '';
+        final initial = name.trim().isNotEmpty
+            ? name.trim()[0].toUpperCaseTr()
+            : '?';
+        final avatarUrl = (u?.avatarUrl?.isNotEmpty ?? false)
+            ? u!.avatarUrl!
+            : placeholderAvatarFor(u?.gender, u?.id ?? name);
+        return Row(
+          children: [
+            // Köşeleri yuvarlatılmış kare avatar
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                // Çember avatar
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 64 * s,
-                      height: 64 * s,
+                Container(
+                  width: 72 * s,
+                  height: 72 * s,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10 * s),
+                    color: Colors.white.withValues(alpha: 0.45),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10 * s),
+                    child: SizedBox(
+                      width: 72 * s,
+                      height: 72 * s,
+                      child: buildAvatarImage(
+                        avatarUrl,
+                        size: 72 * s,
+                        placeholder: Text(
+                          initial,
+                          style: _display(
+                            size: 24 * s,
+                            weight: FontWeight.w500,
+                            color: _kGold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(top: -5 * s, left: -5 * s, child: _corner(s, 0)),
+                Positioned(top: -5 * s, right: -5 * s, child: _corner(s, 1)),
+                Positioned(bottom: -5 * s, left: -5 * s, child: _corner(s, 2)),
+                Positioned(bottom: -5 * s, right: -5 * s, child: _corner(s, 3)),
+                Positioned(
+                  right: -4 * s,
+                  bottom: -4 * s,
+                  child: GestureDetector(
+                    onTap: _uploadingAvatar ? null : _editAvatar,
+                    child: Container(
+                      width: 22 * s,
+                      height: 22 * s,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.45),
-                        border: Border.all(color: _kGold, width: 1.6),
+                        color: _kGold,
+                        border: Border.all(color: _kCream, width: 1.6),
                       ),
                       alignment: Alignment.center,
-                      child: ClipOval(
-                        child: SizedBox(
-                          width: 60 * s,
-                          height: 60 * s,
-                          child: buildAvatarImage(
-                            avatarUrl,
-                            size: 60 * s,
-                            placeholder: Text(
-                              initial,
-                              style: _serif(
-                                  size: 24 * s, weight: FontWeight.w500, color: _kGold),
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: _uploadingAvatar
+                          ? SizedBox(
+                              width: 10 * s,
+                              height: 10 * s,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 1.6,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Icon(Icons.edit, size: 11 * s, color: Colors.white),
                     ),
-                    Positioned(
-                      right: -2 * s,
-                      bottom: -2 * s,
-                      child: GestureDetector(
-                        onTap: _uploadingAvatar ? null : _editAvatar,
-                        child: Container(
-                          width: 22 * s,
-                          height: 22 * s,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _kGold,
-                            border: Border.all(color: _kCream, width: 1.6),
-                          ),
-                          alignment: Alignment.center,
-                          child: _uploadingAvatar
-                              ? SizedBox(
-                                  width: 10 * s,
-                                  height: 10 * s,
-                                  child: const CircularProgressIndicator(
-                                      strokeWidth: 1.6, color: Colors.white),
-                                )
-                              : Icon(Icons.edit, size: 11 * s, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 18 * s),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 9 * s, vertical: 3.5 * s),
-                        decoration: BoxDecoration(
-                          color: _kGold.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                              color: _kGold.withValues(alpha: 0.45)),
-                        ),
-                        child: Text(
-                          'MÜŞTERİ',
-                          style: _mono(
-                              size: 8 * s,
-                              weight: FontWeight.w700,
-                              color: _kGold,
-                              spacing: 1.2),
-                        ),
-                      ),
-                      SizedBox(height: 8 * s),
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _serif(
-                            size: 24 * s, weight: FontWeight.w600, color: _kInk),
-                      ),
-                      SizedBox(height: 3 * s),
-                      Text(
-                        email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
-                      ),
-                    ],
                   ),
                 ),
               ],
-            );
-          }),
-        ),
-      ],
+            ),
+            SizedBox(width: 18 * s),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 9 * s,
+                      vertical: 3.5 * s,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _kGold.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: _kGold.withValues(alpha: 0.45)),
+                    ),
+                    child: Text(
+                      'MÜŞTERİ',
+                      style: _ui(
+                        size: 8 * s,
+                        weight: FontWeight.w700,
+                        color: _kGold,
+                        spacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8 * s),
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _display(
+                      size: 24 * s,
+                      weight: FontWeight.w600,
+                      color: _kInk,
+                    ),
+                  ),
+                  SizedBox(height: 3 * s),
+                  Text(
+                    email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  // Köşe çentiği: ana hizmet kartlarında kullanılan işaretin aynısı.
+  Widget _corner(double s, int quadrant) {
+    final len = 12 * s;
+    final isLeft = quadrant == 0 || quadrant == 2;
+    final isTop = quadrant == 0 || quadrant == 1;
+    return SizedBox(
+      width: len,
+      height: len,
+      child: Stack(
+        children: [
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: len, height: 1.4, color: _kInk),
+          ),
+          Positioned(
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            child: Container(width: 1.4, height: len, color: _kInk),
+          ),
+        ],
+      ),
     );
   }
 
@@ -454,11 +517,39 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 SizedBox(width: 10 * s),
                 Text(
                   'PROJELERİM',
-                  style: _mono(
-                      size: 8 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 1.8),
+                  style: _ui(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kBlack,
+                    spacing: 1.8,
+                  ),
+                ),
+                const Spacer(),
+                InkWell(
+                  onTap: () {
+                    final home = Get.find<ClientHomeController>();
+                    home.changeTab(3);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'TÜMÜNÜ GÖR',
+                        style: _ui(
+                          size: 8 * s,
+                          weight: FontWeight.w600,
+                          color: _kBlack.withValues(alpha: 0.55),
+                          spacing: 1,
+                        ),
+                      ),
+                      SizedBox(width: 2 * s),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 12 * s,
+                        color: _kBlack.withValues(alpha: 0.4),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -475,15 +566,27 @@ class _ClientProfileTabState extends State<ClientProfileTab>
             return Row(
               children: [
                 Expanded(
-                  child: _StatTile(scale: s, value: created, label: 'OLUŞTURULAN'),
+                  child: _StatTile(
+                    scale: s,
+                    value: created,
+                    label: 'OLUŞTURULAN',
+                  ),
                 ),
                 SizedBox(width: 10 * s),
                 Expanded(
-                  child: _StatTile(scale: s, value: ongoing, label: 'DEVAM EDEN'),
+                  child: _StatTile(
+                    scale: s,
+                    value: ongoing,
+                    label: 'DEVAM EDEN',
+                  ),
                 ),
                 SizedBox(width: 10 * s),
                 Expanded(
-                  child: _StatTile(scale: s, value: completed, label: 'TAMAMLANAN'),
+                  child: _StatTile(
+                    scale: s,
+                    value: completed,
+                    label: 'TAMAMLANAN',
+                  ),
                 ),
               ],
             );
@@ -496,8 +599,8 @@ class _ClientProfileTabState extends State<ClientProfileTab>
   // ─── Bölüm: altın çizgi + başlık + sağda satır sayısı, sonra düz liste ──────
   Widget _buildSection(double s, String title, List<Widget> rows) {
     return Padding(
-      // Ana gruplar arasında ferah boşluk
-      padding: EdgeInsets.only(top: 58 * s),
+      // Ana gruplar arasında boşluk
+      padding: EdgeInsets.only(top: 30 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -509,16 +612,17 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 SizedBox(width: 10 * s),
                 Text(
                   title,
-                  style: _mono(
-                      size: 8 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 1.8),
+                  style: _ui(
+                    size: 8 * s,
+                    weight: FontWeight.w700,
+                    color: _kBlack,
+                    spacing: 1.8,
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   rows.length.toString().padLeft(2, '0'),
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 1),
                 ),
               ],
             ),
@@ -537,7 +641,11 @@ class _ClientProfileTabState extends State<ClientProfileTab>
 
 // ─── İstatistik karosu ────────────────────────────────────────────────────────
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.scale, required this.value, required this.label});
+  const _StatTile({
+    required this.scale,
+    required this.value,
+    required this.label,
+  });
 
   final double scale;
   final int value;
@@ -555,13 +663,13 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: _serif(size: 26 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 26 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 4 * s),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
+            style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
           ),
         ],
       ),
@@ -617,7 +725,6 @@ class _StaggeredItem extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.scale,
-    required this.icon,
     required this.label,
     this.sub,
     this.onTap,
@@ -625,7 +732,6 @@ class _SettingsRow extends StatelessWidget {
   });
 
   final double scale;
-  final IconData icon;
   final String label;
   final String? sub;
   final VoidCallback? onTap;
@@ -635,10 +741,6 @@ class _SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     final titleColor = danger ? _kDanger : _kInk;
-    final iconColor = danger ? _kDanger : _kInk;
-    final borderColor = danger
-        ? _kDanger.withValues(alpha: 0.4)
-        : Colors.black.withValues(alpha: 0.14);
 
     return InkWell(
       onTap: onTap,
@@ -646,17 +748,6 @@ class _SettingsRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 20 * s),
         child: Row(
           children: [
-            Container(
-              width: 38 * s,
-              height: 38 * s,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor),
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, size: 16 * s, color: iconColor),
-            ),
-            SizedBox(width: 15 * s),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,22 +755,28 @@ class _SettingsRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: _serif(
-                        size: 14 * s, weight: FontWeight.w500, color: titleColor),
+                    style: _display(
+                      size: 12 * s,
+                      weight: FontWeight.w600,
+                      color: titleColor,
+                    ),
                   ),
                   if (sub != null) ...[
                     SizedBox(height: 3 * s),
                     Text(
                       sub!,
-                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
+                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ],
                 ],
               ),
             ),
             if (onTap != null && !danger)
-              Icon(Icons.chevron_right,
-                  size: 16 * s, color: Colors.black.withValues(alpha: 0.22)),
+              Icon(
+                Icons.chevron_right,
+                size: 16 * s,
+                color: Colors.black.withValues(alpha: 0.22),
+              ),
           ],
         ),
       ),

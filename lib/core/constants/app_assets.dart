@@ -8,13 +8,30 @@ class AppAssets {
   static const String _loginPages = '$_images/login_pages';
   static const String _profilePhotos = '$_images/profile_photos';
   static const String _placeholder = '$_images/placeholder';
+  static const String _briefImages = '$_images/brief_images';
+  static const String _pageImages = '$_images/page_images';
 
   // Login / choose-auth screens
   static const String loginLogo = '$_loginPages/logo.png';
-  static const String loginGoogle = '$_loginPages/login_google.png';
-  static const String loginApple = '$_loginPages/login_apple.png';
-  static const String loginEmail = '$_loginPages/login_email.png';
+  static const String loginGoogle = '$_loginPages/google.png';
+  static const String loginApple = '$_loginPages/apple.png';
+  static const String loginEmail = '$_loginPages/mail.png';
   static const String choosePageBg = '$_loginPages/choose_page_bg.jpeg';
+
+  // Profil sayfası ve ayarlar menüsü ikonları
+  static const String settingsProfile = '$_loginPages/profile.png';
+  static const String settingsMail = '$_loginPages/mail.png';
+  static const String settingsPassword = '$_loginPages/pasword.png';
+  static const String settingsNotification = '$_loginPages/notification.png';
+  static const String settingsLanguage = '$_loginPages/language_nation.png';
+  static const String settingsHelp = '$_loginPages/help.png';
+  static const String settingsContact = '$_loginPages/contact.png';
+  static const String settingsTerms = '$_loginPages/terms.png';
+  static const String settingsRole = '$_loginPages/role.png';
+  static const String settingsExit = '$_loginPages/exit.png';
+  static const String settingsDelete = '$_loginPages/delete.png';
+  static const String settingsPortfolio = '$_loginPages/portfolio.png';
+  static const String settingsInteraction = '$_loginPages/interaction.png';
 
   // Role selection screen
   static const String roleProjectClient = '$_roleSelection/project_client.jpg';
@@ -48,6 +65,25 @@ class AppAssets {
     '$_profilePhotos/male2.png',
     '$_profilePhotos/male3.png',
     '$_profilePhotos/male4.png',
+  ];
+
+  // Proje modu seçimi — "Freelancer Bul" / "SET Halletsin" kart illüstrasyonları
+  static const String briefFreelancerIllustration =
+      '$_briefImages/mercek_freelancerbul.png';
+  static const String briefFreelancerIllustrationShadow =
+      '$_briefImages/mercek_shadow.png';
+  static const String briefSetIllustration = '$_briefImages/cep_saati.png';
+  static const String briefSetIllustrationShadow =
+      '$_briefImages/cep_saati_shadow.png';
+
+  // Splash ekranı — sırayla değişen tanıtım görselleri
+  static const List<String> splashPageImages = [
+    '$_pageImages/apple.png',
+    '$_pageImages/atlas.png',
+    '$_pageImages/bird.png',
+    '$_pageImages/feather.png',
+    '$_pageImages/key.png',
+    '$_pageImages/pot.png',
   ];
 
   // Proje detayı — Mercedes Campaign yer tutucu görselleri

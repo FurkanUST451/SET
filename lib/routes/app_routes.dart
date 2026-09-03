@@ -6,7 +6,6 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
 
   // Auth
-  static const String chooseAuth = '/choose-auth';
   static const String login = '/login';
   static const String register = '/register';
 
@@ -22,6 +21,7 @@ class AppRoutes {
   static const String briefShare = '/client/brief-share';
   static const String projectMode = '/client/project-mode';
   static const String chatDetail = '/client/chat-detail';
+  static const String offerReview = '/client/offer-review';
   static const String projectDetail = '/client/project-detail';
   static const String briefDetail = '/client/brief-detail';
   static const String setProjects = '/client/set-projects';

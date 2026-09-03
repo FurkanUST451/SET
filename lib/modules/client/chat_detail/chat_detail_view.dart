@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/brief_model.dart';
 import '../../../data/models/message_model.dart';
 import '../../../data/models/offer_model.dart';
+import '../../../routes/app_routes.dart';
 import 'chat_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB); // üst bar
@@ -16,28 +18,28 @@ const _kInk = Color(0xFF35333F);
 const _kBubbleMe = Color(0xFF23212B); // giden balon (koyu)
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kAccepted = Color(0xFF6B8F71);
 const _kDanger = Color(0xFFBE6A5A);
 const _kCardBorder = Color(0x14000000);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -60,7 +62,7 @@ String _dayLabel(DateTime dt) {
   final diff = d0.difference(d).inDays;
   if (diff == 0) return 'BUGÜN';
   if (diff == 1) return 'DÜN';
-  return '${dt.day} ${_monthsShort[dt.month]}'.toUpperCase();
+  return '${dt.day} ${_monthsShort[dt.month]}'.toUpperCaseTr();
 }
 
 bool _sameDay(DateTime a, DateTime b) =>
@@ -92,8 +94,10 @@ class ChatDetailView extends GetView<ChatDetailController> {
     final double s = (width / 390).clamp(0.85, 1.15).toDouble();
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) => controller.goBack(),
+      canPop: Get.key.currentState?.canPop() ?? false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) controller.goBack();
+      },
       child: MediaQuery.withNoTextScaling(
         child: Scaffold(
           backgroundColor: _kChatBg,
@@ -179,7 +183,7 @@ class ChatDetailView extends GetView<ChatDetailController> {
                         controller.chatName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _serif(
+                        style: _display(
                             size: 19 * s, weight: FontWeight.w600, color: _kInk),
                       ),
                       SizedBox(height: 2 * s),
@@ -194,12 +198,12 @@ class ChatDetailView extends GetView<ChatDetailController> {
                           Flexible(
                             child: Text(
                               controller.briefTitle.isNotEmpty
-                                  ? 'ÇEVRİMİÇİ · ${controller.briefTitle.toUpperCase()}'
+                                  ? 'ÇEVRİMİÇİ · ${controller.briefTitle.toUpperCaseTr()}'
                                   : 'ÇEVRİMİÇİ',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
-                                  _mono(size: 7.5 * s, color: _kBlack, spacing: 1),
+                                  _ui(size: 7.5 * s, color: _kBlack, spacing: 1),
                             ),
                           ),
                         ],
@@ -207,11 +211,6 @@ class ChatDetailView extends GetView<ChatDetailController> {
                     ],
                   ),
                 ),
-                SizedBox(width: 8 * s),
-                _SquareBtn(scale: s, icon: Icons.call_outlined, onTap: () {}),
-                SizedBox(width: 8 * s),
-                _SquareBtn(scale: s, icon: Icons.videocam_outlined, onTap: () {}),
-                SizedBox(width: 14 * s),
               ],
             ),
           ),
@@ -228,9 +227,11 @@ class ChatDetailView extends GetView<ChatDetailController> {
       return Obx(() {
         final offer = controller.offers[msg.offerId];
         if (offer == null) return const SizedBox.shrink();
+        final brief = controller.brief.value;
         return _OfferBubble(
           scale: s,
           offer: offer,
+          brief: brief,
           isMe: isMe,
           time: time,
           onAccept: () => controller.respondToOffer(offer, true),
@@ -250,6 +251,24 @@ class _BriefCard extends StatelessWidget {
   const _BriefCard({required this.scale, required this.controller});
   final double scale;
   final ChatDetailController controller;
+
+  String _categoryAsset(String category) {
+    final cat = category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,9 +294,15 @@ class _BriefCard extends StatelessWidget {
               Container(
                 width: 38 * s,
                 height: 38 * s,
-                color: _kGold.withValues(alpha: 0.15),
+                decoration: const BoxDecoration(color: Colors.white),
                 alignment: Alignment.center,
-                child: Icon(Icons.work_outline_rounded, color: _kGold, size: 18 * s),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  _categoryAsset(category),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.work_outline_rounded, color: _kGold, size: 18 * s),
+                ),
               ),
               SizedBox(width: 12 * s),
               Expanded(
@@ -286,7 +311,7 @@ class _BriefCard extends StatelessWidget {
                   children: [
                     Text(
                       category,
-                      style: _serif(size: 15 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 15 * s, weight: FontWeight.w600, color: _kInk),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -294,7 +319,7 @@ class _BriefCard extends StatelessWidget {
                       SizedBox(height: 2 * s),
                       Text(
                         shootingType,
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.3),
+                        style: _ui(size: 8 * s, color: _kBlack, spacing: 0.3),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -355,13 +380,13 @@ class _BriefDetailSheet extends StatelessWidget {
           children: [
             Text(
               brief.category.isNotEmpty ? brief.category : 'İş',
-              style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
             ),
             if (a.shootingType != null && a.shootingType!.isNotEmpty) ...[
               SizedBox(height: 2 * s),
               Text(
                 a.shootingType!,
-                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
               ),
             ],
             SizedBox(height: 18 * s),
@@ -382,12 +407,12 @@ class _BriefDetailSheet extends StatelessWidget {
               SizedBox(height: 18 * s),
               Text(
                 'İŞ TARİFİ',
-                style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
+                style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
               ),
               SizedBox(height: 8 * s),
               Text(
                 a.notes!,
-                style: _mono(size: 10 * s, color: _kBlack, height: 1.6, spacing: 0.2),
+                style: _ui(size: 10 * s, color: _kBlack, height: 1.6, spacing: 0.2),
               ),
             ],
           ],
@@ -426,13 +451,13 @@ class _DetailChip extends StatelessWidget {
             children: [
               Icon(icon, size: 12 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _mono(size: 7 * s, color: _kBlack, spacing: 0.5)),
+              Text(label, style: _ui(size: 7 * s, color: _kBlack, spacing: 0.5)),
             ],
           ),
           SizedBox(height: 4 * s),
           Text(
             value,
-            style: _mono(size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.2),
+            style: _ui(size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.2),
           ),
         ],
       ),
@@ -445,6 +470,7 @@ class _OfferBubble extends StatelessWidget {
   const _OfferBubble({
     required this.scale,
     required this.offer,
+    required this.brief,
     required this.isMe,
     required this.time,
     required this.onAccept,
@@ -453,10 +479,11 @@ class _OfferBubble extends StatelessWidget {
 
   final double scale;
   final OfferModel offer;
+  final BriefModel? brief;
   final bool isMe;
   final String time;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
+  final Future<void> Function() onAccept;
+  final Future<void> Function() onReject;
 
   String get _statusLabel {
     switch (offer.status) {
@@ -504,11 +531,11 @@ class _OfferBubble extends StatelessWidget {
                   Icon(Icons.payments_outlined, size: 16 * s, color: _kGold),
                   SizedBox(width: 6 * s),
                   Text('FİYAT TEKLİFİ',
-                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.8)),
+                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.8)),
                   const Spacer(),
                   Text(
                     _statusLabel,
-                    style: _mono(
+                    style: _ui(
                         size: 8 * s,
                         weight: FontWeight.w700,
                         color: _statusColor,
@@ -519,56 +546,41 @@ class _OfferBubble extends StatelessWidget {
               SizedBox(height: 6 * s),
               Text(
                 '${offer.amount.toStringAsFixed(0)} ₺',
-                style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
               ),
               if (offer.message.isNotEmpty) ...[
                 SizedBox(height: 4 * s),
                 Text(offer.message,
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2)),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2)),
               ],
               if (!isMe && offer.status == OfferStatus.pending) ...[
                 SizedBox(height: 10 * s),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: onReject,
-                        child: Container(
-                          height: 38 * s,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: _kDanger)),
-                          child: Text('Reddet',
-                              style: _mono(
-                                  size: 9 * s,
-                                  weight: FontWeight.w700,
-                                  color: _kDanger,
-                                  spacing: 0.4)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8 * s),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: onAccept,
-                        child: Container(
-                          height: 38 * s,
-                          alignment: Alignment.center,
-                          color: _kGold,
-                          child: Text('Kabul Et',
-                              style: _mono(
-                                  size: 9 * s,
-                                  weight: FontWeight.w700,
-                                  color: Colors.white,
-                                  spacing: 0.4)),
-                        ),
-                      ),
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: () => Get.toNamed(
+                    AppRoutes.offerReview,
+                    arguments: {
+                      'offer': offer,
+                      'brief': brief,
+                      'onAccept': onAccept,
+                      'onReject': onReject,
+                    },
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    height: 38 * s,
+                    alignment: Alignment.center,
+                    color: _kGold,
+                    child: Text('İNCELE',
+                        style: _ui(
+                            size: 9 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                            spacing: 0.6)),
+                  ),
                 ),
               ],
               SizedBox(height: 4 * s),
-              Text(time, style: _mono(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
+              Text(time, style: _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
             ],
           ),
         ),
@@ -621,7 +633,7 @@ class _DayChip extends StatelessWidget {
           color: Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.zero,
         ),
-        child: Text(label, style: _mono(size: 8 * s, color: _kBlack, spacing: 1.5)),
+        child: Text(label, style: _ui(size: 8 * s, color: _kBlack, spacing: 1.5)),
       ),
     );
   }
@@ -652,7 +664,7 @@ class _TheirBubble extends StatelessWidget {
           children: [
             Text.rich(
               TextSpan(
-                style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
                 children: _highlightSpans(text, _kGold),
               ),
             ),
@@ -660,7 +672,7 @@ class _TheirBubble extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Text(time,
-                  style: _mono(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
+                  style: _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
             ),
           ],
         ),
@@ -693,7 +705,7 @@ class _MyBubble extends StatelessWidget {
           children: [
             Text.rich(
               TextSpan(
-                style: _mono(
+                style: _ui(
                     size: 10 * s,
                     color: Colors.white.withValues(alpha: 0.92),
                     spacing: 0.2),
@@ -706,7 +718,7 @@ class _MyBubble extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(time,
-                    style: _mono(
+                    style: _ui(
                         size: 7.5 * s,
                         color: Colors.white.withValues(alpha: 0.45),
                         spacing: 0.5)),
@@ -716,33 +728,6 @@ class _MyBubble extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Bar ikon butonu ──────────────────────────────────────────────
-class _SquareBtn extends StatelessWidget {
-  const _SquareBtn({required this.scale, required this.icon, required this.onTap});
-  final double scale;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 40 * s,
-        height: 40 * s,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.zero,
-          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
-        ),
-        child: Icon(icon, size: 18 * s, color: _kInk),
       ),
     );
   }
@@ -768,19 +753,29 @@ class _Composer extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 12 * s),
           child: Row(
             children: [
-              GestureDetector(
-                onTap: () => _showOfferSheet(context, controller, s),
-                child: Container(
-                  width: 46 * s,
-                  height: 46 * s,
-                  margin: EdgeInsets.only(right: 10 * s),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: _kGold.withValues(alpha: 0.5)),
+              Obx(() {
+                final disabled = controller.hasAcceptedOffer;
+                return GestureDetector(
+                  onTap: disabled
+                      ? null
+                      : () => _showOfferSheet(context, controller, s),
+                  child: Container(
+                    width: 46 * s,
+                    height: 46 * s,
+                    margin: EdgeInsets.only(right: 10 * s),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                          color: disabled
+                              ? _kMuted.withValues(alpha: 0.3)
+                              : _kGold.withValues(alpha: 0.5)),
+                    ),
+                    child: Icon(Icons.payments_outlined,
+                        size: 19 * s,
+                        color: disabled ? _kMuted : _kGold),
                   ),
-                  child: Icon(Icons.payments_outlined, size: 19 * s, color: _kGold),
-                ),
-              ),
+                );
+              }),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16 * s),
@@ -795,7 +790,7 @@ class _Composer extends StatelessWidget {
                   child: TextField(
                     controller: controller.messageController,
                     cursorColor: _kGold,
-                    style: _mono(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.2),
+                    style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2, height: 1.2),
                     decoration: InputDecoration(
                       isCollapsed: true,
                       filled: false,
@@ -806,7 +801,7 @@ class _Composer extends StatelessWidget {
                       disabledBorder: InputBorder.none,
                       hintText: 'Mesaj yaz...',
                       hintStyle:
-                          _mono(size: 10 * s, color: _kBlack, spacing: 0.2),
+                          _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
                     ),
                     onSubmitted: (_) => controller.send(),
                   ),
@@ -846,17 +841,17 @@ void _showOfferSheet(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Fiyat Teklifi Gönder',
-                style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 16 * s),
             TextField(
               controller: controller.offerAmountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+              style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
               cursorColor: _kGold,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: 'Tutar (₺)',
-                hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+                hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: EdgeInsets.symmetric(
@@ -879,12 +874,12 @@ void _showOfferSheet(
             TextField(
               controller: controller.offerNoteController,
               maxLines: 2,
-              style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+              style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
               cursorColor: _kGold,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: 'Not (opsiyonel)',
-                hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+                hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: EdgeInsets.symmetric(
@@ -922,7 +917,7 @@ void _showOfferSheet(
                                   strokeWidth: 2, color: Colors.white),
                             )
                           : Text('Teklifi Gönder',
-                              style: _mono(
+                              style: _ui(
                                   size: 10 * s,
                                   weight: FontWeight.w700,
                                   color: Colors.white,

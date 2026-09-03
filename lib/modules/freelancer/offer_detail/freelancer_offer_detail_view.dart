@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import 'freelancer_offer_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kDanger = Color(0xFFBE6A5A);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -42,6 +43,29 @@ class FreelancerOfferDetailView
   const FreelancerOfferDetailView({super.key});
 
   // ── Category helper (aynı mantık: BriefDetailView) ─────────────────────────
+
+  static String _categoryAsset(String cat) {
+    final c = cat.toLowerCase();
+    if (c.contains('video') || c.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    }
+    if (c.contains('fotoğraf') || c.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    }
+    if (c.contains('ses') || c.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    }
+    if (c.contains('cgi') || c.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    }
+    if (c.contains('kurgu') || c.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    }
+    if (c.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
 
   static IconData _categoryIcon(String cat) {
     final c = cat.toLowerCase();
@@ -96,7 +120,7 @@ class FreelancerOfferDetailView
                       child: Text(
                         'İş Teklifi',
                         textAlign: TextAlign.center,
-                        style: _serif(
+                        style: _display(
                             size: 22 * s, weight: FontWeight.w600, color: _kInk),
                       ),
                     ),
@@ -139,7 +163,7 @@ class FreelancerOfferDetailView
                             padding: EdgeInsets.only(top: 12 * s),
                             child: Text(
                               a.notes!,
-                              style: _mono(
+                              style: _ui(
                                   size: 10 * s,
                                   color: _kBlack,
                                   spacing: 0.2,
@@ -168,7 +192,7 @@ class FreelancerOfferDetailView
                                 scale: s,
                                 label: 'Proje ID',
                                 value:
-                                    '#PRJ-${brief.createdAt.year}-${brief.id.substring(0, 8).toUpperCase()}',
+                                    '#PRJ-${brief.createdAt.year}-${brief.id.substring(0, 8).toUpperCaseTr()}',
                               ),
                             ],
                           ),
@@ -204,9 +228,15 @@ class FreelancerOfferDetailView
           Container(
             width: 56 * s,
             height: 56 * s,
-            color: _kGold,
+            decoration: const BoxDecoration(color: Colors.white),
             alignment: Alignment.center,
-            child: Icon(_categoryIcon(category), size: 28 * s, color: Colors.white),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              _categoryAsset(category),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(_categoryIcon(category), size: 28 * s, color: _kGold),
+            ),
           ),
           SizedBox(width: 14 * s),
           Expanded(
@@ -215,7 +245,7 @@ class FreelancerOfferDetailView
               children: [
                 Text(
                   'YENİ TEKLİF',
-                  style: _mono(
+                  style: _ui(
                       size: 8 * s,
                       weight: FontWeight.w700,
                       color: _kGold,
@@ -226,13 +256,13 @@ class FreelancerOfferDetailView
                   title.isNotEmpty ? title : category,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(
+                  style: _display(
                       size: 24 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 SizedBox(height: 2 * s),
                 Text(
                   category,
-                  style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -354,7 +384,7 @@ class FreelancerOfferDetailView
                               SizedBox(width: 6 * s),
                               Text(
                                 'REDDET',
-                                style: _mono(
+                                style: _ui(
                                     size: 10 * s,
                                     weight: FontWeight.w700,
                                     color: _kDanger,
@@ -394,7 +424,7 @@ class FreelancerOfferDetailView
                               SizedBox(width: 8 * s),
                               Text(
                                 'MESAJLAŞ',
-                                style: _mono(
+                                style: _ui(
                                     size: 11 * s,
                                     weight: FontWeight.w700,
                                     color: Colors.white,
@@ -446,7 +476,7 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: _mono(
+                  style: _ui(
                       size: 8 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
@@ -492,10 +522,10 @@ class _GridCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label.toUpperCase(),
+                item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -505,7 +535,7 @@ class _GridCell extends StatelessWidget {
           item.value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: _mono(
+          style: _ui(
               size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.2),
         ),
       ],
@@ -530,13 +560,13 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
         Text(
           value,
-          style: _mono(
+          style: _ui(
               size: 9 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
         ),
       ],

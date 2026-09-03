@@ -4,6 +4,7 @@ import '../../../data/models/brief_model.dart';
 import '../../../data/models/project_model.dart';
 import '../../../data/repositories/brief_repository.dart';
 import '../../../data/repositories/project_repository.dart';
+import '../../../routes/app_routes.dart';
 import '../../app/user_controller.dart';
 
 class ClientProjectsController extends GetxController {
@@ -50,6 +51,32 @@ class ClientProjectsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Onaylı proje kartına dokununca ilişkili brief'in detay sayfasını aç.
+  Future<void> openProjectDetail(ProjectModel project) async {
+    final briefId = project.briefId;
+    if (briefId == null || briefId.isEmpty) {
+      Get.snackbar(
+        'Hata',
+        'Proje detayları bulunamadı',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    final brief = await _briefRepo.fetchBrief(briefId);
+    if (brief == null) {
+      Get.snackbar(
+        'Hata',
+        'Proje detayları bulunamadı',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    Get.toNamed(
+      AppRoutes.briefDetail,
+      arguments: {'brief': brief, 'project': project},
+    );
   }
 
   Future<void> updateBriefNotes(String briefId, String notes) async {

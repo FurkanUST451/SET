@@ -4,15 +4,17 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/utils/avatar_image.dart';
 import '../../../../data/dummy/dummy_data.dart';
 import '../../../../data/models/freelancer_model.dart';
 import '../../../../data/repositories/freelancer_repository.dart';
 import '../../../../data/repositories/user_repository.dart';
 import '../../../app/user_controller.dart';
+import '../../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -20,7 +22,7 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kDanger = Color(0xFFBE6A5A);
 const _kCardBorder = Color(0x14000000);
@@ -29,23 +31,23 @@ const _kCardBorder = Color(0x14000000);
 double _scaleOf(BuildContext c) =>
     (MediaQuery.sizeOf(c).width / 390).clamp(0.85, 1.15).toDouble();
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -103,7 +105,7 @@ class _ProfileSubScaffold extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _serif(
+                        style: _display(
                             size: 26 * s, weight: FontWeight.w600, color: _kInk),
                       ),
                     ),
@@ -116,7 +118,7 @@ class _ProfileSubScaffold extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 24 * s),
                   child: Text(
                     subtitle!,
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                   ),
                 ),
               ],
@@ -185,8 +187,8 @@ class _LabeledField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
-          style: _mono(
+          label.toUpperCaseTr(),
+          style: _ui(
               size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
         ),
         SizedBox(height: 7 * s),
@@ -196,13 +198,13 @@ class _LabeledField extends StatelessWidget {
           keyboardType: keyboardType,
           obscureText: obscure,
           cursorColor: _kGold,
-          style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2, height: 1.3),
+          style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2, height: 1.3),
           decoration: InputDecoration(
             isDense: true,
             filled: true,
             fillColor: Colors.white,
             hintText: hint,
-            hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+            hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
             contentPadding:
                 EdgeInsets.symmetric(horizontal: 14 * s, vertical: 12 * s),
             border: border(Colors.black.withValues(alpha: 0.12)),
@@ -239,8 +241,8 @@ class _PrimaryButton extends StatelessWidget {
         color: danger ? _kDanger : _kGold,
         alignment: Alignment.center,
         child: Text(
-          label.toUpperCase(),
-          style: _mono(
+          label.toUpperCaseTr(),
+          style: _ui(
               size: 11 * s,
               weight: FontWeight.w700,
               color: Colors.white,
@@ -258,7 +260,7 @@ void _toast(String msg) {
     titleText: const SizedBox.shrink(),
     messageText: Text(
       msg,
-      style: _mono(size: 11, weight: FontWeight.w600, color: Colors.white),
+      style: _ui(size: 11, weight: FontWeight.w600, color: Colors.white),
     ),
     snackPosition: SnackPosition.BOTTOM,
     backgroundColor: _kInk,
@@ -568,7 +570,7 @@ class _ToggleRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label,
-                        style: _serif(
+                        style: _display(
                             size: 15 * s,
                             weight: FontWeight.w600,
                             color: _kInk)),
@@ -576,7 +578,7 @@ class _ToggleRow extends StatelessWidget {
                       SizedBox(height: 2 * s),
                       Text(sub!,
                           style:
-                              _mono(size: 8 * s, color: _kBlack, spacing: 0.2)),
+                              _ui(size: 8 * s, color: _kBlack, spacing: 0.2)),
                     ],
                   ],
                 ),
@@ -639,7 +641,7 @@ class _LanguageRegionScreenState extends State<LanguageRegionScreen> {
                         Expanded(
                           child: Text(
                             _languages[i],
-                            style: _serif(
+                            style: _display(
                                 size: 16 * s,
                                 weight: _selected == _languages[i]
                                     ? FontWeight.w700
@@ -712,7 +714,7 @@ class HelpCenterScreen extends StatelessWidget {
                     collapsedIconColor: _kMuted,
                     title: Text(
                       item[0],
-                      style: _serif(
+                      style: _display(
                           size: 16 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                     children: [
@@ -721,7 +723,7 @@ class HelpCenterScreen extends StatelessWidget {
                         child: Text(
                           item[1],
                           style:
-                              _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                              _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                         ),
                       ),
                     ],
@@ -823,12 +825,12 @@ class TermsScreen extends StatelessWidget {
                 Text(
                   sec[0],
                   style:
-                      _serif(size: 17 * s, weight: FontWeight.w700, color: _kInk),
+                      _display(size: 17 * s, weight: FontWeight.w700, color: _kInk),
                 ),
                 SizedBox(height: 8 * s),
                 Text(
                   sec[1],
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                  style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                 ),
               ],
             ),
@@ -875,12 +877,12 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               Text(
                 'Hesabını silmek üzeresin',
                 style:
-                    _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+                    _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
               ),
               SizedBox(height: 8 * s),
               Text(
                 'Bu işlem geri alınamaz. Tüm projelerin, mesajların ve profil bilgilerin kalıcı olarak silinir.',
-                style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
               ),
             ],
           ),
@@ -900,7 +902,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               Expanded(
                 child: Text(
                   'Sonuçları anladım ve hesabımı silmek istiyorum.',
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                  style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                 ),
               ),
             ],
@@ -1003,7 +1005,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
     final u = Get.find<UserController>().currentUser;
     final name = u?.fullName ?? 'Freelancer';
     final email = u?.email ?? '';
-    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCaseTr() : '?';
     final photoUrl = _freelancer?.profileImageUrl ??
         placeholderAvatarFor(u?.gender, u?.id ?? name);
 
@@ -1031,7 +1033,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                     SizedBox(width: 8 * s),
                     Text(
                       'Profil',
-                      style: _serif(size: 26 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 26 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                   ],
                 ),
@@ -1059,7 +1061,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                             size: 92 * s,
                             placeholder: Text(
                               initial,
-                              style: _serif(
+                              style: _display(
                                   size: 34 * s, weight: FontWeight.w500, color: _kGold),
                             ),
                           ),
@@ -1098,7 +1100,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
               Center(
                 child: Text(
                   name,
-                  style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                  style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
                 ),
               ),
               if (email.isNotEmpty) ...[
@@ -1106,7 +1108,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                 Center(
                   child: Text(
                     email,
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ),
               ],
@@ -1115,7 +1117,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                 padding: EdgeInsets.symmetric(horizontal: 24 * s),
                 child: _ProfileMenuRow(
                   scale: s,
-                  icon: Icons.grid_view_rounded,
+                  iconAsset: AppAssets.settingsPortfolio,
                   label: 'Portfolyo / Profil Düzenle',
                   sub: 'Hizmet alanları, deneyim, hakkımda ve projeler',
                   onTap: () => Get.to<void>(() => const FreelancerPortfolioEditScreen()),
@@ -1126,7 +1128,7 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
                 padding: EdgeInsets.symmetric(horizontal: 24 * s),
                 child: _ProfileMenuRow(
                   scale: s,
-                  icon: Icons.forum_outlined,
+                  iconAsset: AppAssets.settingsInteraction,
                   label: 'Etkileşimler',
                   sub: 'Yorumlar, oylamalar ve tamamlanan projeler',
                   onTap: () => Get.to<void>(() => const FreelancerInteractionsScreen()),
@@ -1144,14 +1146,14 @@ class _FreelancerOwnProfileScreenState extends State<FreelancerOwnProfileScreen>
 class _ProfileMenuRow extends StatelessWidget {
   const _ProfileMenuRow({
     required this.scale,
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     required this.sub,
     required this.onTap,
   });
 
   final double scale;
-  final IconData icon;
+  final String iconAsset;
   final String label;
   final String sub;
   final VoidCallback onTap;
@@ -1170,14 +1172,14 @@ class _ProfileMenuRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 38 * s,
-              height: 38 * s,
+              width: 44 * s,
+              height: 44 * s,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.black.withValues(alpha: 0.14)),
               ),
               alignment: Alignment.center,
-              child: Icon(icon, size: 16 * s, color: _kInk),
+              child: Image.asset(iconAsset, width: 24 * s, height: 24 * s),
             ),
             SizedBox(width: 15 * s),
             Expanded(
@@ -1185,9 +1187,9 @@ class _ProfileMenuRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label, style: _serif(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
+                  Text(label, style: _display(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
                   SizedBox(height: 3 * s),
-                  Text(sub, style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2)),
+                  Text(sub, style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2)),
                 ],
               ),
             ),
@@ -1330,11 +1332,11 @@ class _FreelancerPortfolioEditScreenState
                 Center(child: _bottomSheetHandle(s)),
                 SizedBox(height: 14 * s),
                 Text('Ad Soyad & Konum',
-                    style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                    style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
                 SizedBox(height: 4 * s),
                 Text(
                   'Profilinde görünen kimlik bilgilerini güncelle.',
-                  style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
+                  style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
                 ),
                 SizedBox(height: 16 * s),
                 _LabeledField(label: 'Ad', controller: _nameController, hint: 'Adın'),
@@ -1377,11 +1379,11 @@ class _FreelancerPortfolioEditScreenState
                   Center(child: _bottomSheetHandle(s)),
                   SizedBox(height: 14 * s),
                   Text('Hizmet Alanları',
-                      style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                      style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
                   SizedBox(height: 4 * s),
                   Text(
                     'Birden fazla seçebilirsin, eklemek veya çıkarmak için dokun.',
-                    style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
                   ),
                   SizedBox(height: 16 * s),
                   Flexible(
@@ -1413,7 +1415,7 @@ class _FreelancerPortfolioEditScreenState
                               ),
                               child: Text(
                                 cat,
-                                style: _mono(
+                                style: _ui(
                                   size: 9.5 * s,
                                   weight: selected ? FontWeight.w700 : FontWeight.w400,
                                   color: selected ? _kGold : _kBlack,
@@ -1453,7 +1455,7 @@ class _FreelancerPortfolioEditScreenState
               _bottomSheetHandle(s),
               SizedBox(height: 10 * s),
               Text('Deneyim Yılı',
-                  style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
+                  style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk)),
               Expanded(
                 child: CupertinoPicker(
                   itemExtent: 42 * s,
@@ -1464,7 +1466,7 @@ class _FreelancerPortfolioEditScreenState
                     (i) => Center(
                       child: Text(
                         i == 0 ? '0 yıl' : '$i yıl',
-                        style: _mono(size: 12 * s, color: _kBlack, spacing: 0.2),
+                        style: _ui(size: 12 * s, color: _kBlack, spacing: 0.2),
                       ),
                     ),
                   ),
@@ -1506,11 +1508,11 @@ class _FreelancerPortfolioEditScreenState
                 Center(child: _bottomSheetHandle(s)),
                 SizedBox(height: 14 * s),
                 Text('Hakkımda',
-                    style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                    style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
                 SizedBox(height: 4 * s),
                 Text(
                   'Kendinden kısaca bahset, hangi işlere odaklanıyorsun?',
-                  style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
+                  style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
                 ),
                 SizedBox(height: 16 * s),
                 _LabeledField(
@@ -1579,7 +1581,7 @@ class _FreelancerPortfolioEditScreenState
                         'Portfolyo / Profil Düzenle',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                        style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
                       ),
                     ),
                   ],
@@ -1590,7 +1592,7 @@ class _FreelancerPortfolioEditScreenState
                 padding: EdgeInsets.symmetric(horizontal: 24 * s),
                 child: Text(
                   'Profilinde görünen bilgileri güncelle.',
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                  style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                 ),
               ),
               SizedBox(height: 18 * s),
@@ -1724,14 +1726,14 @@ class _PortfolioSettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label, style: _serif(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
+                  Text(label, style: _display(size: 14 * s, weight: FontWeight.w500, color: _kInk)),
                   if (sub != null) ...[
                     SizedBox(height: 3 * s),
                     Text(
                       sub!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
+                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ],
                 ],
@@ -1813,13 +1815,13 @@ class _ProjectsManagerSheetState extends State<_ProjectsManagerSheet> {
           Padding(
             padding: EdgeInsets.fromLTRB(20 * s, 14 * s, 20 * s, 0),
             child: Text('Projelerin',
-                style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(20 * s, 4 * s, 20 * s, 12 * s),
             child: Text(
               'Sürükleyerek sırasını değiştirebilirsin, ilk sıradaki proje önce görünür.',
-              style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2),
+              style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2),
             ),
           ),
           Expanded(
@@ -1830,7 +1832,7 @@ class _ProjectsManagerSheetState extends State<_ProjectsManagerSheet> {
                       child: Text(
                         'Henüz proje eklemedin. Aşağıdaki butonla ilk projeni yükle.',
                         textAlign: TextAlign.center,
-                        style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+                        style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
                       ),
                     ),
                   )
@@ -1874,7 +1876,7 @@ class _ProjectsManagerSheetState extends State<_ProjectsManagerSheet> {
                     Icon(Icons.add_photo_alternate_outlined, size: 18 * s, color: _kGold),
                     SizedBox(width: 8 * s),
                     Text('Proje Yükle',
-                        style: _mono(
+                        style: _ui(
                             size: 10 * s, weight: FontWeight.w700, color: _kGold, spacing: 0.4)),
                   ],
                 ),
@@ -1925,7 +1927,7 @@ class _ProjectManagerRow extends StatelessWidget {
             decoration:
                 BoxDecoration(color: _kGold.withValues(alpha: 0.14), shape: BoxShape.circle),
             child: Text('$order',
-                style: _mono(size: 9 * s, weight: FontWeight.w700, color: _kGold)),
+                style: _ui(size: 9 * s, weight: FontWeight.w700, color: _kGold)),
           ),
           SizedBox(width: 10 * s),
           SizedBox(
@@ -1949,7 +1951,7 @@ class _ProjectManagerRow extends StatelessWidget {
                   project.title.isNotEmpty ? project.title : 'İsimsiz proje',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: _serif(size: 14 * s, weight: FontWeight.w600, color: _kInk),
+                  style: _display(size: 14 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 if (project.jobType.isNotEmpty) ...[
                   SizedBox(height: 2 * s),
@@ -1957,7 +1959,7 @@ class _ProjectManagerRow extends StatelessWidget {
                     project.jobType,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(size: 8 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ],
               ],
@@ -2063,10 +2065,10 @@ class _AddProjectSheetState extends State<_AddProjectSheet> {
           children: [
             Center(child: _bottomSheetHandle(s)),
             SizedBox(height: 14 * s),
-            Text('Proje Yükle', style: _serif(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+            Text('Proje Yükle', style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 4 * s),
             Text('Projene özel bir isim ve görsel ekle.',
-                style: _mono(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
+                style: _ui(size: 8.5 * s, color: _kBlack, spacing: 0.2)),
             SizedBox(height: 16 * s),
             InkWell(
               onTap: _uploading ? null : _pickImage,
@@ -2100,7 +2102,7 @@ class _AddProjectSheetState extends State<_AddProjectSheet> {
                           Icon(Icons.add_photo_alternate_outlined, size: 26 * s, color: _kGold),
                           SizedBox(height: 6 * s),
                           Text('Görsel Yükle',
-                              style: _mono(
+                              style: _ui(
                                   size: 9 * s,
                                   weight: FontWeight.w700,
                                   color: _kGold,
@@ -2210,7 +2212,7 @@ class _FreelancerInteractionsScreenState extends State<FreelancerInteractionsScr
                     SizedBox(width: 8 * s),
                     Text(
                       'Etkileşimler',
-                      style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
                     ),
                   ],
                 ),
@@ -2220,7 +2222,7 @@ class _FreelancerInteractionsScreenState extends State<FreelancerInteractionsScr
                 padding: EdgeInsets.symmetric(horizontal: 24 * s),
                 child: Text(
                   'Müşterilerinden aldığın yorumlar ve oylamalar.',
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                  style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                 ),
               ),
               SizedBox(height: 18 * s),
@@ -2260,7 +2262,7 @@ class _FreelancerInteractionsScreenState extends State<FreelancerInteractionsScr
                           SizedBox(height: 26 * s),
                           Text(
                             'Yorumlar (${_reviews.length})',
-                            style: _serif(size: 18 * s, weight: FontWeight.w600, color: _kInk),
+                            style: _display(size: 18 * s, weight: FontWeight.w600, color: _kInk),
                           ),
                           SizedBox(height: 12 * s),
                           ..._reviews.map((r) => Padding(
@@ -2305,11 +2307,11 @@ class _StatBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value, style: _serif(size: 22 * s, weight: FontWeight.w700, color: _kGold)),
+          Text(value, style: _display(size: 22 * s, weight: FontWeight.w700, color: _kGold)),
           SizedBox(height: 4 * s),
           Text(
-            label.toUpperCase(),
-            style: _mono(size: 7 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.8),
+            label.toUpperCaseTr(),
+            style: _ui(size: 7 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.8),
           ),
         ],
       ),
@@ -2354,7 +2356,7 @@ class _InteractionReviewItem extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               initials,
-              style: _mono(size: 12 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.5),
+              style: _ui(size: 12 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.5),
             ),
           ),
           SizedBox(width: 12 * s),
@@ -2369,7 +2371,7 @@ class _InteractionReviewItem extends StatelessWidget {
                         '$brand · $projectType',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: _mono(size: 8 * s, color: _kBlack, spacing: 0.3),
+                        style: _ui(size: 8 * s, color: _kBlack, spacing: 0.3),
                       ),
                     ),
                     const Spacer(),
@@ -2386,14 +2388,14 @@ class _InteractionReviewItem extends StatelessWidget {
                     SizedBox(width: 4 * s),
                     Text(
                       rating.toStringAsFixed(1),
-                      style: _mono(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
+                      style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
                     ),
                   ],
                 ),
                 SizedBox(height: 5 * s),
                 Text(
                   comment,
-                  style: _serif(size: 15 * s, weight: FontWeight.w500, color: _kInk),
+                  style: _display(size: 15 * s, weight: FontWeight.w500, color: _kInk),
                 ),
               ],
             ),

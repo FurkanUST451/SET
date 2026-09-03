@@ -1,25 +1,59 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../data/models/brief_model.dart';
 import '../../../data/models/freelancer_model.dart';
+import '../../../data/models/progress_entry_model.dart';
+import '../../../data/models/project_model.dart';
+import '../../../data/repositories/brief_repository.dart';
 import '../../../data/repositories/freelancer_repository.dart';
+import '../../../data/repositories/progress_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../home/client_projects_controller.dart';
 
 class BriefDetailController extends GetxController {
   late final BriefModel brief;
+  // Brief henüz bir fiyatta anlaşılıp projeye dönüşmediyse null olur —
+  // bu durumda ilerleme bölümünün gösterecek bir şeyi yoktur.
+  late final ProjectModel? project;
 
   final RxList<FreelancerModel> freelancers = <FreelancerModel>[].obs;
   final RxBool loadingFreelancers = false.obs;
+  final RxBool isCancelling = false.obs;
+
+  final RxList<ProgressEntryModel> progressEntries =
+      <ProgressEntryModel>[].obs;
+  StreamSubscription<List<ProgressEntryModel>>? _progressSub;
 
   final _freelancerRepo = Get.find<FreelancerRepository>();
+  final _briefRepo = Get.find<BriefRepository>();
+  final _progressRepo = Get.find<ProgressRepository>();
+
+  // Onaylı projeye dönüşmüş bir brief burada iptal edilemez — o farklı bir
+  // senaryo (proje iptali), henüz kabul edilmemiş teklifler için geçerli.
+  bool get canCancel => brief.status != 'accepted' && brief.status != 'cancelled';
 
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     brief = args!['brief'] as BriefModel;
+    project = args['project'] as ProjectModel?;
     _loadFreelancers();
+    final p = project;
+    if (p != null) {
+      _progressSub = _progressRepo.watchByProject(p.id).listen((entries) {
+        progressEntries.assignAll(entries);
+      });
+    }
+  }
+
+  @override
+  void onClose() {
+    _progressSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _loadFreelancers() async {
@@ -53,5 +87,25 @@ class BriefDetailController extends GetxController {
     try {
       Get.find<ClientProjectsController>().loadBriefs();
     } catch (_) {}
+  }
+
+  Future<void> cancelBrief(String reason) async {
+    if (isCancelling.value) return;
+    isCancelling.value = true;
+    try {
+      await _briefRepo.cancelBrief(brief.id, reason);
+      refreshBriefs();
+      isCancelling.value = false;
+      Get.back<void>(); // dialog'u kapat
+      Get.back<void>(); // brief detay sayfasından çık — artık iptal edildi
+    } catch (_) {
+      isCancelling.value = false;
+      Get.snackbar(
+        'Hata',
+        'Brief iptal edilemedi. Lütfen tekrar deneyin.',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: const Color(0xFFFFFFFF),
+      );
+    }
   }
 }

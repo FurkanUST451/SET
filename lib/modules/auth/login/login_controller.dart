@@ -13,12 +13,39 @@ class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController(text: 'ornek@set.app');
   final passwordController = TextEditingController(text: '123456');
+  final resetEmailController = TextEditingController();
   final RxBool obscurePassword = true.obs;
+  final RxBool isSendingReset = false.obs;
 
   RxBool get isLoading => _auth.isLoading;
   RxnString get errorMessage => _auth.errorMessage;
 
   void toggleObscure() => obscurePassword.toggle();
+
+  Future<void> sendPasswordReset(String email) async {
+    final trimmed = email.trim();
+    if (trimmed.isEmpty) return;
+    isSendingReset.value = true;
+    try {
+      await _auth.sendPasswordResetEmail(trimmed);
+      Get.back<void>();
+      Get.snackbar(
+        'E-posta gönderildi',
+        'Şifre sıfırlama bağlantısı $trimmed adresine gönderildi.',
+        backgroundColor: const Color(0xFF2E7D32),
+        colorText: Colors.white,
+      );
+    } catch (_) {
+      Get.snackbar(
+        'Hata',
+        'Bağlantı gönderilemedi. E-postanı kontrol et.',
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: Colors.white,
+      );
+    } finally {
+      isSendingReset.value = false;
+    }
+  }
 
   Future<void> submit() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
@@ -27,7 +54,20 @@ class LoginController extends GetxController {
       password: passwordController.text,
     );
     if (!ok) return;
+    _navigateAfterLogin();
+  }
 
+  Future<void> loginWithGoogle() async {
+    final result = await _auth.loginWithGoogle();
+    if (!result.ok) return;
+    if (result.isNewUser) {
+      Get.offAllNamed(AppRoutes.roleSelection);
+      return;
+    }
+    _navigateAfterLogin();
+  }
+
+  void _navigateAfterLogin() {
     final role = _user.currentUser?.role;
     switch (role) {
       case UserRole.freelancer:
@@ -45,6 +85,7 @@ class LoginController extends GetxController {
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
+    resetEmailController.dispose();
     super.onClose();
   }
 }

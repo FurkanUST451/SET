@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../core/utils/avatar_image.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../data/models/progress_entry_model.dart';
 import '../../../data/models/project_model.dart';
 import 'project_detail_controller.dart';
+import '../../../core/utils/turkish_case.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -12,31 +15,31 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDivider = Color(0x12000000);
 const _kCardBorder = Color(0x14000000);
 const _kCompleted = Color(0xFF6B8F71);
 const _kCancelled = Color(0xFFBE6A5A);
 
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
-}) => GoogleFonts.cormorantGaramond(
+}) => AppFonts.display(
   fontSize: size,
   fontWeight: weight,
   color: color,
   height: height,
 );
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
   double height = 1.4,
-}) => GoogleFonts.spaceMono(
+}) => AppFonts.ui(
   fontSize: size,
   fontWeight: weight,
   color: color,
@@ -70,8 +73,6 @@ class _FreelancerProjectDetailViewState
   final FreelancerProjectDetailController controller =
       Get.find<FreelancerProjectDetailController>();
 
-  late List<_Milestone> _milestones;
-
   static const _months = [
     '',
     'Oca',
@@ -88,29 +89,15 @@ class _FreelancerProjectDetailViewState
     'Ara',
   ];
 
-  @override
-  void initState() {
-    super.initState();
+  // Zaman çizelgesinin ilk kalemi — brief bir fiyatta anlaşılıp proje aktif
+  // olduğu an (project.createdAt) otomatik oluşur, hiçbir yerde saklanmaz.
+  _Milestone get _briefApprovalMilestone {
     final project = controller.project;
-    _milestones = [
-      _Milestone(
-        title: 'Brief Onayı',
-        subtitle: project.title,
-        timeLabel: _fmtFull(project.createdAt),
-      ),
-      if (project.dateRange != null && project.dateRange!.isNotEmpty)
-        _Milestone(
-          title: 'Çekim Planlama',
-          subtitle: project.title,
-          timeLabel: project.dateRange!,
-        ),
-      if (project.deadline != null)
-        _Milestone(
-          title: 'Teslim',
-          subtitle: project.title,
-          timeLabel: _fmtFull(project.deadline!),
-        ),
-    ];
+    return _Milestone(
+      title: 'Brief Onayı',
+      subtitle: project.title,
+      timeLabel: _fmtFull(project.createdAt),
+    );
   }
 
   String _fmtFull(DateTime d) {
@@ -121,7 +108,7 @@ class _FreelancerProjectDetailViewState
 
   String get _projectCode {
     final p = controller.project;
-    return '#PRJ-${p.createdAt.year}-${p.id.substring(0, p.id.length >= 8 ? 8 : p.id.length).toUpperCase()}';
+    return '#PRJ-${p.createdAt.year}-${p.id.substring(0, p.id.length >= 8 ? 8 : p.id.length).toUpperCaseTr()}';
   }
 
   String get _statusLabel {
@@ -148,6 +135,24 @@ class _FreelancerProjectDetailViewState
       case ProjectStatus.pending:
         return _kMuted;
     }
+  }
+
+  String _categoryAsset(String category) {
+    final cat = category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
   }
 
   IconData _categoryIcon(String category) {
@@ -199,7 +204,7 @@ class _FreelancerProjectDetailViewState
                       child: Text(
                         'Proje Detayı',
                         textAlign: TextAlign.center,
-                        style: _serif(
+                        style: _display(
                           size: 22 * s,
                           weight: FontWeight.w600,
                           color: _kInk,
@@ -232,12 +237,17 @@ class _FreelancerProjectDetailViewState
                             Container(
                               width: 56 * s,
                               height: 56 * s,
-                              color: _kGold,
+                              decoration: const BoxDecoration(color: Colors.white),
                               alignment: Alignment.center,
-                              child: Icon(
-                                _categoryIcon(project.category ?? ''),
-                                size: 28 * s,
-                                color: Colors.white,
+                              clipBehavior: Clip.antiAlias,
+                              child: Image.asset(
+                                _categoryAsset(project.category ?? ''),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Icon(
+                                  _categoryIcon(project.category ?? ''),
+                                  size: 28 * s,
+                                  color: _kGold,
+                                ),
                               ),
                             ),
                             SizedBox(width: 14 * s),
@@ -247,7 +257,7 @@ class _FreelancerProjectDetailViewState
                                 children: [
                                   Text(
                                     _statusLabel,
-                                    style: _mono(
+                                    style: _ui(
                                       size: 8 * s,
                                       weight: FontWeight.w700,
                                       color: _statusColor,
@@ -261,7 +271,7 @@ class _FreelancerProjectDetailViewState
                                         : (project.category ?? ''),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: _serif(
+                                    style: _display(
                                       size: 24 * s,
                                       weight: FontWeight.w600,
                                       color: _kInk,
@@ -270,7 +280,7 @@ class _FreelancerProjectDetailViewState
                                   SizedBox(height: 2 * s),
                                   Text(
                                     '${project.shootingType ?? ''} · «${project.category ?? ''}»',
-                                    style: _mono(
+                                    style: _ui(
                                       size: 8 * s,
                                       color: _kBlack,
                                       spacing: 0.5,
@@ -310,7 +320,7 @@ class _FreelancerProjectDetailViewState
                             padding: EdgeInsets.only(top: 12 * s),
                             child: Text(
                               project.notes ?? project.description,
-                              style: _mono(
+                              style: _ui(
                                 size: 10 * s,
                                 color: _kBlack,
                                 spacing: 0.2,
@@ -334,19 +344,22 @@ class _FreelancerProjectDetailViewState
                         onAdd: () => _openMilestoneSheet(),
                         child: Padding(
                           padding: EdgeInsets.only(top: 6 * s),
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < _milestones.length; i++) ...[
-                                _buildMilestoneRow(_milestones[i], s),
-                                if (i < _milestones.length - 1)
+                          child: Obx(() {
+                            final entries = controller.progressEntries;
+                            return Column(
+                              children: [
+                                _buildSyntheticRow(_briefApprovalMilestone, s),
+                                for (final entry in entries) ...[
                                   const Divider(
                                     height: 1,
                                     thickness: 1,
                                     color: _kDivider,
                                   ),
+                                  _buildEntryRow(entry, s),
+                                ],
                               ],
-                            ],
-                          ),
+                            );
+                          }),
                         ),
                       ),
                       SizedBox(height: 14 * s),
@@ -383,6 +396,10 @@ class _FreelancerProjectDetailViewState
                           ),
                         ),
                       ),
+                      SizedBox(height: 14 * s),
+
+                      // Anlaşılan ücret — sadece rakam, açıklama yok.
+                      _buildAgreedPriceBox(project, s),
 
                       SizedBox(height: 120 * s),
                     ],
@@ -395,6 +412,42 @@ class _FreelancerProjectDetailViewState
 
         // ── Alt eylem çubuğu ────────────────────────────────────────────────
         bottomNavigationBar: _buildBottomBar(s),
+      ),
+    );
+  }
+
+  // ── Anlaşılan ücret kutusu ───────────────────────────────────────────────
+  Widget _buildAgreedPriceBox(ProjectModel p, double s) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 14 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _kGold, width: 1.4),
+      ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'ANLAŞILAN ÜCRET',
+            style: _ui(
+              size: 13 * s,
+              weight: FontWeight.w700,
+              color: _kBlack,
+              spacing: 1.4,
+            ),
+          ),
+          SizedBox(height: 6 * s),
+          Text(
+            '${Formatters.groupThousands(p.budget)} ₺',
+            style: _display(
+              size: 15 * s,
+              weight: FontWeight.w700,
+              color: _kInk,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -512,7 +565,7 @@ class _FreelancerProjectDetailViewState
                   Expanded(
                     child: Text(
                       client?.fullName ?? 'Müşteri',
-                      style: _mono(
+                      style: _ui(
                         size: 11 * s,
                         weight: FontWeight.w600,
                         color: _kBlack,
@@ -529,7 +582,7 @@ class _FreelancerProjectDetailViewState
                       color: _kGold.withValues(alpha: 0.15),
                       child: Text(
                         'Mesaj',
-                        style: _mono(
+                        style: _ui(
                           size: 9 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
@@ -545,84 +598,133 @@ class _FreelancerProjectDetailViewState
   }
 
   Widget _buildBottomBar(double s) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 28 * s),
-      decoration: BoxDecoration(
-        color: _kCream,
-        border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.08))),
-      ),
-      child: Obx(() => GestureDetector(
-            onTap: controller.isOpeningChat.value ? null : controller.openChat,
-            child: Container(
-              height: 52 * s,
-              color: _kGold,
-              alignment: Alignment.center,
-              child: controller.isOpeningChat.value
-                  ? SizedBox(
-                      width: 18 * s,
-                      height: 18 * s,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_bubble_outline_rounded,
-                            size: 17 * s, color: Colors.white),
-                        SizedBox(width: 6 * s),
-                        Text(
-                          'Müşteriyle Mesajlaş',
-                          style: _mono(
-                            size: 11 * s,
-                            weight: FontWeight.w700,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 28 * s),
+          decoration: BoxDecoration(
+            color: _kCream,
+            border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.08))),
+          ),
+          child: Obx(() => GestureDetector(
+                onTap: controller.isOpeningChat.value ? null : controller.openChat,
+                child: Container(
+                  width: double.infinity,
+                  height: 52 * s,
+                  color: _kGold,
+                  alignment: Alignment.center,
+                  child: controller.isOpeningChat.value
+                      ? SizedBox(
+                          width: 18 * s,
+                          height: 18 * s,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
                             color: Colors.white,
-                            spacing: 0.5,
                           ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.chat_bubble_outline_rounded,
+                                size: 17 * s, color: Colors.white),
+                            SizedBox(width: 6 * s),
+                            Text(
+                              'Müşteriyle Mesajlaş',
+                              style: _ui(
+                                size: 11 * s,
+                                weight: FontWeight.w700,
+                                color: Colors.white,
+                                spacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                ),
+              )),
+        ),
+        Positioned(
+          top: -20 * s,
+          left: 16 * s,
+          child: GestureDetector(
+            onTap: () => _openMilestoneSheet(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 10 * s),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16 * s),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.14),
+                    blurRadius: 18 * s,
+                    offset: Offset(0, 8 * s),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'İlerleme',
+                    style: _ui(
+                      size: 11 * s,
+                      weight: FontWeight.w700,
+                      color: _kInk,
+                      spacing: 0.5,
                     ),
+                  ),
+                  SizedBox(width: 8 * s),
+                  Container(
+                    width: 20 * s,
+                    height: 20 * s,
+                    decoration: const BoxDecoration(
+                      color: _kGold,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(Icons.add_rounded, size: 13 * s, color: Colors.white),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
+        ),
+      ],
     );
   }
 
-  // ── İlerleme satırı ──────────────────────────────────────────────────────────
-  Widget _buildMilestoneRow(_Milestone m, double s) {
-    return _SwipeToDeleteRow(
-      key: ValueKey(m),
-      scale: s,
-      onDelete: () => setState(() => _milestones.remove(m)),
-      onTap: () => _openMilestoneSheet(existing: m),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12 * s),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _MilestoneDot(scale: s),
-            SizedBox(width: 14 * s),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${m.title} · ${m.timeLabel}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: _mono(
-                      size: 11 * s,
-                      weight: FontWeight.w700,
-                      color: _kBlack,
-                      spacing: 0.2,
-                    ),
+  // ── İlerleme satırı (görsel gövde, hem sabit hem gerçek kayıt için) ─────────
+  Widget _milestoneRowBody(String title, String timeLabel, String subtitle, double s) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12 * s),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _MilestoneDot(scale: s),
+          SizedBox(width: 14 * s),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$title · $timeLabel',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _ui(
+                    size: 11 * s,
+                    weight: FontWeight.w700,
+                    color: _kBlack,
+                    spacing: 0.2,
                   ),
+                ),
+                if (subtitle.isNotEmpty) ...[
                   SizedBox(height: 3 * s),
                   Text(
-                    m.subtitle,
+                    subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _mono(
+                    style: _ui(
                       size: 9 * s,
                       weight: FontWeight.w600,
                       color: _kGold,
@@ -630,19 +732,40 @@ class _FreelancerProjectDetailViewState
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            Icon(Icons.chevron_right, size: 16 * s, color: _kMuted),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Brief Onayı — otomatik oluşan, silinemeyen/düzenlenemeyen ilk kalem.
+  Widget _buildSyntheticRow(_Milestone m, double s) {
+    return _milestoneRowBody(m.title, m.timeLabel, m.subtitle, s);
+  }
+
+  // Freelancer'ın Firestore'a yazdığı gerçek ilerleme kaydı — kaydırarak sil,
+  // dokununca düzenle.
+  Widget _buildEntryRow(ProgressEntryModel entry, double s) {
+    return _SwipeToDeleteRow(
+      key: ValueKey(entry.id),
+      scale: s,
+      onDelete: () => controller.deleteProgress(entry),
+      onTap: () => _openMilestoneSheet(existing: entry),
+      child: _milestoneRowBody(
+        entry.title,
+        _fmtFull(entry.createdAt),
+        entry.description,
+        s,
       ),
     );
   }
 
   // ── İlerleme ekle / düzenle bottomsheet ────────────────────────────────────
-  Future<void> _openMilestoneSheet({_Milestone? existing}) async {
+  Future<void> _openMilestoneSheet({ProgressEntryModel? existing}) async {
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
-    final descCtrl = TextEditingController(text: existing?.subtitle ?? '');
+    final descCtrl = TextEditingController(text: existing?.description ?? '');
 
     await showModalBottomSheet<void>(
       context: context,
@@ -674,7 +797,7 @@ class _FreelancerProjectDetailViewState
               ),
               Text(
                 existing == null ? 'İlerleme Ekle' : 'İlerlemeyi Düzenle',
-                style: _serif(
+                style: _display(
                   size: 22 * s,
                   weight: FontWeight.w600,
                   color: _kInk,
@@ -683,7 +806,7 @@ class _FreelancerProjectDetailViewState
               SizedBox(height: 20 * s),
               Text(
                 'BAŞLIK',
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
@@ -699,7 +822,7 @@ class _FreelancerProjectDetailViewState
               SizedBox(height: 18 * s),
               Text(
                 'AÇIKLAMA',
-                style: _mono(
+                style: _ui(
                   size: 8 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
@@ -715,27 +838,16 @@ class _FreelancerProjectDetailViewState
               ),
               SizedBox(height: 24 * s),
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   final title = titleCtrl.text.trim();
                   if (title.isEmpty) return;
                   final desc = descCtrl.text.trim();
-                  setState(() {
-                    if (existing != null) {
-                      existing.title = title;
-                      existing.subtitle = desc;
-                    } else {
-                      final now = DateTime.now();
-                      _milestones.add(
-                        _Milestone(
-                          title: title,
-                          subtitle: desc,
-                          timeLabel:
-                              '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-                        ),
-                      );
-                    }
-                  });
-                  Navigator.of(ctx).pop();
+                  if (existing != null) {
+                    await controller.updateProgress(existing, title, desc);
+                  } else {
+                    await controller.addProgress(title, desc);
+                  }
+                  if (ctx.mounted) Navigator.of(ctx).pop();
                 },
                 behavior: HitTestBehavior.opaque,
                 child: Container(
@@ -745,7 +857,7 @@ class _FreelancerProjectDetailViewState
                   alignment: Alignment.center,
                   child: Text(
                     'KAYDET',
-                    style: _mono(
+                    style: _ui(
                       size: 11 * s,
                       weight: FontWeight.w700,
                       color: Colors.white,
@@ -895,13 +1007,13 @@ class _SheetField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       cursorColor: _kGold,
-      style: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+      style: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
       decoration: InputDecoration(
         isDense: true,
         filled: true,
         fillColor: Colors.white,
         hintText: hint,
-        hintStyle: _mono(size: 11 * s, color: _kBlack, spacing: 0.2),
+        hintStyle: _ui(size: 11 * s, color: _kBlack, spacing: 0.2),
         contentPadding: EdgeInsets.symmetric(
           horizontal: 14 * s,
           vertical: 12 * s,
@@ -950,7 +1062,7 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: _mono(
+                  style: _ui(
                     size: 8 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
@@ -1012,10 +1124,10 @@ class _GridCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Expanded(
               child: Text(
-                item.label.toUpperCase(),
+                item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _mono(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -1025,7 +1137,7 @@ class _GridCell extends StatelessWidget {
           item.value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: _mono(
+          style: _ui(
             size: 10 * s,
             weight: FontWeight.w700,
             color: _kBlack,
@@ -1057,13 +1169,13 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ),
         SizedBox(width: 10 * s),
         Text(
           value,
-          style: _mono(
+          style: _ui(
             size: 9 * s,
             weight: FontWeight.w700,
             color: _kBlack,

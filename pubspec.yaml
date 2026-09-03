@@ -18,6 +18,7 @@ dependencies:
   # Firebase
   firebase_core: ^3.8.0
   firebase_auth: ^5.3.4
+  google_sign_in: ^6.2.2
   cloud_firestore: ^5.5.0
   firebase_storage: ^12.3.7
   firebase_messaging: ^15.1.6
@@ -37,7 +38,8 @@ dependencies:
   video_compress: ^3.1.4
   video_player: ^2.13.0
 
-  # Typography
+  # Typography — Bricolage Grotesque (display) + Inter (gövde/UI).
+  # Tek kullanım noktası: lib/core/theme/app_fonts.dart
   google_fonts: ^6.2.1
 
   # Utilities
@@ -71,4 +73,4 @@ flutter:
     - assets/images/page_images/
     - assets/images/profile_photos/
     - assets/images/placeholder/
-    - assets/animations/
+    - assets/images/brief_images/

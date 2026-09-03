@@ -5,6 +5,7 @@ import '../core/theme/app_radius.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import 'set_chip.dart';
+import '../core/utils/turkish_case.dart';
 
 class SetHeroCard extends StatelessWidget {
   const SetHeroCard({
@@ -148,7 +149,7 @@ class SetHeroCard extends StatelessWidget {
                   children: [
                     if (eyebrow != null) ...[
                       Text(
-                        eyebrow!.toUpperCase(),
+                        eyebrow!.toUpperCaseTr(),
                         style: AppTextStyles.eyebrow.copyWith(
                           color: AppColors.accentCyan,
                         ),

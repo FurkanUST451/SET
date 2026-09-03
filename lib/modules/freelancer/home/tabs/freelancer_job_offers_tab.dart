@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_fonts.dart';
 
 import '../../../../data/models/brief_model.dart';
 import '../../../../data/models/project_model.dart';
@@ -13,28 +13,29 @@ const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF35333F);
 const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
-const _kBlack = Color(0xFF000000); // mono etiket fontu - tam siyah
+const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kCardBorder = Color(0x0F000000);
 const _kDivider = Color(0x12000000);
 const _kAccepted = Color(0xFF6B8F71);
+const _kDanger = Color(0xFFBE6A5A);
 
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
-TextStyle _serif({
+TextStyle _display({
   required double size,
   FontWeight weight = FontWeight.w500,
   required Color color,
   double height = 1.05,
 }) =>
-    GoogleFonts.cormorantGaramond(
+    AppFonts.display(
         fontSize: size, fontWeight: weight, color: color, height: height);
 
-TextStyle _mono({
+TextStyle _ui({
   required double size,
   FontWeight weight = FontWeight.w400,
   required Color color,
   double spacing = 0.5,
 }) =>
-    GoogleFonts.spaceMono(
+    AppFonts.ui(
         fontSize: size, fontWeight: weight, color: color, letterSpacing: spacing);
 
 class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
@@ -101,7 +102,9 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
                               return _OfferCard(
                                 scale: s,
                                 brief: brief,
+                                freelancerId: controller.freelancerId,
                                 onReload: controller.reload,
+                                onDelete: () => controller.deleteOffer(brief),
                               );
                             },
                           ),
@@ -123,7 +126,7 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · GELEN İŞLER',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -139,12 +142,12 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
         children: [
           Text(
             'Teklifler',
-            style: _serif(size: 40 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 40 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             '$count teklif görüntüleniyor',
-            style: _mono(size: 8 * s, color: _kBlack, spacing: 0.5),
+            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
           ),
         ],
       ),
@@ -177,6 +180,42 @@ class _AcceptedCard extends StatelessWidget {
     return brief.category;
   }
 
+  String get _categoryAsset {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
+  IconData get _categoryIcon {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
+    } else if (cat.contains('kurgu')) {
+      return Icons.content_cut_rounded;
+    } else if (cat.contains('grafik')) {
+      return Icons.brush_rounded;
+    }
+    return Icons.check_circle_outline;
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = scale;
@@ -191,9 +230,14 @@ class _AcceptedCard extends StatelessWidget {
           Container(
             width: 36 * s,
             height: 36 * s,
-            color: _kAccepted.withValues(alpha: 0.12),
-            alignment: Alignment.center,
-            child: Icon(Icons.check_circle_outline, size: 18 * s, color: _kAccepted),
+            decoration: const BoxDecoration(color: Colors.white),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              _categoryAsset,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(_categoryIcon, size: 18 * s, color: _kAccepted),
+            ),
           ),
           SizedBox(width: 12 * s),
           Expanded(
@@ -202,7 +246,7 @@ class _AcceptedCard extends StatelessWidget {
               children: [
                 Text(
                   _displayTitle,
-                  style: _mono(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
+                  style: _ui(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -210,7 +254,7 @@ class _AcceptedCard extends StatelessWidget {
                   SizedBox(height: 3 * s),
                   Text(
                     _displaySubtitle,
-                    style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -224,7 +268,7 @@ class _AcceptedCard extends StatelessWidget {
             children: [
               Text(
                 '${project.budget.toStringAsFixed(0)} ₺',
-                style: _mono(size: 12 * s, weight: FontWeight.w700, color: _kAccepted),
+                style: _ui(size: 12 * s, weight: FontWeight.w700, color: _kAccepted),
               ),
               SizedBox(height: 4 * s),
               Container(
@@ -232,7 +276,7 @@ class _AcceptedCard extends StatelessWidget {
                 color: _kAccepted.withValues(alpha: 0.12),
                 child: Text(
                   'KABUL EDİLDİ',
-                  style: _mono(
+                  style: _ui(
                       size: 7 * s,
                       weight: FontWeight.w700,
                       color: _kAccepted,
@@ -254,15 +298,44 @@ class _OfferCard extends StatelessWidget {
   const _OfferCard({
     required this.scale,
     required this.brief,
+    required this.freelancerId,
     required this.onReload,
+    required this.onDelete,
   });
 
   final double scale;
   final BriefModel brief;
+  final String freelancerId;
   final Future<void> Function() onReload;
+  final VoidCallback onDelete;
 
   String get _displayTitle =>
       brief.title.isNotEmpty ? brief.title : brief.category;
+
+  bool get _isCancelled => brief.status == 'cancelled';
+  bool get _isRejected =>
+      !_isCancelled && brief.rejectedByIds.contains(freelancerId);
+  // Karar verilmiş (reddedilmiş ya da müşteri iptal etmiş) teklifler
+  // listeden silinebilir; henüz değerlendirilmemiş olan silinemez.
+  bool get _canDelete => _isCancelled || _isRejected;
+
+  String get _categoryAsset {
+    final cat = brief.category.toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
 
   IconData get _categoryIcon {
     final cat = brief.category.toLowerCase();
@@ -281,8 +354,9 @@ class _OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final dimmed = _isRejected;
     return GestureDetector(
-      onTap: () => _openDetail(context),
+      onTap: _isCancelled ? null : () => _openDetail(context),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -293,19 +367,60 @@ class _OfferCard extends StatelessWidget {
           children: [
             // Durum satırı
             Padding(
-              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 14 * s, 0),
+              padding: EdgeInsets.fromLTRB(18 * s, 16 * s, 10 * s, 0),
               child: Row(
                 children: [
-                  Container(width: 8 * s, height: 8 * s, color: _kGold),
+                  Container(
+                      width: 8 * s,
+                      height: 8 * s,
+                      color: _isCancelled || _isRejected ? _kDanger : _kGold),
                   SizedBox(width: 8 * s),
-                  Text(
-                    'YENİ TEKLİF',
-                    style: _mono(
-                        size: 8 * s,
-                        weight: FontWeight.w700,
-                        color: _kBlack,
-                        spacing: 1.4),
+                  Expanded(
+                    child: Text(
+                      _isCancelled
+                          ? 'İPTAL EDİLDİ'
+                          : _isRejected
+                              ? 'TEKLİF REDDEDİLDİ'
+                              : 'YENİ TEKLİF',
+                      style: _ui(
+                          size: 8 * s,
+                          weight: FontWeight.w700,
+                          color: _isCancelled || _isRejected
+                              ? _kDanger
+                              : _kBlack,
+                          spacing: 1.4),
+                    ),
                   ),
+                  if (_canDelete)
+                    PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      color: _kCream,
+                      surfaceTintColor: Colors.transparent,
+                      elevation: 3,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                        side: BorderSide(color: _kDivider),
+                      ),
+                      icon: Icon(Icons.more_vert_rounded,
+                          size: 18 * s, color: _kTaupe),
+                      onSelected: (value) {
+                        if (value == 'delete') onDelete();
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'delete',
+                          height: 40,
+                          child: Text(
+                            'Sil',
+                            style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w600,
+                                color: _kDanger,
+                                spacing: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -319,31 +434,43 @@ class _OfferCard extends StatelessWidget {
                   Container(
                     width: 48 * s,
                     height: 48 * s,
-                    color: _kGold,
-                    child: Icon(_categoryIcon, size: 24 * s, color: Colors.white),
+                    decoration: const BoxDecoration(color: Colors.white),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      _categoryAsset,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(_categoryIcon, size: 24 * s, color: _kGold),
+                    ),
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _displayTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _serif(
-                              size: 20 * s, weight: FontWeight.w600, color: _kInk),
-                        ),
-                        if (brief.category.isNotEmpty) ...[
-                          SizedBox(height: 3 * s),
+                    child: Opacity(
+                      opacity: dimmed ? 0.55 : 1.0,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            brief.category,
+                            _displayTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _mono(size: 8 * s, color: _kBlack, spacing: 1),
+                            style: _display(
+                                size: 20 * s,
+                                weight: FontWeight.w600,
+                                color: _kInk),
                           ),
+                          if (brief.category.isNotEmpty) ...[
+                            SizedBox(height: 3 * s),
+                            Text(
+                              brief.category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  _ui(size: 8 * s, color: _kBlack, spacing: 1),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ],
@@ -355,39 +482,42 @@ class _OfferCard extends StatelessWidget {
                 brief.answers.dateRange != null ||
                 brief.answers.location != null) ...[
               SizedBox(height: 18 * s),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18 * s),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (brief.answers.budget != null)
-                      Expanded(
-                        child: _MetaCell(
-                          scale: s,
-                          icon: Icons.payments_outlined,
-                          label: 'BÜTÇE',
-                          value: brief.answers.budget!,
+              Opacity(
+                opacity: dimmed ? 0.55 : 1.0,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (brief.answers.budget != null)
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.payments_outlined,
+                            label: 'BÜTÇE',
+                            value: brief.answers.budget!,
+                          ),
                         ),
-                      ),
-                    if (brief.answers.dateRange != null)
-                      Expanded(
-                        child: _MetaCell(
-                          scale: s,
-                          icon: Icons.calendar_today_rounded,
-                          label: 'ÇEKİM',
-                          value: brief.answers.dateRange!,
+                      if (brief.answers.dateRange != null)
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.calendar_today_rounded,
+                            label: 'ÇEKİM',
+                            value: brief.answers.dateRange!,
+                          ),
                         ),
-                      ),
-                    if (brief.answers.location != null)
-                      Expanded(
-                        child: _MetaCell(
-                          scale: s,
-                          icon: Icons.location_on_outlined,
-                          label: 'LOKASYON',
-                          value: brief.answers.location!,
+                      if (brief.answers.location != null)
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.location_on_outlined,
+                            label: 'LOKASYON',
+                            value: brief.answers.location!,
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -396,39 +526,75 @@ class _OfferCard extends StatelessWidget {
             if (brief.answers.notes != null &&
                 brief.answers.notes!.isNotEmpty) ...[
               SizedBox(height: 14 * s),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18 * s),
-                child: Text(
-                  brief.answers.notes!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: _mono(size: 9 * s, color: _kBlack, spacing: 0.2),
+              Opacity(
+                opacity: dimmed ? 0.55 : 1.0,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18 * s),
+                  child: Text(
+                    brief.answers.notes!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
+                  ),
                 ),
               ),
             ],
 
-            // İncele butonu
+            // İncele / Yeniden Değerlendir butonu
             SizedBox(height: 18 * s),
             Container(
               width: double.infinity,
               height: 46 * s,
-              color: _kInk,
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'İNCELE',
-                    style: _mono(
-                        size: 10 * s,
-                        weight: FontWeight.w700,
-                        color: Colors.white,
-                        spacing: 1.4),
-                  ),
-                  SizedBox(width: 6 * s),
-                  Icon(Icons.arrow_forward_rounded, size: 14 * s, color: _kGold),
-                ],
+              decoration: BoxDecoration(
+                color: _isCancelled
+                    ? _kMuted.withValues(alpha: 0.3)
+                    : _isRejected
+                        ? _kInk.withValues(alpha: 0.65)
+                        : _kInk,
               ),
+              alignment: Alignment.center,
+              child: _isCancelled
+                  ? Text(
+                      'İPTAL EDİLDİ',
+                      style: _ui(
+                          size: 10 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                          spacing: 1.4),
+                    )
+                  : _isRejected
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.refresh_rounded,
+                                size: 15 * s, color: _kGold),
+                            SizedBox(width: 6 * s),
+                            Text(
+                              'YENİDEN DEĞERLENDİR',
+                              style: _ui(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 1),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'İNCELE',
+                              style: _ui(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 1.4),
+                            ),
+                            SizedBox(width: 6 * s),
+                            Icon(Icons.arrow_forward_rounded,
+                                size: 14 * s, color: _kGold),
+                          ],
+                        ),
             ),
           ],
         ),
@@ -473,7 +639,7 @@ class _MetaCell extends StatelessWidget {
             children: [
               Icon(icon, size: 11 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _mono(size: 7 * s, color: _kBlack, spacing: 1)),
+              Text(label, style: _ui(size: 7 * s, color: _kBlack, spacing: 1)),
             ],
           ),
           SizedBox(height: 5 * s),
@@ -481,7 +647,7 @@ class _MetaCell extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _mono(
+            style: _ui(
                 size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 0.3),
           ),
         ],
@@ -513,12 +679,12 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz teklif yok',
-            style: _serif(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             'Müşteriler teklif gönderince burada görünür.',
-            style: _mono(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_radius.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/utils/turkish_case.dart';
 
 class SetTextField extends StatefulWidget {
   const SetTextField({
@@ -88,7 +89,7 @@ class _SetTextFieldState extends State<SetTextField> {
       children: [
         if (widget.label != null) ...[
           Text(
-            widget.label!.toUpperCase(),
+            widget.label!.toUpperCaseTr(),
             style: AppTextStyles.eyebrow.copyWith(color: labelColor),
           ),
           const SizedBox(height: AppSpacing.sm),

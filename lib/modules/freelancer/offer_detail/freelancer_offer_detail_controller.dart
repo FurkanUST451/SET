@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_fonts.dart';
 
 import '../../../data/models/brief_model.dart';
 import '../../../data/repositories/brief_repository.dart';
@@ -48,7 +48,16 @@ class FreelancerOfferDetailController extends GetxController {
         briefTitle: briefTitle,
       );
 
-      Get.toNamed(
+      if (brief.status == 'offer_sent') {
+        await _briefRepo.updateStatus(brief.id, 'submitted');
+      }
+      // Daha önce reddedilmişse (yeniden değerlendirip mesajlaşmayı
+      // seçtiyse) reddedilmiş işaretini kaldır.
+      if (brief.rejectedByIds.contains(me.id)) {
+        await _briefRepo.unrejectByFreelancer(brief.id, me.id);
+      }
+
+      Get.offNamed(
         AppRoutes.chatDetail,
         arguments: {
           'chatId': chat.id,
@@ -81,7 +90,7 @@ class FreelancerOfferDetailController extends GetxController {
         ),
         title: Text(
           'Teklifi Reddet',
-          style: GoogleFonts.cormorantGaramond(
+          style: AppFonts.display(
             fontSize: 22,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF35333F),
@@ -89,7 +98,7 @@ class FreelancerOfferDetailController extends GetxController {
         ),
         content: Text(
           'Bu teklifi reddetmek istediğinize emin misiniz?',
-          style: GoogleFonts.spaceMono(
+          style: AppFonts.ui(
             fontSize: 12,
             color: const Color(0xFF000000),
             height: 1.4,
@@ -100,7 +109,7 @@ class FreelancerOfferDetailController extends GetxController {
             onPressed: () => Get.back(result: false),
             child: Text(
               'VAZGEÇ',
-              style: GoogleFonts.spaceMono(
+              style: AppFonts.ui(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF000000),
@@ -112,7 +121,7 @@ class FreelancerOfferDetailController extends GetxController {
             onPressed: () => Get.back(result: true),
             child: Text(
               'REDDET',
-              style: GoogleFonts.spaceMono(
+              style: AppFonts.ui(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFFBE6A5A),
@@ -131,9 +140,7 @@ class FreelancerOfferDetailController extends GetxController {
       final userId = _userController.currentUser?.id ?? '';
       if (userId.isEmpty) return;
 
-      final updatedIds =
-          brief.sentToIds.where((id) => id != userId).toList();
-      await _briefRepo.removeSentToId(brief.id, userId, updatedIds);
+      await _briefRepo.rejectByFreelancer(brief.id, userId);
       Get.back(result: 'rejected');
     } catch (_) {
       Get.snackbar(

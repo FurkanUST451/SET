@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/utils/turkish_case.dart';
 
 class SetSectionHeader extends StatelessWidget {
   const SetSectionHeader({
@@ -34,7 +35,7 @@ class SetSectionHeader extends StatelessWidget {
       children: [
         if (eyebrow != null) ...[
           Text(
-            eyebrow!.toUpperCase(),
+            eyebrow!.toUpperCaseTr(),
             style: AppTextStyles.eyebrow.copyWith(color: AppColors.primary),
           ),
           const SizedBox(height: AppSpacing.sm),

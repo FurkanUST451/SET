@@ -28,18 +28,15 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundDark,
       canvasColor: AppColors.backgroundDark,
       dividerColor: AppColors.border,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.backgroundDark,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
+        titleTextStyle:
+            AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimary),
       ),
       textTheme: _textTheme(AppColors.textPrimary, AppColors.textSecondary),
       inputDecorationTheme: _inputDecorationTheme(
@@ -130,18 +127,15 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundLight,
       canvasColor: AppColors.backgroundLight,
       dividerColor: AppColors.borderLight,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.backgroundLight,
         foregroundColor: AppColors.textPrimaryLight,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryLight,
-        ),
+        titleTextStyle:
+            AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimaryLight),
       ),
       textTheme: _textTheme(
         AppColors.textPrimaryLight,
@@ -218,11 +212,17 @@ class AppTheme {
 
   static TextTheme _textTheme(Color primary, Color secondary) {
     return TextTheme(
-      displayLarge: AppTextStyles.heading1.copyWith(color: primary),
-      displayMedium: AppTextStyles.heading2.copyWith(color: primary),
-      displaySmall: AppTextStyles.heading3.copyWith(color: primary),
+      // Display / başlık katmanı — Bricolage Grotesque
+      displayLarge: AppTextStyles.displayXL.copyWith(color: primary),
+      displayMedium: AppTextStyles.displayL.copyWith(color: primary),
+      displaySmall: AppTextStyles.heading1.copyWith(color: primary),
+      headlineLarge: AppTextStyles.heading1.copyWith(color: primary),
       headlineMedium: AppTextStyles.heading2.copyWith(color: primary),
+      headlineSmall: AppTextStyles.heading3.copyWith(color: primary),
       titleLarge: AppTextStyles.heading3.copyWith(color: primary),
+      titleMedium: AppTextStyles.cardTitle.copyWith(color: primary),
+      // Gövde / UI katmanı — Inter
+      titleSmall: AppTextStyles.lead.copyWith(color: primary),
       bodyLarge: AppTextStyles.body1.copyWith(color: primary),
       bodyMedium: AppTextStyles.body2.copyWith(color: primary),
       bodySmall: AppTextStyles.caption.copyWith(color: secondary),

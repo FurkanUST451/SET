@@ -21,9 +21,14 @@ class AuthController extends GetxController {
   bool get isLoggedIn =>
       _user.hasUser || StorageService.has(StorageService.userId);
 
+  // Giriş yaparkenki yükleme animasyonu ağ isteği çok hızlı dönse bile en az
+  // bu kadar görünür kalır.
+  static const _minLoginLoadingDuration = Duration(milliseconds: 700);
+
   Future<bool> login({required String email, required String password}) async {
     isLoading.value = true;
     errorMessage.value = null;
+    final started = DateTime.now();
     try {
       final authUser = await _repo.login(email: email, password: password);
       // Firestore'dan tam profili çek
@@ -37,6 +42,10 @@ class AuthController extends GetxController {
       errorMessage.value = e.toString();
       return false;
     } finally {
+      final elapsed = DateTime.now().difference(started);
+      if (elapsed < _minLoginLoadingDuration) {
+        await Future.delayed(_minLoginLoadingDuration - elapsed);
+      }
       isLoading.value = false;
     }
   }
@@ -76,6 +85,36 @@ class AuthController extends GetxController {
     }
   }
 
+  // ok=false => kullanıcı iptal etti ya da hata oluştu (errorMessage set edilir).
+  Future<({bool ok, bool isNewUser})> loginWithGoogle() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final authUser = await _repo.loginWithGoogle();
+      if (authUser == null) return (ok: false, isNewUser: false);
+
+      // Firestore'da profili var mı diye bak; yoksa ilk girişidir.
+      final stored = await _userRepo.fetchUser(authUser.id);
+      final isNewUser = stored == null;
+      final finalUser = stored ??
+          authUser.copyWith(
+            avatarUrl:
+                authUser.avatarUrl ?? placeholderAvatarFor(null, authUser.id),
+          );
+      if (isNewUser) {
+        await _userRepo.upsertUser(finalUser);
+      }
+      _user.setUser(finalUser);
+      unawaited(_notifications.registerDevice(finalUser.id));
+      return (ok: true, isNewUser: isNewUser);
+    } catch (e) {
+      errorMessage.value = e.toString();
+      return (ok: false, isNewUser: false);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     isLoading.value = true;
     try {
@@ -86,4 +125,7 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> sendPasswordResetEmail(String email) =>
+      _repo.sendPasswordResetEmail(email);
 }

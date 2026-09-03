@@ -17,6 +17,18 @@ class Formatters {
   static String time(DateTime date) => _time.format(date);
   static String currency(num amount) => _currency.format(amount);
 
+  // 80000 -> "80.000" — Türkçe binlik ayracı (nokta).
+  static String groupThousands(num amount) {
+    final digits = amount.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      final remaining = digits.length - i;
+      if (i > 0 && remaining % 3 == 0) buffer.write('.');
+      buffer.write(digits[i]);
+    }
+    return buffer.toString();
+  }
+
   static String relativeTime(DateTime date) {
     final diff = DateTime.now().difference(date);
     if (diff.inSeconds < 60) return 'şimdi';
