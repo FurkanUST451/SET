@@ -1,4 +1,4 @@
-{
+     {
   "project_info": {
     "project_number": "618037220000",
     "project_id": "sett-451",
@@ -27,6 +27,14 @@
           "android_info": {
             "package_name": "com.example.setdeneme1",
             "certificate_hash": "a3ee31b0f97dcc3f62c72c0469e449975469a906"
+          }
+        },
+        {
+          "client_id": "618037220000-mmder8oa75tsej0n3jafl2t3o1qf04b7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.setdeneme1",
+            "certificate_hash": "85e47242a63ca134811761609bf685abbc24555b"
           }
         },
         {
