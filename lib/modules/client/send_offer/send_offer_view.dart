@@ -186,31 +186,36 @@ class SendOfferView extends GetView<SendOfferController> {
                 padding: EdgeInsets.fromLTRB(0, 10 * s, 0, 14 * s),
                 child: Column(
                   children: [
-                    Obx(() => GestureDetector(
-                          onTap: controller.isSubmitting.value
-                              ? null
-                              : controller.submit,
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: double.infinity,
-                            height: 54 * s,
-                            color: _kGold,
-                            alignment: Alignment.center,
-                            child: controller.isSubmitting.value
-                                ? SizedBox(
-                                    width: 22 * s,
-                                    height: 22 * s,
-                                    child: const CircularProgressIndicator(
-                                        strokeWidth: 2.4, color: Colors.white),
-                                  )
-                                : Text('DEVAM ET  →',
-                                    style: _ui(
-                                        size: 11 * s,
-                                        weight: FontWeight.w700,
-                                        color: Colors.white,
-                                        spacing: 1.5)),
-                          ),
-                        )),
+                    Obx(() {
+                      final isComplete =
+                          controller.completedSteps == controller.totalSteps;
+                      final enabled = isComplete && !controller.isSubmitting.value;
+                      return GestureDetector(
+                        onTap: enabled ? controller.submit : null,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: double.infinity,
+                          height: 54 * s,
+                          color: isComplete
+                              ? _kGold
+                              : _kGold.withValues(alpha: 0.35),
+                          alignment: Alignment.center,
+                          child: controller.isSubmitting.value
+                              ? SizedBox(
+                                  width: 22 * s,
+                                  height: 22 * s,
+                                  child: const CircularProgressIndicator(
+                                      strokeWidth: 2.4, color: Colors.white),
+                                )
+                              : Text('DEVAM ET  →',
+                                  style: _ui(
+                                      size: 11 * s,
+                                      weight: FontWeight.w700,
+                                      color: Colors.white,
+                                      spacing: 1.5)),
+                        ),
+                      );
+                    }),
                     SizedBox(height: 14 * s),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 24 * s),

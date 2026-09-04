@@ -210,12 +210,26 @@ class _CategoryCarouselState extends State<_CategoryCarousel> {
                 },
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8 * s),
-                  child: _CategoryCard(
-                    scale: s,
-                    index: i,
-                    total: widget.categories.length,
-                    label: cat,
-                    active: i == _activeIndex,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (i == _activeIndex) {
+                        widget.onContinue(cat);
+                      } else {
+                        _pageController.animateToPage(
+                          i,
+                          duration: const Duration(milliseconds: 320),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: _CategoryCard(
+                      scale: s,
+                      index: i,
+                      total: widget.categories.length,
+                      label: cat,
+                      active: i == _activeIndex,
+                    ),
                   ),
                 ),
               );

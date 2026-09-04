@@ -49,7 +49,12 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType in ['image/jpeg', 'image/png'];
 
-      allow update: if false;
+      // Profil fotoğrafı sabit isimli (uid.jpg) olduğundan değiştirme işlemi
+      // Storage tarafında "update" sayılır; create ile aynı koşullarla izin verilir.
+      allow update: if request.auth != null
+        && fileName.matches(request.auth.uid + '\\..*')
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/png'];
 
       allow delete: if request.auth != null
         && fileName.matches(request.auth.uid + '\\..*');
