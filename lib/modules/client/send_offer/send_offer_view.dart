@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_fonts.dart';
 
+import '../../../core/constants/app_assets.dart';
 import 'send_offer_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -38,26 +39,8 @@ TextStyle _ui({
         letterSpacing: spacing,
         height: height);
 
-Widget _wordmark(double s) => RichText(
-      text: TextSpan(children: [
-        TextSpan(
-          text: 'SE',
-          style: AppFonts.display(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w700,
-              color: _kInk,
-              letterSpacing: 2.5),
-        ),
-        TextSpan(
-          text: 'T',
-          style: AppFonts.display(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w800,
-              color: _kGold,
-              letterSpacing: 2.5),
-        ),
-      ]),
-    );
+// Hizmet seçimi ekranıyla aynı marka logosu, aynı ölçekte.
+Widget _wordmark(double s) => Image.asset(AppAssets.loginLogo, height: 28 * s);
 
 class SendOfferView extends GetView<SendOfferController> {
   const SendOfferView({super.key});
@@ -119,7 +102,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                   : 'Video Çekim')
                               .toUpperCaseTr(),
                           style:
-                              _ui(size: 8 * s, color: _kBlack, spacing: 1.5),
+                              _ui(size: 10 * s, color: _kBlack, spacing: 1.5),
                         ),
                       ),
                       SizedBox(height: 8 * s),
@@ -131,7 +114,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                   TextSpan(
                                     text: "Brief'ini\n",
                                     style: _display(
-                                        size: 40 * s,
+                                        size: 32 * s,
                                         weight: FontWeight.w600,
                                         color: _kInk,
                                         height: 1.05),
@@ -139,7 +122,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                   TextSpan(
                                     text: 'güncelle.',
                                     style: _display(
-                                        size: 40 * s,
+                                        size: 32 * s,
                                         weight: FontWeight.w600,
                                         color: _kGold,
                                         height: 1.05),
@@ -149,7 +132,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                   TextSpan(
                                     text: "Doğru brief'i\n",
                                     style: _display(
-                                        size: 40 * s,
+                                        size: 32 * s,
                                         weight: FontWeight.w600,
                                         color: _kInk,
                                         height: 1.05),
@@ -157,7 +140,7 @@ class SendOfferView extends GetView<SendOfferController> {
                                   TextSpan(
                                     text: 'oluşturalım.',
                                     style: _display(
-                                        size: 40 * s,
+                                        size: 32 * s,
                                         weight: FontWeight.w600,
                                         color: _kGold,
                                         height: 1.05),
@@ -172,7 +155,7 @@ class SendOfferView extends GetView<SendOfferController> {
                         child: Text(
                             'Projene en uygun kreatif ekibi eşleştirelim.',
                             style: _ui(
-                                size: 9 * s, color: _kBlack, spacing: 0.2)),
+                                size: 13 * s, color: _kBlack, spacing: 0.2)),
                       ),
                       SizedBox(height: 24 * s),
 
@@ -362,7 +345,7 @@ class _ExpandableCard extends StatelessWidget {
                       SizedBox(width: 12 * s),
                       Text(label.toUpperCaseTr(),
                           style:
-                              _ui(size: 8 * s, color: _kBlack, spacing: 1.2)),
+                              _ui(size: 10 * s, color: _kBlack, spacing: 1.2)),
                       const Spacer(),
                       Icon(
                         expanded ? Icons.remove_rounded : Icons.add_rounded,
@@ -379,7 +362,7 @@ class _ExpandableCard extends StatelessWidget {
                           ? 'Seç'
                           : valueText!,
                       style: _display(
-                          size: 18 * s,
+                          size: 19 * s,
                           weight: FontWeight.w600,
                           color: valueText == null || valueText!.isEmpty
                               ? _kMuted
@@ -583,7 +566,7 @@ class _DateCard extends StatelessWidget {
                 SizedBox(height: 12 * s),
                 Text(
                   'Ekip, senin takvimine göre esnek planlanacak.',
-                  style: _ui(size: 8.5 * s, color: _kMuted, spacing: 0.2),
+                  style: _ui(size: 13 * s, color: _kMuted, spacing: 0.2),
                 ),
               ],
             ],
@@ -619,7 +602,7 @@ class _ModeTab extends StatelessWidget {
         ),
         child: Text(label,
             style: _ui(
-                size: 9 * s,
+                size: 11 * s,
                 weight: FontWeight.w700,
                 color: selected ? Colors.white : _kInk,
                 spacing: 0.6)),
@@ -864,7 +847,7 @@ class _DeliveryOptionButton extends StatelessWidget {
         child: Text(
           label,
           style: _display(
-            size: 14 * s,
+            size: 17 * s,
             weight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected ? Colors.white : _kInk,
           ),
@@ -980,7 +963,7 @@ class _LocationList extends StatelessWidget {
                     child: Text(
                       name,
                       style: _display(
-                        size: 14 * s,
+                        size: 19 * s,
                         weight: selected ? FontWeight.w700 : FontWeight.w500,
                         color: selected ? _kGold : _kInk,
                       ),

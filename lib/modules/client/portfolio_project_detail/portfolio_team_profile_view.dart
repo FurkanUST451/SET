@@ -96,7 +96,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                   child: Center(
                     child: Text(
                       'Profil bulunamadı.',
-                      style: _ui(size: 10 * s, color: _kTaupe),
+                      style: _ui(size: 13 * s, color: _kTaupe),
                     ),
                   ),
                 )
@@ -144,7 +144,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                               Text(
                                 member.name,
                                 style: _display(
-                                  size: 26 * s,
+                                  size: 24 * s,
                                   weight: FontWeight.w600,
                                   color: _kInk,
                                 ),
@@ -153,7 +153,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                               Text(
                                 member.role,
                                 style: _ui(
-                                  size: 9 * s,
+                                  size: 10 * s,
                                   weight: FontWeight.w700,
                                   color: _kGold,
                                   spacing: 1.2,
@@ -176,7 +176,7 @@ class PortfolioTeamProfileView extends StatelessWidget {
                             'henüz eklenmedi. Deneyim, geçmiş projeler ve '
                             'iletişim bilgileri yakında burada yer alacak.',
                             style: _ui(
-                              size: 10 * s,
+                              size: 15 * s,
                               color: _kBlack,
                               spacing: 0.2,
                               height: 1.6,

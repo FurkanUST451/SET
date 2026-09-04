@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../data/dummy/dummy_data.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/brief_repository.dart';
@@ -22,7 +23,7 @@ class FreelancersByCategoryController extends GetxController {
   final RxString errorMsg = ''.obs;
   final RxList<String> selectedIds = <String>[].obs;
   final RxBool isSending = false.obs;
-  static const int maxSelections = 5;
+  static const int maxSelections = 3;
 
   final Map<String, UserModel> _userCache = {};
 
@@ -40,12 +41,20 @@ class FreelancersByCategoryController extends GetxController {
       isLoading.value = true;
       errorMsg.value = '';
       final list = await _freelancerRepo.filterByCategory(category);
+      // Varsayılan sıralama: puana göre yüksekten düşüğe ("SIRALA · PUAN").
+      list.sort((a, b) => b.rating.compareTo(a.rating));
       for (final f in list) {
         try {
           final user = await _userRepo.fetchUser(f.userId);
           if (user != null) _userCache[f.userId] = user;
         } catch (_) {}
       }
+      // Liste tek tük kayıtla boş görünmesin diye gösterimlik kartlar
+      // sıralamanın sonuna eklenir (bkz. DummyData.demoFreelancersFor).
+      for (final user in DummyData.demoUsers) {
+        _userCache[user.id] = user;
+      }
+      list.addAll(DummyData.demoFreelancersFor(category));
       freelancers.assignAll(list);
     } catch (e) {
       errorMsg.value = e.toString();
@@ -65,6 +74,20 @@ class FreelancersByCategoryController extends GetxController {
       );
 
   bool isSelected(FreelancerModel f) => selectedIds.contains(f.userId);
+
+  // Seçim sırasına göre (rozet numaralarıyla eşleşsin diye) seçilenler.
+  List<FreelancerModel> get selectedFreelancers {
+    final result = <FreelancerModel>[];
+    for (final id in selectedIds) {
+      for (final f in freelancers) {
+        if (f.userId == id) {
+          result.add(f);
+          break;
+        }
+      }
+    }
+    return result;
+  }
 
   void toggleSelect(FreelancerModel f) {
     if (isSelected(f)) {

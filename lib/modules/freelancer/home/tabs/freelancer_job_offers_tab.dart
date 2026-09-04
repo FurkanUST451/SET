@@ -126,7 +126,7 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · GELEN İŞLER',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -142,12 +142,12 @@ class FreelancerJobOffersTab extends GetView<FreelancerJobOffersController> {
         children: [
           Text(
             'Teklifler',
-            style: _display(size: 40 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 32 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             '$count teklif görüntüleniyor',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+            style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
           ),
         ],
       ),
@@ -246,7 +246,7 @@ class _AcceptedCard extends StatelessWidget {
               children: [
                 Text(
                   _displayTitle,
-                  style: _ui(size: 11 * s, weight: FontWeight.w700, color: _kBlack),
+                  style: _ui(size: 17 * s, weight: FontWeight.w700, color: _kBlack),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -254,7 +254,7 @@ class _AcceptedCard extends StatelessWidget {
                   SizedBox(height: 3 * s),
                   Text(
                     _displaySubtitle,
-                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -277,7 +277,7 @@ class _AcceptedCard extends StatelessWidget {
                 child: Text(
                   'KABUL EDİLDİ',
                   style: _ui(
-                      size: 7 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kAccepted,
                       spacing: 0.6),
@@ -383,7 +383,7 @@ class _OfferCard extends StatelessWidget {
                               ? 'TEKLİF REDDEDİLDİ'
                               : 'YENİ TEKLİF',
                       style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _isCancelled || _isRejected
                               ? _kDanger
@@ -455,7 +455,7 @@ class _OfferCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                                size: 20 * s,
+                                size: 24 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
@@ -466,7 +466,7 @@ class _OfferCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
-                                  _ui(size: 8 * s, color: _kBlack, spacing: 1),
+                                  _ui(size: 13 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
                         ],
@@ -534,7 +534,7 @@ class _OfferCard extends StatelessWidget {
                     brief.answers.notes!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(size: 9 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 15 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ),
               ),
@@ -639,7 +639,7 @@ class _MetaCell extends StatelessWidget {
             children: [
               Icon(icon, size: 11 * s, color: _kTaupe),
               SizedBox(width: 4 * s),
-              Text(label, style: _ui(size: 7 * s, color: _kBlack, spacing: 1)),
+              Text(label, style: _ui(size: 10 * s, color: _kBlack, spacing: 1)),
             ],
           ),
           SizedBox(height: 5 * s),
@@ -679,12 +679,12 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz teklif yok',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
             'Müşteriler teklif gönderince burada görünür.',
-            style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
+            style: _ui(size: 13 * s, color: _kBlack, spacing: 0.3),
           ),
         ],
       ),

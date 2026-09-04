@@ -164,7 +164,7 @@ class FreelancerOfferDetailView
                             child: Text(
                               a.notes!,
                               style: _ui(
-                                  size: 10 * s,
+                                  size: 15 * s,
                                   color: _kBlack,
                                   spacing: 0.2,
                                   height: 1.6),
@@ -246,7 +246,7 @@ class FreelancerOfferDetailView
                 Text(
                   'YENİ TEKLİF',
                   style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kGold,
                       spacing: 1.2),
@@ -262,7 +262,7 @@ class FreelancerOfferDetailView
                 SizedBox(height: 2 * s),
                 Text(
                   category,
-                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -477,7 +477,7 @@ class _Section extends StatelessWidget {
                 child: Text(
                   label,
                   style: _ui(
-                      size: 8 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1.4),
@@ -525,7 +525,7 @@ class _GridCell extends StatelessWidget {
                 item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],

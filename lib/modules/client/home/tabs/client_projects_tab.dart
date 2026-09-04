@@ -65,13 +65,23 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     'TÜMÜ',
     'AKTİF PROJELER',
     'TEKLİF AŞAMASINDA',
-    'ANLAŞMA BEKLİYOR'
+    'ANLAŞMA BEKLİYOR',
+    'SET HALLETSİN',
   ];
-  static const _filterStatus = <String?>[null, null, 'offer_sent', 'submitted'];
+  static const _filterStatus = <String?>[
+    null,
+    null,
+    'offer_sent',
+    'submitted',
+    null,
+  ];
   static const _activeFilterIndex = 1;
+  static const _setFilterIndex = 4;
 
   List<BriefModel> _apply(List<BriefModel> all) {
-    if (_filterIndex == _activeFilterIndex) return [];
+    if (_filterIndex == _activeFilterIndex || _filterIndex == _setFilterIndex) {
+      return [];
+    }
     // Kabul edilip projeye dönüşen brief'ler artık ONAYLI PROJE kartı
     // olarak gösteriliyor; iptal edilenler ise kapanmış sayılır — ikisi de
     // burada tekrar gösterilmesin.
@@ -83,9 +93,15 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     return base.where((b) => b.status == st).toList();
   }
 
-  // Aktif projeler "TÜMÜ" ve "AKTİF PROJELER" filtrelerinde gösterilir.
+  // Aktif projeler "TÜMÜ", "AKTİF PROJELER" ve "SET HALLETSİN"
+  // filtrelerinde gösterilir — SET Halletsin, aynı aktif projelerin
+  // SET tarafından yürütülen takip ekranına önizlemesidir.
   List<ProjectModel> _activeProjects(ClientProjectsController controller) {
-    if (_filterIndex != 0 && _filterIndex != _activeFilterIndex) return [];
+    if (_filterIndex != 0 &&
+        _filterIndex != _activeFilterIndex &&
+        _filterIndex != _setFilterIndex) {
+      return [];
+    }
     return controller.projects
         .where((p) => p.status == ProjectStatus.active)
         .toList();
@@ -96,66 +112,67 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     final controller = Get.find<ClientProjectsController>();
     final width = MediaQuery.sizeOf(context).width;
     final double s = (width / 390).clamp(0.85, 1.15).toDouble();
-    // Kayan nav bar (68 yükseklik + 16 alt boşluk) üstünde kalması için pay.
-    final double navClear = MediaQuery.paddingOf(context).bottom + 68 + 16 + 14;
 
     return Scaffold(
       backgroundColor: _kCream,
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
           bottom: false,
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopStrip(s),
-                  SizedBox(height: 18 * s),
-                  _buildHeader(s, controller),
-                  SizedBox(height: 20 * s),
-                  _buildFilterBar(s),
-                  SizedBox(height: 8 * s),
-                  Expanded(
-                    child: Obx(() {
-                      if (controller.isLoading.value) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: _kGold),
-                        );
-                      }
-                      if (controller.errorMsg.isNotEmpty) {
-                        return _ErrorView(
-                            scale: s, onRetry: controller.loadBriefs);
-                      }
-                      final briefs = _apply(controller.briefs);
-                      final activeProjects = _activeProjects(controller);
-                      if (briefs.isEmpty && activeProjects.isEmpty) {
-                        return _EmptyState(scale: s);
-                      }
-                      return RefreshIndicator(
-                        color: _kGold,
-                        onRefresh: controller.loadBriefs,
-                        child: ListView(
-                          padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 130 * s),
-                          children: [
-                            for (var i = 0; i < activeProjects.length; i++) ...[
-                              _ProjectCard(scale: s, project: activeProjects[i]),
-                              if (i < activeProjects.length - 1 ||
-                                  briefs.isNotEmpty)
-                                SizedBox(height: 18 * s),
-                            ],
-                            for (var i = 0; i < briefs.length; i++) ...[
-                              _BriefCard(scale: s, brief: briefs[i]),
-                              if (i < briefs.length - 1)
-                                SizedBox(height: 18 * s),
-                            ],
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+              _buildTopStrip(s),
+              SizedBox(height: 18 * s),
+              _buildHeader(s, controller),
+              SizedBox(height: 20 * s),
+              _buildFilterBar(s),
+              SizedBox(height: 8 * s),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _kGold),
+                    );
+                  }
+                  if (controller.errorMsg.isNotEmpty) {
+                    return _ErrorView(
+                        scale: s, onRetry: controller.loadBriefs);
+                  }
+                  final briefs = _apply(controller.briefs);
+                  final activeProjects = _activeProjects(controller);
+                  if (briefs.isEmpty && activeProjects.isEmpty) {
+                    return _EmptyState(scale: s);
+                  }
+                  // SET Halletsin kartı, kendi sekmesinde olduğu gibi
+                  // "TÜMÜ" sekmesinde de gösterilir.
+                  final isSetTab =
+                      _filterIndex == _setFilterIndex || _filterIndex == 0;
+                  return RefreshIndicator(
+                    color: _kGold,
+                    onRefresh: controller.loadBriefs,
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(0, 6 * s, 0, 30 * s),
+                      children: [
+                        for (var i = 0; i < activeProjects.length; i++) ...[
+                          isSetTab
+                              ? _SetProjectCard(
+                                  scale: s, project: activeProjects[i])
+                              : _ProjectCard(
+                                  scale: s, project: activeProjects[i]),
+                          if (i < activeProjects.length - 1 ||
+                              briefs.isNotEmpty)
+                            SizedBox(height: 18 * s),
+                        ],
+                        for (var i = 0; i < briefs.length; i++) ...[
+                          _BriefCard(scale: s, brief: briefs[i]),
+                          if (i < briefs.length - 1)
+                            SizedBox(height: 18 * s),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
               ),
-              _buildSetFab(s, navClear),
             ],
           ),
         ),
@@ -172,7 +189,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROJELERİM',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -194,7 +211,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                 Text(
                   'Projelerim',
                   style: _display(
-                      size: 40 * s, weight: FontWeight.w600, color: _kInk),
+                      size: 32 * s, weight: FontWeight.w600, color: _kInk),
                 ),
                 SizedBox(height: 6 * s),
                 Obx(() {
@@ -202,7 +219,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                       _activeProjects(controller).length;
                   return Text(
                     '$count proje görüntüleniyor',
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.5),
                   );
                 }),
               ],
@@ -244,7 +261,7 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
                   Text(
                     _filterLabels[i],
                     style: _ui(
-                      size: 9 * s,
+                      size: 11 * s,
                       weight: selected ? FontWeight.w700 : FontWeight.w400,
                       color: _kBlack,
                       spacing: 1,
@@ -259,36 +276,6 @@ class _ClientProjectsTabState extends State<ClientProjectsTab> {
     );
   }
 
-  // ── Kayan SET butonu (sağ alt) ──────────────────────────────────
-  // SET Halletsin ile ilerleyen projelerin takip ekranına götürür.
-  Widget _buildSetFab(double s, double bottom) {
-    return Positioned(
-      right: 24 * s,
-      bottom: bottom - 46 * s,
-      child: GestureDetector(
-        onTap: () => Get.toNamed(AppRoutes.setProjects),
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 56 * s,
-          height: 56 * s,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(12 * s),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18 * s),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.22),
-                blurRadius: 16 * s,
-                offset: Offset(0, 6 * s),
-              ),
-            ],
-          ),
-          child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
-        ),
-      ),
-    );
-  }
 }
 
 // ─── Sinyal gibi yanıp sönen durum noktası ─────────────────────────
@@ -419,7 +406,7 @@ class _ProjectCard extends StatelessWidget {
                   Text(
                     'ONAYLI PROJE',
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
                         spacing: 1.4),
@@ -452,18 +439,19 @@ class _ProjectCard extends StatelessWidget {
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: SizedBox(
-                      height: 48 * s,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 48 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _bigTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                                size: 20 * s,
+                                size: 24 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
@@ -474,7 +462,7 @@ class _ProjectCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1),
+                                  size: 13 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
                         ],
@@ -504,7 +492,7 @@ class _ProjectCard extends StatelessWidget {
                     Expanded(
                       child: _MetaCell(
                         scale: s,
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label: 'BÜTÇE',
                         value: _compactBudget,
                       ),
@@ -574,7 +562,7 @@ class _ProjectCard extends StatelessWidget {
                   Text(
                     'DETAY',
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1.2),
@@ -582,6 +570,286 @@ class _ProjectCard extends StatelessWidget {
                   SizedBox(width: 4 * s),
                   Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SET HALLETSİN CARD — "SET Halletsin" sekmesinde aktif projelerin SET
+// tarafından yürütülen takip ekranına önizlemesi. ACTIVE PROJECT CARD ile
+// aynı düzeni kullanır; yalnızca durum etiketi/rengi, sağ üst SET rozeti
+// ve dokunma hedefi (proje detayı yerine SET takip sayfası) değişir.
+// ─────────────────────────────────────────────────────────────────
+class _SetProjectCard extends StatelessWidget {
+  const _SetProjectCard({required this.scale, required this.project});
+
+  final double scale;
+  final ProjectModel project;
+
+  String get _bigTitle {
+    final cat = project.category ?? '';
+    return cat.isNotEmpty ? cat : project.title;
+  }
+
+  String get _subtitle => project.shootingType ?? '';
+
+  String get _categoryAsset {
+    final cat = (project.category ?? '').toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return 'assets/images/main_service_icons/video.png';
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return 'assets/images/main_service_icons/foto.png';
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return 'assets/images/main_service_icons/ses.png';
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return 'assets/images/main_service_icons/cgi.png';
+    } else if (cat.contains('kurgu') || cat.contains('montaj')) {
+      return 'assets/images/main_service_icons/kurgu.png';
+    } else if (cat.contains('sosyal')) {
+      return 'assets/images/main_service_icons/sosyal medya.png';
+    }
+    return 'assets/images/main_service_icons/grafiktasarim.png';
+  }
+
+  IconData get _categoryIcon {
+    final cat = (project.category ?? '').toLowerCase();
+    if (cat.contains('video') || cat.contains('film')) {
+      return Icons.videocam_rounded;
+    } else if (cat.contains('fotoğraf') || cat.contains('photo')) {
+      return Icons.camera_alt_rounded;
+    } else if (cat.contains('ses') || cat.contains('müzik')) {
+      return Icons.music_note_rounded;
+    } else if (cat.contains('cgi') || cat.contains('vfx')) {
+      return Icons.auto_awesome_rounded;
+    }
+    return Icons.work_rounded;
+  }
+
+  String get _compactBudget {
+    final b = project.budget;
+    if (b >= 1000) {
+      final k = b / 1000;
+      final kStr = k == k.roundToDouble()
+          ? k.toStringAsFixed(0)
+          : k.toStringAsFixed(1);
+      return '${kStr}K';
+    }
+    return b.toStringAsFixed(0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.setProjects),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: _kCardBorder),
+            bottom: BorderSide(color: _kCardBorder),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Durum satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 38 * s, 0),
+                  child: Row(
+                    children: [
+                      _PulsingDot(color: _kGold, size: 8 * s),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        'SET HALLEDİYOR',
+                        style: _ui(
+                            size: 10 * s,
+                            weight: FontWeight.w700,
+                            color: _kBlack,
+                            spacing: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Kimlik satırı
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 16 * s, 42 * s, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 48 * s,
+                        height: 48 * s,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          _categoryAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                              _categoryIcon,
+                              size: 22 * s,
+                              color: _kGold),
+                        ),
+                      ),
+                      SizedBox(width: 14 * s),
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: 48 * s),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _bigTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _display(
+                                    size: 24 * s,
+                                    weight: FontWeight.w600,
+                                    color: _kInk),
+                              ),
+                              if (_subtitle.isNotEmpty) ...[
+                                SizedBox(height: 3 * s),
+                                Text(
+                                  _subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: _ui(
+                                      size: 13 * s, color: _kBlack, spacing: 1),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Meta satırı (teslim / bütçe / çekim)
+                if (project.deliveryTime != null ||
+                    project.dateRange != null) ...[
+                  SizedBox(height: 18 * s),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.schedule_rounded,
+                            label: 'TESLİM',
+                            value: project.deliveryTime ?? '—',
+                          ),
+                        ),
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.payments_rounded,
+                            label: 'BÜTÇE',
+                            value: _compactBudget,
+                          ),
+                        ),
+                        Expanded(
+                          child: _MetaCell(
+                            scale: s,
+                            icon: Icons.calendar_today_rounded,
+                            label: 'ÇEKİM',
+                            value: project.dateRange ?? '—',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Konum
+                if (project.location != null &&
+                    project.location!.isNotEmpty) ...[
+                  SizedBox(height: 24 * s),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 42 * s),
+                    child: Row(
+                      children: [
+                        Icon(Icons.location_on_outlined,
+                            size: 13 * s, color: _kTaupe),
+                        SizedBox(width: 5 * s),
+                        Expanded(
+                          child: Text(
+                            project.location!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                _ui(size: 9 * s, color: _kBlack, spacing: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Açıklama + Detay
+                SizedBox(height: 14 * s),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(42 * s, 0, 38 * s, 16 * s),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (project.notes != null &&
+                          project.notes!.isNotEmpty) ...[
+                        Icon(Icons.chat_bubble_outline_rounded,
+                            size: 13 * s, color: _kTaupe),
+                        SizedBox(width: 5 * s),
+                        Expanded(
+                          child: Text(
+                            project.notes!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w700,
+                                color: _kInk,
+                                spacing: 0.2),
+                          ),
+                        ),
+                        SizedBox(width: 8 * s),
+                      ] else
+                        const Spacer(),
+                      Text(
+                        'DETAY',
+                        style: _ui(
+                            size: 10 * s,
+                            weight: FontWeight.w700,
+                            color: _kGold,
+                            spacing: 1.2),
+                      ),
+                      SizedBox(width: 4 * s),
+                      Icon(Icons.chevron_right, size: 16 * s, color: _kGold),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // Sağ üst SET rozeti
+            Positioned(
+              top: 12 * s,
+              right: 12 * s,
+              child: SizedBox(
+                width: 36 * s,
+                height: 36 * s,
+                child: Image.asset(AppAssets.loginLogo, fit: BoxFit.contain),
               ),
             ),
           ],
@@ -703,7 +971,7 @@ class _BriefCard extends StatelessWidget {
                   Text(
                     _statusLabel,
                     style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kBlack,
                         spacing: 1.4),
@@ -736,18 +1004,19 @@ class _BriefCard extends StatelessWidget {
                   ),
                   SizedBox(width: 14 * s),
                   Expanded(
-                    child: SizedBox(
-                      height: 48 * s,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: 48 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _bigTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _display(
-                                size: 20 * s,
+                                size: 24 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
@@ -758,7 +1027,7 @@ class _BriefCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1),
+                                  size: 13 * s, color: _kBlack, spacing: 1),
                             ),
                           ],
                         ],
@@ -770,7 +1039,7 @@ class _BriefCard extends StatelessWidget {
                     Text(
                       '${brief.sentToIds.length}',
                       style: _display(
-                          size: 25 * s,
+                          size: 22 * s,
                           weight: FontWeight.w700,
                           color: _kGold),
                     ),
@@ -800,7 +1069,7 @@ class _BriefCard extends StatelessWidget {
                     Expanded(
                       child: _MetaCell(
                         scale: s,
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label: 'BÜTÇE',
                         value: brief.answers.budget != null
                             ? _compactBudget(brief.answers.budget!)
@@ -876,7 +1145,7 @@ class _BriefCard extends StatelessWidget {
                       Text(
                         'REVİZE ET',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
                             spacing: 1.2),
@@ -903,7 +1172,7 @@ class _BriefCard extends StatelessWidget {
                       Text(
                         'REVİZE ET',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kGold,
                             spacing: 1.2),
@@ -949,7 +1218,11 @@ class _MetaCell extends StatelessWidget {
             SizedBox(width: 4 * s),
             Text(
               label,
-              style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
+              style: _ui(
+                  size: 10 * s,
+                  weight: FontWeight.w700,
+                  color: _kBlack,
+                  spacing: 1),
             ),
           ],
         ),
@@ -990,7 +1263,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 18 * s),
           Text(
             'Henüz proje yok',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 6 * s),
           Text(
@@ -1018,7 +1291,7 @@ class _ErrorView extends StatelessWidget {
         children: [
           Text(
             'Projeler yüklenemedi',
-            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 12 * s),
           GestureDetector(
@@ -1032,7 +1305,7 @@ class _ErrorView extends StatelessWidget {
               child: Text(
                 'TEKRAR DENE',
                 style: _ui(
-                    size: 9 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: Colors.white,
                     spacing: 1),

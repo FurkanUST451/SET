@@ -66,11 +66,11 @@ flutter:
 
   assets:
     - assets/images/role_selection/
-    - assets/images/splash_screens/
-    - assets/images/welcome_pages/
     - assets/images/login_pages/
     - assets/images/main_service_icons/
     - assets/images/page_images/
     - assets/images/profile_photos/
     - assets/images/placeholder/
     - assets/images/brief_images/
+    - assets/images/freelancer_set/
+    - assets/videos/

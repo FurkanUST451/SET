@@ -2,8 +2,9 @@ class AppRoutes {
   AppRoutes._();
 
   // Boot
+  static const String splashBrand = '/splash-brand';
+  static const String splashWelcome = '/splash-welcome';
   static const String splash = '/splash';
-  static const String onboarding = '/onboarding';
 
   // Auth
   static const String login = '/login';
@@ -27,6 +28,7 @@ class AppRoutes {
   static const String setProjects = '/client/set-projects';
   static const String portfolioProjectDetail = '/client/portfolio-project-detail';
   static const String portfolioTeamProfile = '/client/portfolio-team-profile';
+  static const String clientArchive = '/client/archive';
 
   // Freelancer (Hizmet Ver) flow — implementation pending
   static const String freelancerOnboarding = '/freelancer/onboarding';
@@ -34,4 +36,5 @@ class AppRoutes {
   static const String freelancerOfferDetail = '/freelancer/offer-detail';
   static const String freelancerProjectDetail = '/freelancer/project-detail';
   static const String freelancerUploadWork = '/freelancer/upload-work';
+  static const String freelancerSetProjects = '/freelancer/set-projects';
 }

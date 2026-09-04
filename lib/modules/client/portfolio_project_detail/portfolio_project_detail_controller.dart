@@ -3,12 +3,8 @@ import 'package:get/get.dart';
 import '../../../data/dummy/dummy_data.dart';
 import '../../../data/models/portfolio_project_model.dart';
 
-enum PortfolioDetailTab { overview, team, process }
-
 class PortfolioProjectDetailController extends GetxController {
   late final PortfolioProjectModel project;
-
-  final Rx<PortfolioDetailTab> activeTab = PortfolioDetailTab.overview.obs;
 
   @override
   void onInit() {
@@ -34,6 +30,4 @@ class PortfolioProjectDetailController extends GetxController {
       ),
     );
   }
-
-  void selectTab(PortfolioDetailTab tab) => activeTab.value = tab;
 }

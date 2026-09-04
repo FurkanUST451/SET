@@ -3,13 +3,12 @@ class AppAssets {
 
   static const String _images = 'assets/images';
   static const String _roleSelection = '$_images/role_selection';
-  static const String _splashScreens = '$_images/splash_screens';
-  static const String _welcomePages = '$_images/welcome_pages';
   static const String _loginPages = '$_images/login_pages';
   static const String _profilePhotos = '$_images/profile_photos';
   static const String _placeholder = '$_images/placeholder';
   static const String _briefImages = '$_images/brief_images';
   static const String _pageImages = '$_images/page_images';
+  static const String _freelancerSet = '$_images/freelancer_set';
 
   // Login / choose-auth screens
   static const String loginLogo = '$_loginPages/logo.png';
@@ -34,24 +33,8 @@ class AppAssets {
   static const String settingsInteraction = '$_loginPages/interaction.png';
 
   // Role selection screen
-  static const String roleProjectClient = '$_roleSelection/project_client.jpg';
-  static const String roleProjectClient2 = '$_roleSelection/project_client2.jpeg';
-  static const String roleFreelancer = '$_roleSelection/freelancer.jpg';
-
-  // Onboarding / splash screens
-  static const String splashScreen1 = '$_splashScreens/splashsayfa1.png';
-  static const String splashScreen2 = '$_splashScreens/splash_screen2.png';
-  static const String splashScreen3 = '$_splashScreens/splash_screen3.png';
-
-  // Welcome page backgrounds (JPEG - %99 küçüldü)
-  static const String welcomeBg1 = '$_welcomePages/welcom_page_bg_1.jpg';
-  static const String welcomeBg2 = '$_welcomePages/welcome_page_bg_2.jpg';
-  static const String welcomeBg3 = '$_welcomePages/welcome_page_bg_3.jpg';
-
-  // Welcome page mascots (PNG - resize ile %80-94 küçüldü)
-  static const String welcomeMascot1 = '$_welcomePages/welcome_page_mascot_1.png';
-  static const String welcomeMascot2 = '$_welcomePages/welcome_page_mascot_2.png';
-  static const String welcomeMascot3 = '$_welcomePages/welcome_page_mascot_3.png';
+  static const String roleTelephone = '$_roleSelection/telephone_hizmet_alan.png';
+  static const String roleCamera = '$_roleSelection/video_camera_hizmet_veren.png';
 
   // Yer tutucu profil fotoğrafları — cinsiyete göre dummy kullanıcılara dağıtılır
   static const List<String> profilePhotosFemale = [
@@ -65,6 +48,7 @@ class AppAssets {
     '$_profilePhotos/male2.png',
     '$_profilePhotos/male3.png',
     '$_profilePhotos/male4.png',
+    '$_profilePhotos/male5.png',
   ];
 
   // Proje modu seçimi — "Freelancer Bul" / "SET Halletsin" kart illüstrasyonları
@@ -75,6 +59,18 @@ class AppAssets {
   static const String briefSetIllustration = '$_briefImages/cep_saati.png';
   static const String briefSetIllustrationShadow =
       '$_briefImages/cep_saati_shadow.png';
+
+  // "İki yol var" karşılaştırma ekranı — freelancer / SET ekibi görselleri
+  static const String projectModeFreelancerBox =
+      '$_freelancerSet/box_freelancer.png';
+  static const String projectModeSetRing =
+      '$_freelancerSet/ring_role_selection.png';
+
+  // Splash — marka/karşılama ekranlarının ana görseli
+  static const String splashHeroAtlas = '$_pageImages/atlas.png';
+
+  // Ana sayfa karşılama (ilk kullanım) hero görseli
+  static const String homeClapperboard = '$_pageImages/klaket.png';
 
   // Splash ekranı — sırayla değişen tanıtım görselleri
   static const List<String> splashPageImages = [
@@ -92,6 +88,16 @@ class AppAssets {
     '$_placeholder/mercedes_project_image.png',
     '$_placeholder/mercedes_project_image2.png',
     '$_placeholder/mercedes_project_image3.png',
+    '$_placeholder/mercedes_project_image4.png',
+  ];
+
+  /// Profildeki "İŞLERİ" şeridi — kendiliğinden akan galerinin bir turu.
+  /// Akış hemen başa dönmesin diye galeriden biraz daha uzun tutuldu.
+  static const List<String> portfolioWorksStrip = [
+    '$_placeholder/mercedes_project_image.png',
+    '$_placeholder/mercedes_project_image2.png',
+    '$_placeholder/mercedes_project_image3.png',
+    '$_placeholder/mercedes_bg.png',
     '$_placeholder/mercedes_project_image4.png',
   ];
 }

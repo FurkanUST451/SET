@@ -4,6 +4,7 @@ import '../modules/auth/login/login_binding.dart';
 import '../modules/auth/login/login_view.dart';
 import '../modules/auth/register/register_binding.dart';
 import '../modules/auth/register/register_view.dart';
+import '../modules/client/archive/client_archive_view.dart';
 import '../modules/client/brief_share/brief_share_binding.dart';
 import '../modules/client/brief_share/brief_share_view.dart';
 import '../modules/client/category_picker/category_picker_binding.dart';
@@ -36,14 +37,15 @@ import '../modules/freelancer/project_detail/project_detail_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_binding.dart';
 import '../modules/freelancer/onboarding/freelancer_onboarding_view.dart';
 import '../modules/freelancer/project_detail/freelancer_project_detail_view.dart';
+import '../modules/freelancer/set_projects/freelancer_set_projects_view.dart';
 import '../modules/freelancer/upload_work/freelancer_upload_work_binding.dart';
 import '../modules/freelancer/upload_work/freelancer_upload_work_view.dart';
-import '../modules/onboarding/onboarding_binding.dart';
-import '../modules/onboarding/onboarding_view.dart';
 import '../modules/role_selection/role_selection_binding.dart';
 import '../modules/role_selection/role_selection_view.dart';
 import '../modules/splash/splash_binding.dart';
+import '../modules/splash/splash_brand_view.dart';
 import '../modules/splash/splash_view.dart';
+import '../modules/splash/splash_welcome_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -51,14 +53,17 @@ class AppPages {
 
   static final List<GetPage> pages = [
     GetPage(
+      name: AppRoutes.splashBrand,
+      page: () => const SplashBrandScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.splashWelcome,
+      page: () => const SplashWelcomeScreen(),
+    ),
+    GetPage(
       name: AppRoutes.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
-    ),
-    GetPage(
-      name: AppRoutes.onboarding,
-      page: () => const OnboardingView(),
-      binding: OnboardingBinding(),
     ),
     GetPage(
       name: AppRoutes.login,
@@ -143,6 +148,10 @@ class AppPages {
       name: AppRoutes.portfolioTeamProfile,
       page: () => const PortfolioTeamProfileView(),
     ),
+    GetPage(
+      name: AppRoutes.clientArchive,
+      page: () => const ClientArchiveView(),
+    ),
 
     // Freelancer (Hizmet Ver) — implementation pending
     GetPage(
@@ -169,6 +178,10 @@ class AppPages {
       name: AppRoutes.freelancerUploadWork,
       page: () => const FreelancerUploadWorkView(),
       binding: FreelancerUploadWorkBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.freelancerSetProjects,
+      page: () => const FreelancerSetProjectsView(),
     ),
   ];
 }

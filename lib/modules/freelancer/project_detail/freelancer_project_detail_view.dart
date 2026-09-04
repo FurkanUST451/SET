@@ -6,6 +6,7 @@ import '../../../core/utils/avatar_image.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/progress_entry_model.dart';
 import '../../../data/models/project_model.dart';
+import '../../../routes/app_routes.dart';
 import 'project_detail_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -205,13 +206,25 @@ class _FreelancerProjectDetailViewState
                         'Proje Detayı',
                         textAlign: TextAlign.center,
                         style: _display(
-                          size: 22 * s,
+                          size: 24 * s,
                           weight: FontWeight.w600,
                           color: _kInk,
                         ),
                       ),
                     ),
-                    const SizedBox.shrink(),
+                    GestureDetector(
+                      onTap: () =>
+                          Get.toNamed(AppRoutes.freelancerSetProjects),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: EdgeInsets.all(8 * s),
+                        child: Icon(
+                          Icons.timeline_outlined,
+                          size: 22 * s,
+                          color: _kInk,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -258,7 +271,7 @@ class _FreelancerProjectDetailViewState
                                   Text(
                                     _statusLabel,
                                     style: _ui(
-                                      size: 8 * s,
+                                      size: 10 * s,
                                       weight: FontWeight.w700,
                                       color: _statusColor,
                                       spacing: 1.2,
@@ -281,7 +294,7 @@ class _FreelancerProjectDetailViewState
                                   Text(
                                     '${project.shootingType ?? ''} · «${project.category ?? ''}»',
                                     style: _ui(
-                                      size: 8 * s,
+                                      size: 13 * s,
                                       color: _kBlack,
                                       spacing: 0.5,
                                     ),
@@ -321,7 +334,7 @@ class _FreelancerProjectDetailViewState
                             child: Text(
                               project.notes ?? project.description,
                               style: _ui(
-                                size: 10 * s,
+                                size: 15 * s,
                                 color: _kBlack,
                                 spacing: 0.2,
                                 height: 1.6,
@@ -583,7 +596,7 @@ class _FreelancerProjectDetailViewState
                       child: Text(
                         'Mesaj',
                         style: _ui(
-                          size: 9 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kBlack,
                           spacing: 0.5,
@@ -745,7 +758,7 @@ class _FreelancerProjectDetailViewState
               Text(
                 existing == null ? 'İlerleme Ekle' : 'İlerlemeyi Düzenle',
                 style: _display(
-                  size: 22 * s,
+                  size: 24 * s,
                   weight: FontWeight.w600,
                   color: _kInk,
                 ),
@@ -754,7 +767,7 @@ class _FreelancerProjectDetailViewState
               Text(
                 'BAŞLIK',
                 style: _ui(
-                  size: 8 * s,
+                  size: 10 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
                   spacing: 1.2,
@@ -770,7 +783,7 @@ class _FreelancerProjectDetailViewState
               Text(
                 'AÇIKLAMA',
                 style: _ui(
-                  size: 8 * s,
+                  size: 10 * s,
                   weight: FontWeight.w700,
                   color: _kBlack,
                   spacing: 1.2,
@@ -1010,7 +1023,7 @@ class _Section extends StatelessWidget {
                 child: Text(
                   label,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.4,
@@ -1074,7 +1087,7 @@ class _GridCell extends StatelessWidget {
                 item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],

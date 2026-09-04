@@ -478,7 +478,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                 Text(
                   _statusLabel,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _statusColor,
                     spacing: 1.2,
@@ -498,7 +498,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                 SizedBox(height: 2 * s),
                 Text(
                   brief.category,
-                  style: _ui(size: 8 * s, color: _kBlack, spacing: 0.5),
+                  style: _ui(size: 10 * s, color: _kBlack, spacing: 0.5),
                 ),
               ],
             ),
@@ -606,7 +606,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
           Text(
             '${Formatters.groupThousands(p.budget)} ₺',
             style: _display(
-              size: 15 * s,
+              size: 22 * s,
               weight: FontWeight.w700,
               color: _kInk,
             ),
@@ -665,7 +665,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                             Text(
                               'TÜMÜNÜ GÖR',
                               style: _ui(
-                                size: 8 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w700,
                                 color: _kGold,
                                 spacing: 1.2,
@@ -782,7 +782,7 @@ class BriefDetailView extends GetView<BriefDetailController> {
                     Text(
                       "YENİ FREELANCER'A GÖNDER",
                       style: _ui(
-                        size: 9 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: Colors.white,
                         spacing: 1,
@@ -837,7 +837,7 @@ class _Section extends StatelessWidget {
                 child: Text(
                   label,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.4,
@@ -887,7 +887,7 @@ class _GridCell extends StatelessWidget {
                 item.label.toUpperCaseTr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
               ),
             ),
           ],
@@ -1006,7 +1006,7 @@ class _FreelancerRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: _display(
-                    size: 15 * s,
+                    size: 19 * s,
                     weight: FontWeight.w600,
                     color: _kInk,
                   ),
@@ -1016,7 +1016,7 @@ class _FreelancerRow extends StatelessWidget {
                     freelancer.categories.first.toUpperCaseTr(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(size: 7 * s, color: _kBlack, spacing: 1),
+                    style: _ui(size: 10 * s, color: _kBlack, spacing: 1),
                   ),
               ],
             ),
@@ -1030,7 +1030,7 @@ class _FreelancerRow extends StatelessWidget {
             child: Text(
               isRejected ? 'REDDEDİLDİ' : 'TEKLİF BEKLENİYOR',
               style: _ui(
-                size: 7 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: isRejected ? _kDanger : _kGold,
                 spacing: 0.8,
@@ -1151,7 +1151,7 @@ void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
                   child: Text(
                     m.title,
                     style: _display(
-                      size: 22 * s,
+                      size: 24 * s,
                       weight: FontWeight.w600,
                       color: _kInk,
                     ),
@@ -1163,7 +1163,7 @@ void _showMilestoneDetail(BuildContext context, _Milestone m, double s) {
             Text(
               m.timeLabel.toUpperCaseTr(),
               style: _ui(
-                size: 8 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kGold,
                 spacing: 1.2,
@@ -1266,7 +1266,7 @@ class _CancelBriefDialogState extends State<_CancelBriefDialog> {
           children: [
             Text(
               'Emin misin?',
-              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
             ),
             SizedBox(height: 6 * s),
             Text(
@@ -1278,7 +1278,7 @@ class _CancelBriefDialogState extends State<_CancelBriefDialog> {
             Text(
               'İPTALİN SEBEBİ NEDİR?',
               style: _ui(
-                size: 8 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
                 spacing: 1.2,
@@ -1393,7 +1393,7 @@ class _ReasonChip extends StatelessWidget {
         child: Text(
           label,
           style: _ui(
-            size: 9.5 * s,
+            size: 11 * s,
             weight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected ? Colors.white : _kInk,
             spacing: 0.2,
@@ -1474,7 +1474,7 @@ class _CancelProjectDialogState extends State<_CancelProjectDialog> {
           children: [
             Text(
               'Projeyi İptal Et',
-              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
             ),
             SizedBox(height: 6 * s),
             Text(
@@ -1486,7 +1486,7 @@ class _CancelProjectDialogState extends State<_CancelProjectDialog> {
             Text(
               'İPTAL ETME NEDENİNİZİ BELİRTİN',
               style: _ui(
-                size: 8 * s,
+                size: 10 * s,
                 weight: FontWeight.w700,
                 color: _kBlack,
                 spacing: 1.2,

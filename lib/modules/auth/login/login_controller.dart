@@ -11,9 +11,6 @@ class LoginController extends GetxController {
   final UserController _user = Get.find<UserController>();
 
   final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController(text: 'ornek@set.app');
-  final passwordController = TextEditingController(text: '123456');
-  final resetEmailController = TextEditingController();
   final RxBool obscurePassword = true.obs;
   final RxBool isSendingReset = false.obs;
 
@@ -47,12 +44,9 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> submit() async {
+  Future<void> submit({required String email, required String password}) async {
     if (!(formKey.currentState?.validate() ?? false)) return;
-    final ok = await _auth.login(
-      email: emailController.text.trim(),
-      password: passwordController.text,
-    );
+    final ok = await _auth.login(email: email.trim(), password: password);
     if (!ok) return;
     _navigateAfterLogin();
   }
@@ -80,12 +74,4 @@ class LoginController extends GetxController {
   }
 
   void goToRegister() => Get.toNamed(AppRoutes.register);
-
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    resetEmailController.dispose();
-    super.onClose();
-  }
 }

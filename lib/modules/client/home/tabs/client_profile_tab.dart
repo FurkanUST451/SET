@@ -25,6 +25,11 @@ const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kDanger = Color(0xFFBE6A5A);
 const _kDivider = Color(0x12000000);
 
+// Öbekler (PROJELERİM / HESAP / TERCİHLER / DESTEK / OTURUM) arasındaki dikey
+// boşluk. Profil fotoğrafının üst payı da aynı değeri kullanır; böylece
+// fotoğrafın üstünde ve altında eşit alan kalır.
+const double _kGroupGap = 44;
+
 // ─── Tipografi yardımcıları ───────────────────────────────────────────────────
 TextStyle _display({
   required double size,
@@ -297,7 +302,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                                 child: Text(
                                   'SET · v1.0.0',
                                   style: _ui(
-                                    size: 8 * s,
+                                    size: 10 * s,
                                     color: _kBlack,
                                     spacing: 2,
                                   ),
@@ -327,7 +332,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text(
             'SET · PROFİL',
-            style: _ui(size: 8 * s, color: _kBlack, spacing: 2),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 2),
           ),
         ),
         Container(height: 1, color: _kDivider),
@@ -338,7 +343,9 @@ class _ClientProfileTabState extends State<ClientProfileTab>
   // ─── Avatar + kimlik bilgisi ─────────────────────────────────────────────
   Widget _buildAvatarSection(UserController user, double s) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(26 * s, 24 * s, 26 * s, 0),
+      // Fotoğrafın üstündeki pay; altındaki eşdeğer boşluk bir sonraki
+      // öbeğin üst payından (_kGroupGap) gelir.
+      padding: EdgeInsets.fromLTRB(26 * s, _kGroupGap * s, 26 * s, 0),
       child: Obx(() {
         final u = user.currentUser;
         final name = u?.name ?? 'Misafir';
@@ -439,7 +446,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                     child: Text(
                       'MÜŞTERİ',
                       style: _ui(
-                        size: 8 * s,
+                        size: 10 * s,
                         weight: FontWeight.w700,
                         color: _kGold,
                         spacing: 1.2,
@@ -462,7 +469,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                     email,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                   ),
                 ],
               ),
@@ -505,7 +512,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
   // ─── Projelerim: oluşturulan / devam eden / tamamlanan proje sayıları ───────
   Widget _buildStatsSection(double s) {
     return Padding(
-      padding: EdgeInsets.only(top: 58 * s),
+      padding: EdgeInsets.only(top: _kGroupGap * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -518,7 +525,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 Text(
                   'PROJELERİM',
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.8,
@@ -536,7 +543,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                       Text(
                         'TÜMÜNÜ GÖR',
                         style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w600,
                           color: _kBlack.withValues(alpha: 0.55),
                           spacing: 1,
@@ -600,7 +607,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
   Widget _buildSection(double s, String title, List<Widget> rows) {
     return Padding(
       // Ana gruplar arasında boşluk
-      padding: EdgeInsets.only(top: 30 * s),
+      padding: EdgeInsets.only(top: _kGroupGap * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -613,7 +620,7 @@ class _ClientProfileTabState extends State<ClientProfileTab>
                 Text(
                   title,
                   style: _ui(
-                    size: 8 * s,
+                    size: 10 * s,
                     weight: FontWeight.w700,
                     color: _kBlack,
                     spacing: 1.8,
@@ -663,13 +670,13 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: _display(size: 26 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
           ),
           SizedBox(height: 4 * s),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: _ui(size: 7 * s, color: _kBlack, spacing: 0.8),
+            style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8),
           ),
         ],
       ),
@@ -756,7 +763,7 @@ class _SettingsRow extends StatelessWidget {
                   Text(
                     label,
                     style: _display(
-                      size: 12 * s,
+                      size: 17 * s,
                       weight: FontWeight.w600,
                       color: titleColor,
                     ),
@@ -765,7 +772,7 @@ class _SettingsRow extends StatelessWidget {
                     SizedBox(height: 3 * s),
                     Text(
                       sub!,
-                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.2),
+                      style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                     ),
                   ],
                 ],

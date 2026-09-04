@@ -140,12 +140,12 @@ class ProjectDetailView extends StatelessWidget {
                         children: [
                           Text(
                             'DOSYA NO · ${project.fileNo}',
-                            style: _ui(size: 8 * s, color: _kTaupe, spacing: 1),
+                            style: _ui(size: 10 * s, color: _kTaupe, spacing: 1),
                           ),
                           Text(
                             project.projectIndex,
                             style: _ui(
-                                size: 8 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w700,
                                 color: _kGold,
                                 spacing: 1),
@@ -156,7 +156,7 @@ class ProjectDetailView extends StatelessWidget {
                       Text(
                         project.title,
                         style: _display(
-                            size: 38 * s, weight: FontWeight.w600, color: _kInk),
+                            size: 32 * s, weight: FontWeight.w600, color: _kInk),
                       ),
                       SizedBox(height: 14 * s),
                       Row(
@@ -170,7 +170,7 @@ class ProjectDetailView extends StatelessWidget {
                           Text(
                             project.statusLabel,
                             style: _ui(
-                                size: 9 * s,
+                                size: 10 * s,
                                 weight: FontWeight.w700,
                                 color: _kBlack,
                                 spacing: 1.4),
@@ -228,7 +228,7 @@ class ProjectDetailView extends StatelessWidget {
                       // ── Güncelleme ─────────────────────────────────────────
                       Text(
                         'GÜNCELLEME',
-                        style: _ui(size: 8 * s, color: _kBlack, spacing: 1.5),
+                        style: _ui(size: 10 * s, color: _kBlack, spacing: 1.5),
                       ),
                       SizedBox(height: 14 * s),
                       Row(
@@ -266,7 +266,7 @@ class ProjectDetailView extends StatelessWidget {
                                     Text(
                                       project.updateAuthor,
                                       style: _ui(
-                                          size: 10 * s,
+                                          size: 13 * s,
                                           weight: FontWeight.w700,
                                           color: _kInk,
                                           spacing: 0.2),
@@ -274,7 +274,7 @@ class ProjectDetailView extends StatelessWidget {
                                     Text(
                                       project.updateTime,
                                       style: _ui(
-                                          size: 8 * s,
+                                          size: 13 * s,
                                           color: _kTaupe,
                                           spacing: 0.3),
                                     ),
@@ -284,7 +284,7 @@ class ProjectDetailView extends StatelessWidget {
                                 Text(
                                   project.updateText,
                                   style: _ui(
-                                      size: 9.5 * s,
+                                      size: 15 * s,
                                       color: _kBlack,
                                       spacing: 0.2,
                                       height: 1.55),
@@ -390,7 +390,7 @@ class _TopBar extends StatelessWidget {
           Text(
             'SET · HALLETSİN',
             style: _ui(
-                size: 9 * s, weight: FontWeight.w700, color: _kInk, spacing: 2),
+                size: 10 * s, weight: FontWeight.w700, color: _kInk, spacing: 2),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -547,7 +547,7 @@ class _ManagerCard extends StatelessWidget {
                     Text(
                       'Selin A.',
                       style: _display(
-                          size: 22 * s,
+                          size: 24 * s,
                           weight: FontWeight.w600,
                           color: _kInk),
                     ),
@@ -555,7 +555,7 @@ class _ManagerCard extends StatelessWidget {
                     Text(
                       'PROJE SORUMLUSU',
                       style: _ui(
-                          size: 8 * s,
+                          size: 10 * s,
                           weight: FontWeight.w700,
                           color: _kGold,
                           spacing: 1),
@@ -572,7 +572,7 @@ class _ManagerCard extends StatelessWidget {
                         SizedBox(width: 5 * s),
                         Text(
                           'ŞU AN ONLINE',
-                          style: _ui(size: 8 * s, color: _kTaupe, spacing: 0.8),
+                          style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.8),
                         ),
                       ],
                     ),
@@ -659,11 +659,11 @@ class _ManagerCard extends StatelessWidget {
             children: [
               Text(
                 'YANIT SÜRESİ · ORT. 12 DK',
-                style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 0.6),
+                style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.6),
               ),
               Text(
                 'HAT · 7/24',
-                style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 0.6),
+                style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.6),
               ),
             ],
           ),
@@ -791,7 +791,7 @@ class _StepCircle extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: _ui(
-              size: 7 * s,
+              size: 10 * s,
               weight: isCurrent ? FontWeight.w700 : FontWeight.w600,
               color: isCurrent ? _kGold : _kBlack,
               spacing: 0.4,
@@ -843,12 +843,12 @@ class _StatItem extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: _display(size: 16 * s, weight: FontWeight.w600, color: _kInk),
+          style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
         ),
         SizedBox(height: 4 * s),
         Text(
           label,
-          style: _ui(size: 7.5 * s, color: _kTaupe, spacing: 1),
+          style: _ui(size: 10 * s, color: _kTaupe, spacing: 1),
         ),
       ],
     );

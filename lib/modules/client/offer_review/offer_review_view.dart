@@ -129,7 +129,7 @@ class OfferReviewView extends GetView<OfferReviewController> {
                         children: [
                           Text('ONAY',
                               style: _ui(
-                                  size: 8 * s,
+                                  size: 10 * s,
                                   weight: FontWeight.w700,
                                   color: _kBlack,
                                   spacing: 1.5)),
@@ -145,14 +145,14 @@ class OfferReviewView extends GetView<OfferReviewController> {
                           TextSpan(
                             text: 'Gözden ',
                             style: _display(
-                                size: 34 * s,
+                                size: 32 * s,
                                 weight: FontWeight.w600,
                                 color: _kInk),
                           ),
                           TextSpan(
                             text: 'geçirelim.',
                             style: _display(
-                                size: 34 * s,
+                                size: 32 * s,
                                 weight: FontWeight.w600,
                                 color: _kGold),
                           ),
@@ -312,7 +312,7 @@ class _ReviewRow extends StatelessWidget {
                 child: Text(
                   index.toString().padLeft(2, '0'),
                   style: _ui(
-                      size: 8.5 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kGold,
                       spacing: 0.5),
@@ -323,7 +323,7 @@ class _ReviewRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: _ui(
-                      size: 8.5 * s,
+                      size: 10 * s,
                       weight: FontWeight.w700,
                       color: _kBlack,
                       spacing: 1),

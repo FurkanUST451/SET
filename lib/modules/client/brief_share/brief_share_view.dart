@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_fonts.dart';
 
+import '../../../core/constants/app_assets.dart';
 import 'brief_share_controller.dart';
 import '../../../core/utils/turkish_case.dart';
 
@@ -36,26 +37,8 @@ TextStyle _ui({
         letterSpacing: spacing,
         height: height);
 
-Widget _wordmark(double s) => RichText(
-      text: TextSpan(children: [
-        TextSpan(
-          text: 'SE',
-          style: AppFonts.display(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w700,
-              color: _kInk,
-              letterSpacing: 2.5),
-        ),
-        TextSpan(
-          text: 'T',
-          style: AppFonts.display(
-              fontSize: 18 * s,
-              fontWeight: FontWeight.w800,
-              color: _kGold,
-              letterSpacing: 2.5),
-        ),
-      ]),
-    );
+// Hizmet seçimi ekranıyla aynı marka logosu, aynı ölçekte.
+Widget _wordmark(double s) => Image.asset(AppAssets.loginLogo, height: 28 * s);
 
 class BriefShareView extends GetView<BriefShareController> {
   const BriefShareView({super.key});
@@ -112,7 +95,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                       : 'Video Çekim')
                                   .toUpperCaseTr(),
                               style: _ui(
-                                  size: 8 * s, color: _kBlack, spacing: 1.5),
+                                  size: 10 * s, color: _kBlack, spacing: 1.5),
                             ),
                             SizedBox(height: 8 * s),
                             Text.rich(
@@ -196,7 +179,7 @@ class BriefShareView extends GetView<BriefShareController> {
                                 Obx(() => Text(
                                     '${controller.charCount.value} / 2000',
                                     style: _ui(
-                                        size: 8 * s,
+                                        size: 10 * s,
                                         color: _kBlack,
                                         spacing: 0.5))),
                               ],

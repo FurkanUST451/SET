@@ -203,7 +203,7 @@ class ChatDetailView extends GetView<ChatDetailController> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
-                                  _ui(size: 7.5 * s, color: _kBlack, spacing: 1),
+                                  _ui(size: 10 * s, color: _kBlack, spacing: 1),
                             ),
                           ),
                         ],
@@ -311,7 +311,7 @@ class _BriefCard extends StatelessWidget {
                   children: [
                     Text(
                       category,
-                      style: _display(size: 15 * s, weight: FontWeight.w600, color: _kInk),
+                      style: _display(size: 19 * s, weight: FontWeight.w600, color: _kInk),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -319,7 +319,7 @@ class _BriefCard extends StatelessWidget {
                       SizedBox(height: 2 * s),
                       Text(
                         shootingType,
-                        style: _ui(size: 8 * s, color: _kBlack, spacing: 0.3),
+                        style: _ui(size: 13 * s, color: _kBlack, spacing: 0.3),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -380,13 +380,13 @@ class _BriefDetailSheet extends StatelessWidget {
           children: [
             Text(
               brief.category.isNotEmpty ? brief.category : 'İş',
-              style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
             ),
             if (a.shootingType != null && a.shootingType!.isNotEmpty) ...[
               SizedBox(height: 2 * s),
               Text(
                 a.shootingType!,
-                style: _ui(size: 9 * s, color: _kBlack, spacing: 0.3),
+                style: _ui(size: 13 * s, color: _kBlack, spacing: 0.3),
               ),
             ],
             SizedBox(height: 18 * s),
@@ -407,7 +407,7 @@ class _BriefDetailSheet extends StatelessWidget {
               SizedBox(height: 18 * s),
               Text(
                 'İŞ TARİFİ',
-                style: _ui(size: 8 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
+                style: _ui(size: 10 * s, weight: FontWeight.w700, color: _kBlack, spacing: 1.2),
               ),
               SizedBox(height: 8 * s),
               Text(
@@ -531,7 +531,7 @@ class _OfferBubble extends StatelessWidget {
                   Icon(Icons.payments_outlined, size: 16 * s, color: _kGold),
                   SizedBox(width: 6 * s),
                   Text('FİYAT TEKLİFİ',
-                      style: _ui(size: 8 * s, color: _kBlack, spacing: 0.8)),
+                      style: _ui(size: 10 * s, color: _kBlack, spacing: 0.8)),
                   const Spacer(),
                   Text(
                     _statusLabel,
@@ -572,7 +572,7 @@ class _OfferBubble extends StatelessWidget {
                     color: _kGold,
                     child: Text('İNCELE',
                         style: _ui(
-                            size: 9 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: Colors.white,
                             spacing: 0.6)),
@@ -633,7 +633,7 @@ class _DayChip extends StatelessWidget {
           color: Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.zero,
         ),
-        child: Text(label, style: _ui(size: 8 * s, color: _kBlack, spacing: 1.5)),
+        child: Text(label, style: _ui(size: 10 * s, color: _kBlack, spacing: 1.5)),
       ),
     );
   }
@@ -649,32 +649,37 @@ class _TheirBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final timeStyle = _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5);
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: EdgeInsets.only(bottom: 12 * s, right: 40 * s),
-        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 10 * s),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.zero,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.zero,
+            bottomLeft: Radius.zero,
+            topRight: Radius.circular(14 * s),
+            bottomRight: Radius.circular(14 * s),
+          ),
           border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(
-                style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
-                children: _highlightSpans(text, _kGold),
+        child: Text.rich(
+          TextSpan(
+            style: _ui(size: 15 * s, color: _kBlack, spacing: 0.2),
+            children: [
+              ..._highlightSpans(text, _kGold),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: SizedBox(width: 8 * s),
               ),
-            ),
-            SizedBox(height: 4 * s),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(time,
-                  style: _ui(size: 7.5 * s, color: _kBlack, spacing: 0.5)),
-            ),
-          ],
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Text(time, style: timeStyle),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -691,42 +696,40 @@ class _MyBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = scale;
+    final timeStyle = _ui(
+        size: 7.5 * s, color: Colors.white.withValues(alpha: 0.45), spacing: 0.5);
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         margin: EdgeInsets.only(bottom: 12 * s, left: 40 * s),
-        padding: EdgeInsets.fromLTRB(14 * s, 12 * s, 14 * s, 8 * s),
+        padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 10 * s),
         decoration: BoxDecoration(
           color: _kBubbleMe,
-          borderRadius: BorderRadius.zero,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(14 * s),
+            bottomLeft: Radius.circular(14 * s),
+            topRight: Radius.zero,
+            bottomRight: Radius.zero,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(
-                style: _ui(
-                    size: 10 * s,
-                    color: Colors.white.withValues(alpha: 0.92),
-                    spacing: 0.2),
-                children: _highlightSpans(text, _kGold),
+        child: Text.rich(
+          TextSpan(
+            style: _ui(
+                size: 15 * s,
+                color: Colors.white.withValues(alpha: 0.92),
+                spacing: 0.2),
+            children: [
+              ..._highlightSpans(text, _kGold),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: SizedBox(width: 8 * s),
               ),
-            ),
-            SizedBox(height: 4 * s),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(time,
-                    style: _ui(
-                        size: 7.5 * s,
-                        color: Colors.white.withValues(alpha: 0.45),
-                        spacing: 0.5)),
-                SizedBox(width: 4 * s),
-                Icon(Icons.done_all_rounded, size: 12 * s, color: _kGold),
-              ],
-            ),
-          ],
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Text(time, style: timeStyle),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -841,7 +844,7 @@ void _showOfferSheet(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Fiyat Teklifi Gönder',
-                style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk)),
+                style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk)),
             SizedBox(height: 16 * s),
             TextField(
               controller: controller.offerAmountController,

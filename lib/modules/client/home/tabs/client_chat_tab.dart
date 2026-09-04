@@ -86,7 +86,7 @@ class _ClientChatTabState extends State<ClientChatTab> {
                     SizedBox(width: 10 * s),
                     Text('SON SOHBETLER',
                         style: _ui(
-                            size: 8 * s,
+                            size: 10 * s,
                             weight: FontWeight.w700,
                             color: _kBlack,
                             spacing: 1.8)),
@@ -157,7 +157,7 @@ class _ClientChatTabState extends State<ClientChatTab> {
         Padding(
           padding: EdgeInsets.fromLTRB(26 * s, 6 * s, 26 * s, 12 * s),
           child: Text('SET · SOHBET',
-              style: _ui(size: 8 * s, color: _kBlack, spacing: 2)),
+              style: _ui(size: 10 * s, color: _kBlack, spacing: 2)),
         ),
         Container(height: 1, color: _kDivider),
       ],
@@ -171,7 +171,7 @@ class _ClientChatTabState extends State<ClientChatTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Sohbetler',
-              style: _display(size: 40 * s, weight: FontWeight.w600, color: _kInk)),
+              style: _display(size: 32 * s, weight: FontWeight.w600, color: _kInk)),
         ],
       ),
     );
@@ -280,7 +280,7 @@ class _ChatRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: _display(
-                              size: 18 * s,
+                              size: 19 * s,
                               weight: FontWeight.w600,
                               color: _kInk),
                         ),
@@ -296,7 +296,7 @@ class _ChatRow extends StatelessWidget {
                     snippet,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _ui(size: 9.5 * s, color: _kBlack, spacing: 0.2),
+                    style: _ui(size: 13 * s, color: _kBlack, spacing: 0.2),
                   ),
                   if (eyebrow.isNotEmpty) ...[
                     SizedBox(height: 5 * s),
@@ -304,7 +304,7 @@ class _ChatRow extends StatelessWidget {
                       eyebrow.toUpperCaseTr(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _ui(size: 7 * s, color: _kBlack, spacing: 1.2),
+                      style: _ui(size: 10 * s, color: _kBlack, spacing: 1.2),
                     ),
                   ],
                 ],
@@ -343,7 +343,7 @@ class _EmptyState extends StatelessWidget {
             SizedBox(height: 16 * s),
             Text(
               hasQuery ? 'Sonuç bulunamadı' : 'Henüz mesajın yok',
-              style: _display(size: 22 * s, weight: FontWeight.w600, color: _kInk),
+              style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
             ),
             SizedBox(height: 6 * s),
             Text(

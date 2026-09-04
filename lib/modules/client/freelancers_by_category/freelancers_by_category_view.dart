@@ -5,16 +5,8 @@ import '../../../core/theme/app_fonts.dart';
 import '../../../core/utils/avatar_image.dart';
 import '../../../data/models/freelancer_model.dart';
 import '../../../data/models/user_model.dart';
+import '../../../routes/app_routes.dart';
 import 'freelancers_by_category_controller.dart';
-import '../../../core/utils/turkish_case.dart';
-
-const Map<String, String> _kCategoryShortLabel = {
-  'Video Çekim': 'VİDEO',
-  'Kurgu': 'KURGU',
-  'Ses Tasarımı': 'SES',
-  'CGI & VFX': 'CGI&VFX',
-  'Fotoğraf': 'FOTOĞRAF',
-};
 
 const Map<String, String> _kCategoryRoleLabel = {
   'Video Çekim': 'YÖNETMEN',
@@ -32,6 +24,9 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
+// Boş seçim kutuları (üstteki yuvalar + kart sağındaki kare) ayraçlardan
+// biraz daha belirgin bir çizgi kullanır ki tıklanabilir oldukları anlaşılsın.
+const _kBoxBorder = Color(0x2E000000);
 
 TextStyle _display({
   required double size,
@@ -59,6 +54,20 @@ TextStyle _ui({
   height: height,
 );
 
+// Deneyime göre gösterimlik ücret aralığı (bin TL). Kart ve alt özet
+// çubuğu aynı hesaplamayı paylaşır ki toplam tutarlı olsun.
+(int, int) _feeRangeBoundsFor(FreelancerModel f) {
+  if (f.experience >= 15) return (25, 500);
+  if (f.experience >= 8) return (15, 250);
+  if (f.experience >= 3) return (8, 120);
+  return (2, 50);
+}
+
+String _feeRangeLabelFor(FreelancerModel f) {
+  final (lo, hi) = _feeRangeBoundsFor(f);
+  return '${lo}K-${hi}K TL';
+}
+
 class FreelancersByCategoryView
     extends GetView<FreelancersByCategoryController> {
   const FreelancersByCategoryView({super.key});
@@ -73,277 +82,233 @@ class FreelancersByCategoryView
       backgroundColor: _kCream,
       body: MediaQuery.withNoTextScaling(
         child: SafeArea(
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () => Get.back<void>(),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: EdgeInsets.all(12 * s),
-                      child: Icon(
-                        Icons.arrow_back_rounded,
-                        size: 22 * s,
-                        color: _kInk,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(24 * s, 4 * s, 24 * s, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'sana uygun',
-                          style: _display(
-                            size: 15 * s,
-                            weight: FontWeight.w500,
-                            color: _kTaupe,
-                          ).copyWith(fontStyle: FontStyle.italic),
-                        ),
-                        SizedBox(height: 2 * s),
-                        Obx(
-                          () => RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text:
-                                      '${controller.freelancers.isEmpty ? 0 : controller.freelancers.length * 10} ',
-                                  style: _display(
-                                    size: 42 * s,
-                                    weight: FontWeight.w700,
-                                    color: _kGold,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'kreatif',
-                                  style: _display(
-                                    size: 42 * s,
-                                    weight: FontWeight.w600,
-                                    color: _kInk,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10 * s),
-                        Row(
+              _TopStrip(scale: s),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(bottom: 40 * s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 22 * s),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 6 * s,
-                              height: 6 * s,
-                              color: _kGold,
-                            ),
-                            SizedBox(width: 8 * s),
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: _kCardBorder,
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Ekibini\nsen kur',
+                                    style: _display(
+                                      size: 34 * s,
+                                      weight: FontWeight.w700,
+                                      color: _kBlack,
+                                      height: 1.02,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '.',
+                                    style: _display(
+                                      size: 34 * s,
+                                      weight: FontWeight.w700,
+                                      color: _kGold,
+                                      height: 1.02,
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ),
+                            SizedBox(height: 8 * s),
+                            Text(
+                              'En fazla '
+                              '${FreelancersByCategoryController.maxSelections}'
+                              ' kişiye brief gönderebilirsin.',
+                              style: _ui(size: 12 * s, color: _kTaupe, spacing: 0.2),
+                            ),
+                            SizedBox(height: 22 * s),
+                            Obx(() {
+                              final selected = controller.selectedFreelancers;
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Sabit genişlik: rakam glifleri (0/1/2..)
+                                  // farklı genişlikte olduğu için, bu sütun
+                                  // esnek olsaydı seçim değiştikçe sağdaki
+                                  // avatar kutuları hafifçe kayardı.
+                                  SizedBox(
+                                    width: 104 * s,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '0${selected.length}/0${FreelancersByCategoryController.maxSelections}',
+                                          style: _display(
+                                            size: 30 * s,
+                                            weight: FontWeight.w700,
+                                            color: _kBlack,
+                                          ),
+                                        ),
+                                        Text(
+                                          'SEÇİLDİ',
+                                          style: _ui(
+                                            size: 8 * s,
+                                            weight: FontWeight.w700,
+                                            color: _kTaupe,
+                                            spacing: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        for (var i = 0;
+                                            i <
+                                                FreelancersByCategoryController
+                                                    .maxSelections;
+                                            i++) ...[
+                                          if (i > 0) SizedBox(width: 8 * s),
+                                          SizedBox(
+                                            width: 56 * s,
+                                            height: 56 * s,
+                                            child: i < selected.length
+                                                ? Image.asset(
+                                                    placeholderAvatarFor(
+                                                      controller
+                                                          .userFor(selected[i])
+                                                          .gender,
+                                                      selected[i].userId,
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: _kBoxBorder,
+                                                      ),
+                                                    ),
+                                                  ),
+                                          ),
+                                        ],
+                                        const Spacer(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24 * s),
+                      Container(height: 1, color: _kCardBorder),
+                      SizedBox(height: 14 * s),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              'SIRALA · PUAN',
+                              style: _ui(
+                                size: 9 * s,
+                                weight: FontWeight.w700,
+                                color: _kGold,
+                                spacing: 1,
+                              ),
+                            ),
+                            SizedBox(width: 3 * s),
+                            Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 12 * s,
+                              color: _kGold,
                             ),
                           ],
                         ),
-                        SizedBox(height: 10 * s),
-                        Text(
-                          '5 KİŞİYE ÜCRETSİZ TEKLİF  ·  FAZLASI KREDİ İLE',
-                          style: _ui(
-                            size: 8.5 * s,
-                            weight: FontWeight.w600,
-                            color: _kBlack,
-                            spacing: 0.8,
-                            height: 1.5,
-                          ),
-                        ),
-                        SizedBox(height: 16 * s),
-                        Obx(
-                          () => Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16 * s,
-                              vertical: 12 * s,
-                            ),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              border: Border(
-                                left: BorderSide(color: _kGold, width: 3),
-                                top: BorderSide(color: _kCardBorder),
-                                right: BorderSide(color: _kCardBorder),
-                                bottom: BorderSide(color: _kCardBorder),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${controller.selectedIds.length}/5 seçildi',
-                                  style: _display(
-                                    size: 17 * s,
-                                    weight: FontWeight.w600,
-                                    color: _kInk,
-                                  ),
-                                ),
-                                SizedBox(height: 2 * s),
-                                Text(
-                                  'Öne çıkan işlere bak, doğru ekibi seç',
-                                  style: _ui(
-                                    size: 8 * s,
-                                    color: _kBlack,
-                                    spacing: 0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 14 * s),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Obx(() {
-                      if (controller.isLoading.value) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: _kGold),
-                        );
-                      }
-                      if (controller.errorMsg.isNotEmpty) {
-                        return Center(
-                          child: Text(
-                            controller.errorMsg.value,
-                            style: _ui(
-                              size: 10 * s,
-                              color: _kBlack,
-                              spacing: 0.2,
-                            ),
-                          ),
-                        );
-                      }
-                      if (controller.freelancers.isEmpty) {
-                        return _EmptyState(
-                          scale: s,
-                          category: controller.category,
-                        );
-                      }
-                      return ListView.separated(
-                        padding: EdgeInsets.fromLTRB(
-                          24 * s,
-                          10 * s,
-                          24 * s,
-                          120 * s,
-                        ),
-                        itemCount: controller.freelancers.length,
-                        separatorBuilder: (_, _) => _DotDivider(scale: s),
-                        itemBuilder: (_, i) {
-                          final f = controller.freelancers[i];
-                          return Obx(
-                            () => Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                _FreelancerCard(
-                                  scale: s,
-                                  freelancer: f,
-                                  user: controller.userFor(f),
-                                  selected: controller.isSelected(f),
-                                  onProfile: () => controller.openDetail(f),
-                                  onInvite: () => controller.toggleSelect(f),
-                                ),
-                                Positioned(
-                                  top: -8 * s,
-                                  left: -8 * s,
-                                  child: _CornerBracket(
-                                    scale: s,
-                                    top: true,
-                                    left: true,
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: -8 * s,
-                                  right: -8 * s,
-                                  child: _CornerBracket(
-                                    scale: s,
-                                    top: false,
-                                    left: false,
-                                  ),
-                                ),
-                              ],
+                      ),
+                      SizedBox(height: 10 * s),
+                      Obx(() {
+                        if (controller.isLoading.value) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 60 * s),
+                            child: const Center(
+                              child: CircularProgressIndicator(color: _kGold),
                             ),
                           );
-                        },
-                      );
-                    }),
-                  ),
-                ],
-              ),
-              // Alt CTA
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 14 * s,
-                child: Column(
-                  children: [
-                    Obx(() {
-                      final count = controller.selectedIds.length;
-                      final sending = controller.isSending.value;
-                      return GestureDetector(
-                        onTap: sending ? null : controller.sendOffers,
-                        behavior: HitTestBehavior.opaque,
-                        child: AnimatedOpacity(
-                          opacity: count > 0 ? 1.0 : 0.45,
-                          duration: const Duration(milliseconds: 200),
-                          child: Container(
-                            height: 54 * s,
-                            color: _kGold,
-                            alignment: Alignment.center,
-                            child: sending
-                                ? SizedBox(
-                                    width: 22 * s,
-                                    height: 22 * s,
-                                    child: const CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    'SEÇİLENLERE TEKLİF GÖNDER  →',
+                        }
+                        if (controller.errorMsg.isNotEmpty) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24 * s,
+                              vertical: 40 * s,
+                            ),
+                            child: Text(
+                              controller.errorMsg.value,
+                              style: _ui(size: 10 * s, color: _kBlack, spacing: 0.2),
+                            ),
+                          );
+                        }
+                        final list = controller.freelancers;
+                        if (list.isEmpty) {
+                          return _EmptyState(
+                            scale: s,
+                            category: controller.category,
+                          );
+                        }
+                        return Padding(
+                          // Kartlar sayfa marjininden biraz içeride başlar:
+                          // seçili karttaki altın şerit ve profil fotoğrafı
+                          // sola yaklaşsın diye sol boşluk daha dar.
+                          padding: EdgeInsets.only(left: 16 * s, right: 24 * s),
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < list.length; i++) ...[
+                                Obx(() {
+                                  final f = list[i];
+                                  final order =
+                                      controller.selectedIds.indexOf(f.userId);
+                                  return _FreelancerCard(
+                                    scale: s,
+                                    freelancer: f,
+                                    user: controller.userFor(f),
+                                    selectionIndex:
+                                        order >= 0 ? order + 1 : null,
+                                    onProfile: () => controller.openDetail(f),
+                                    onInvite: () => controller.toggleSelect(f),
+                                  );
+                                }),
+                                if (i < list.length - 1)
+                                  Divider(height: 1, color: _kCardBorder),
+                              ],
+                              Padding(
+                                padding: EdgeInsets.only(top: 18 * s),
+                                child: Center(
+                                  child: Text(
+                                    '${list.length} SETTEKİ GÖSTERİLİYOR',
                                     style: _ui(
-                                      size: 10 * s,
-                                      weight: FontWeight.w700,
-                                      color: Colors.white,
-                                      spacing: 1.2,
+                                      size: 9 * s,
+                                      weight: FontWeight.w600,
+                                      color: _kTaupe,
+                                      spacing: 1,
                                     ),
                                   ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      );
-                    }),
-                    SizedBox(height: 10 * s),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.lock_outline,
-                          size: 11 * s,
-                          color: _kTaupe,
-                        ),
-                        SizedBox(width: 6 * s),
-                        Flexible(
-                          child: Text(
-                            'Tüm bilgilerin güvenliği SET güvencesiyle korunur.'
-                                .toUpperCaseTr(),
-                            style: _ui(
-                              size: 7.5 * s,
-                              weight: FontWeight.w600,
-                              color: _kTaupe,
-                              spacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        );
+                      }),
+                      SizedBox(height: 28 * s),
+                      // Seçim özeti — sayfanın en altında, kaydırmadan
+                      // görünmez; üstte sabit/yüzen bir çubuk değildir.
+                      _SelectionSummaryBar(scale: s, controller: controller),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -354,12 +319,342 @@ class FreelancersByCategoryView
   }
 }
 
+// ─── Üst şerit — geri oku + adım göstergesi ──────────────────────────────
+class _TopStrip extends StatelessWidget {
+  const _TopStrip({required this.scale});
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(10 * s, 6 * s, 24 * s, 12 * s),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.back<void>(),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.all(8 * s),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    size: 20 * s,
+                    color: _kInk,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(height: 1, color: _kCardBorder),
+      ],
+    );
+  }
+}
+
+// ─── Alt özet çubuğu — seçilen ekip, tahmini toplam ve gönderim ─────────
+class _SelectionSummaryBar extends StatelessWidget {
+  const _SelectionSummaryBar({required this.scale, required this.controller});
+
+  final double scale;
+  final FreelancersByCategoryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Obx(() {
+      final selected = controller.selectedFreelancers;
+      final count = selected.length;
+      final sending = controller.isSending.value;
+
+      var totalLo = 0;
+      var totalHi = 0;
+      for (final f in selected) {
+        final (lo, hi) = _feeRangeBoundsFor(f);
+        totalLo += lo;
+        totalHi += hi;
+      }
+      final totalLabel =
+          count == 0 ? '—' : '${totalLo}K-${totalHi}K TL';
+
+      return Container(
+        width: double.infinity,
+        color: _kInk,
+        padding: EdgeInsets.fromLTRB(20 * s, 18 * s, 20 * s, 16 * s),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'SEÇTİKLERİN',
+                  style: _ui(
+                    size: 9 * s,
+                    weight: FontWeight.w700,
+                    color: _kGold,
+                    spacing: 1.4,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '$count/${FreelancersByCategoryController.maxSelections}',
+                  style: _ui(
+                    size: 10 * s,
+                    weight: FontWeight.w700,
+                    color: Colors.white,
+                    spacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12 * s),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              // Seçili kutucukların altında isim satırı var; boş kareler
+              // onlarla üstten hizalansın diye satır yüksekliği serbest.
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0;
+                    i < FreelancersByCategoryController.maxSelections;
+                    i++) ...[
+                  if (i > 0) SizedBox(width: 8 * s),
+                  SizedBox(
+                    width: 72 * s,
+                    child: i < count
+                        ? _SelectedChip(
+                            scale: s,
+                            index: i + 1,
+                            freelancer: selected[i],
+                            user: controller.userFor(selected[i]),
+                          )
+                        : AspectRatio(
+                            aspectRatio: 1,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              ],
+            ),
+            SizedBox(height: 16 * s),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.14)),
+            SizedBox(height: 14 * s),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        totalLabel,
+                        style: _display(
+                          size: 19 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 2 * s),
+                      Text(
+                        'TAHMİNİ TOPLAM',
+                        style: _ui(
+                          size: 8 * s,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          spacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 30 * s,
+                  color: Colors.white.withValues(alpha: 0.14),
+                ),
+                SizedBox(width: 16 * s),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Gerçek yanıt süresi verisi henüz tutulmadığı için
+                      // gösterimlik sabit bir ortalama kullanılır.
+                      Text(
+                        '3 GÜN',
+                        style: _display(
+                          size: 19 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 2 * s),
+                      Text(
+                        'ORT. YANIT SÜRESİ',
+                        style: _ui(
+                          size: 8 * s,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          spacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 18 * s),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (count == 0 || sending)
+                        ? null
+                        : controller.sendOffers,
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedOpacity(
+                      opacity: count > 0 ? 1 : 0.45,
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        height: 46 * s,
+                        color: _kGold,
+                        alignment: Alignment.center,
+                        child: sending
+                            ? SizedBox(
+                                width: 20 * s,
+                                height: 20 * s,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                "BRIEF'İ GÖNDER ($count)",
+                                style: _ui(
+                                  size: 10 * s,
+                                  weight: FontWeight.w700,
+                                  color: Colors.white,
+                                  spacing: 0.6,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10 * s),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.setProjects),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      height: 46 * s,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        'SET HALLETSİN',
+                        style: _ui(
+                          size: 10 * s,
+                          weight: FontWeight.w700,
+                          color: Colors.white,
+                          spacing: 0.6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+// Alt çubuktaki tek bir seçili kişi — küçük fotoğraf + numara rozeti + isim.
+class _SelectedChip extends StatelessWidget {
+  const _SelectedChip({
+    required this.scale,
+    required this.index,
+    required this.freelancer,
+    required this.user,
+  });
+
+  final double scale;
+  final int index;
+  final FreelancerModel freelancer;
+  final UserModel user;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = scale;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  placeholderAvatarFor(user.gender, freelancer.userId),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 3 * s,
+                right: 3 * s,
+                child: Container(
+                  width: 16 * s,
+                  height: 16 * s,
+                  alignment: Alignment.center,
+                  color: _kGold,
+                  child: Text(
+                    '$index',
+                    style: _ui(
+                      size: 8 * s,
+                      weight: FontWeight.w700,
+                      color: _kBlack,
+                      spacing: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 4 * s),
+        Text(
+          freelancer.name.isNotEmpty ? freelancer.name : user.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _ui(
+            size: 7 * s,
+            weight: FontWeight.w700,
+            color: Colors.white,
+            spacing: 0.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _FreelancerCard extends StatelessWidget {
   const _FreelancerCard({
     required this.scale,
     required this.freelancer,
     required this.user,
-    required this.selected,
+    required this.selectionIndex,
     required this.onProfile,
     required this.onInvite,
   });
@@ -367,18 +662,16 @@ class _FreelancerCard extends StatelessWidget {
   final double scale;
   final FreelancerModel freelancer;
   final UserModel user;
-  final bool selected;
+  // Seçiliyse 1 tabanlı seçim sırası (rozette gösterilir); değilse null.
+  final int? selectionIndex;
   final VoidCallback onProfile;
   final VoidCallback onInvite;
 
+  bool get selected => selectionIndex != null;
+
   int get _jobCount => freelancer.experience * 12 + 15;
 
-  String get _feeRangeLabel {
-    if (freelancer.experience >= 15) return '25K-500K TL';
-    if (freelancer.experience >= 8) return '15K-250K TL';
-    if (freelancer.experience >= 3) return '8K-120K TL';
-    return '2K-50K TL';
-  }
+  String get _feeRangeLabel => _feeRangeLabelFor(freelancer);
 
   String _buildDisplayName(FreelancerModel f, UserModel u) {
     final name = f.name.isNotEmpty ? f.name : u.name;
@@ -396,338 +689,106 @@ class _FreelancerCard extends StatelessWidget {
   String get _primaryCategory =>
       freelancer.categories.isNotEmpty ? freelancer.categories.first : '';
 
-  String get _categoryShortLabel =>
-      _kCategoryShortLabel[_primaryCategory] ??
-      _primaryCategory.toUpperCaseTr();
-
   String get _roleLabel =>
       _kCategoryRoleLabel[_primaryCategory] ?? 'KREATİF';
 
   @override
   Widget build(BuildContext context) {
     final s = scale;
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border.fromBorderSide(BorderSide(color: _kCardBorder)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return GestureDetector(
+      onTap: onProfile,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.only(left: 6 * s),
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: selected ? _kGold : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 14 * s),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRect(
+                child: SizedBox(
+                  width: 60 * s,
+                  height: 78 * s,
+                  child: Image.asset(
+                    placeholderAvatarFor(user.gender, freelancer.userId),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(width: 14 * s),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: onProfile,
-                      behavior: HitTestBehavior.opaque,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6 * s),
-                        child: SizedBox(
-                          width: 66 * s,
-                          height: 92 * s,
-                          child: Image.asset(
-                            placeholderAvatarFor(
-                              user.gender,
-                              freelancer.userId,
-                            ),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                    Text(
+                      _buildDisplayName(freelancer, user),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _display(
+                        size: 19 * s,
+                        weight: FontWeight.w700,
+                        color: _kBlack,
                       ),
                     ),
-                    SizedBox(width: 12 * s),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: onProfile,
-                        behavior: HitTestBehavior.opaque,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _categoryShortLabel,
-                              style: _ui(
-                                size: 8 * s,
-                                weight: FontWeight.w700,
-                                color: _kGold,
-                                spacing: 1,
-                              ),
-                            ),
-                            SizedBox(height: 4 * s),
-                            Text(
-                              _buildDisplayName(freelancer, user),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: _display(
-                                size: 20 * s,
-                                weight: FontWeight.w600,
-                                color: _kInk,
-                              ),
-                            ),
-                            SizedBox(height: 2 * s),
-                            Text(
-                              _roleLabel,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: _ui(
-                                size: 8 * s,
-                                weight: FontWeight.w700,
-                                color: _kBlack,
-                                spacing: 0.6,
-                              ),
-                            ),
-                            SizedBox(height: 6 * s),
-                            Text(
-                              freelancer.bio.isNotEmpty
-                                  ? freelancer.bio
-                                  : '${_roleLabel.toLowerCase()} olarak $_jobCount projede yer aldı.',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: _ui(
-                                size: 8 * s,
-                                color: _kBlack,
-                                spacing: 0.2,
-                                height: 1.5,
-                              ),
-                            ),
-                            SizedBox(height: 6 * s),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 11 * s,
-                                  color: _kTaupe,
-                                ),
-                                SizedBox(width: 3 * s),
-                                Text(
-                                  freelancer.location,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: _ui(
-                                    size: 8 * s,
-                                    color: _kTaupe,
-                                    spacing: 0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                    SizedBox(height: 2 * s),
+                    Text(
+                      _roleLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ui(
+                        size: 10 * s,
+                        weight: FontWeight.w700,
+                        color: _kGold,
+                        spacing: 0.6,
                       ),
                     ),
-                    SizedBox(width: 8 * s),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _StatItem(
-                          scale: s,
-                          icon: Icons.star_border_rounded,
-                          label: 'DENEYİM',
-                          value: '${freelancer.experience} YIL',
-                        ),
-                        SizedBox(height: 6 * s),
-                        _StatItem(
-                          scale: s,
-                          icon: Icons.folder_outlined,
-                          label: 'PROJE',
-                          value: '$_jobCount',
-                        ),
-                        SizedBox(height: 6 * s),
-                        _StatItem(
-                          scale: s,
-                          icon: Icons.sell_outlined,
-                          label: 'ÜCRET',
-                          value: _feeRangeLabel,
-                        ),
-                      ],
+                    SizedBox(height: 4 * s),
+                    Text(
+                      '${freelancer.rating.toStringAsFixed(1)} · $_jobCount PROJE · $_feeRangeLabel',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _ui(size: 10 * s, color: _kTaupe, spacing: 0.2),
                     ),
                   ],
                 ),
-                SizedBox(height: 12 * s),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: onProfile,
-                      behavior: HitTestBehavior.opaque,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'PROJELERİNİ GÖRÜNTÜLE',
-                            style: _ui(
-                              size: 8.5 * s,
-                              weight: FontWeight.w700,
-                              color: _kInk,
-                              spacing: 0.8,
-                            ),
-                          ),
-                          SizedBox(width: 4 * s),
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 12 * s,
-                            color: _kInk,
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: onInvite,
-                      behavior: HitTestBehavior.opaque,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 30 * s,
-                        height: 30 * s,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8 * s),
-                          color: selected ? _kGold : Colors.white,
-                          border: Border.all(
-                            color: selected ? _kGold : _kInk,
-                            width: 1.6,
-                          ),
-                          boxShadow: selected
-                              ? [
-                                  BoxShadow(
-                                    color: _kGold.withValues(alpha: 0.35),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          selected ? Icons.check_rounded : Icons.add_rounded,
-                          size: 18 * s,
-                          color: selected ? Colors.white : _kInk,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12 * s),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  const _StatItem({
-    required this.scale,
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final double scale;
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 10 * s, color: _kGold),
-            SizedBox(width: 3 * s),
-            Text(
-              label,
-              style: _ui(
-                size: 7 * s,
-                weight: FontWeight.w600,
-                color: _kTaupe,
-                spacing: 0.4,
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 1 * s),
-        Text(
-          value,
-          style: _ui(
-            size: 9 * s,
-            weight: FontWeight.w700,
-            color: _kInk,
-            spacing: 0.2,
+              SizedBox(width: 10 * s),
+              GestureDetector(
+                onTap: onInvite,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 32 * s,
+                  height: 32 * s,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected ? _kGold : Colors.transparent,
+                    border: Border.all(
+                      color: selected ? _kGold : _kBoxBorder,
+                    ),
+                  ),
+                  child: selected
+                      ? Text(
+                          '$selectionIndex',
+                          style: _display(
+                            size: 15 * s,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-// ─── Kart köşe süslemesi ──────────────────────────────────────────────────
-class _CornerBracket extends StatelessWidget {
-  const _CornerBracket({
-    required this.scale,
-    required this.top,
-    required this.left,
-  });
-
-  final double scale;
-  final bool top;
-  final bool left;
-
-  @override
-  Widget build(BuildContext context) {
-    final double len = 22 * scale;
-    const double thickness = 2;
-    return SizedBox(
-      width: len,
-      height: len,
-      child: Stack(
-        children: [
-          Positioned(
-            top: top ? 0 : null,
-            bottom: top ? null : 0,
-            left: left ? 0 : null,
-            right: left ? null : 0,
-            child: Container(width: len, height: thickness, color: _kGold),
-          ),
-          Positioned(
-            top: top ? 0 : null,
-            bottom: top ? null : 0,
-            left: left ? 0 : null,
-            right: left ? null : 0,
-            child: Container(width: thickness, height: len, color: _kGold),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Kartlar arası nokta ayracı ───────────────────────────────────────────
-class _DotDivider extends StatelessWidget {
-  const _DotDivider({required this.scale});
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = scale;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12 * s),
-      child: Row(
-        children: [
-          Expanded(child: Container(height: 1, color: _kCardBorder)),
-          SizedBox(width: 8 * s),
-          Container(width: 5 * s, height: 5 * s, color: _kGold),
-          SizedBox(width: 8 * s),
-          Expanded(child: Container(height: 1, color: _kCardBorder)),
-        ],
       ),
     );
   }
@@ -750,7 +811,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             '"$category" alanında\nhenüz kreatif yok',
             textAlign: TextAlign.center,
-            style: _display(size: 20 * s, weight: FontWeight.w600, color: _kInk),
+            style: _display(size: 24 * s, weight: FontWeight.w600, color: _kInk),
           ),
         ],
       ),

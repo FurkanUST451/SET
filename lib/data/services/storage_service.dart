@@ -11,7 +11,6 @@ class StorageService {
   static const String themeMode = 'theme_mode';
   static const String userId = 'user_id';
   static const String userRole = 'user_role';
-  static const String onboardingComplete = 'onboarding_complete';
 
   static T? read<T>(String key) => _box.read<T>(key);
 
