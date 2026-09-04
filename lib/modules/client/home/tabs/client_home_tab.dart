@@ -9,6 +9,7 @@ import '../../../../routes/app_routes.dart';
 import '../../../app/user_controller.dart';
 import '../client_home_controller.dart';
 import '../client_projects_controller.dart';
+import 'how_it_works_modal.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFFEFDFB);
@@ -511,16 +512,7 @@ class ClientHomeTab extends StatelessWidget {
               SizedBox(width: 12 * s),
               Expanded(
                 child: GestureDetector(
-                  // Ayrı bir "nasıl işliyor" videosu henüz assets'te yok;
-                  // vitrindeki iş videosu oynatılır.
-                  onTap: () => Get.toNamed(
-                    AppRoutes.portfolioProjectDetail,
-                    arguments: {
-                      'workId': 'w1',
-                      'title': 'Mercedes Campaign',
-                      'category': 'REKLAM',
-                    },
-                  ),
+                  onTap: showHowItWorksModal,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
                     height: 44 * s,

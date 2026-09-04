@@ -358,4 +358,71 @@ class DummyData {
       profileImageUrl: AppAssets.profilePhotosFemale[0],
     ),
   ];
+
+  // ── Gösterimlik kreatifler ───────────────────────────────────────────
+  // "Ekibini sen kur" listesi tek tük kayıtla boş görünmesin diye eklenen
+  // demo kartlar. Firestore'da karşılıkları yok; hangi kategoriye
+  // bakılıyorsa o kategoriyle üretilirler.
+  static const List<({String id, String name, String surname, String gender,
+      int experience, double rating, String location, String bio})>
+      _demoProfiles = [
+    (
+      id: 'demo-f1',
+      name: 'Zeynep',
+      surname: 'Aksoy',
+      gender: 'kadin',
+      experience: 11,
+      rating: 4.9,
+      location: 'İstanbul',
+      bio: 'Marka filmleri ve kampanya işlerinde 10+ yıl saha deneyimi.',
+    ),
+    (
+      id: 'demo-f2',
+      name: 'Barış',
+      surname: 'Demir',
+      gender: 'erkek',
+      experience: 6,
+      rating: 4.7,
+      location: 'İzmir',
+      bio: 'Kısa format içerik ve sosyal medya kampanyalarında hızlı teslim.',
+    ),
+    (
+      id: 'demo-f3',
+      name: 'Elif',
+      surname: 'Yurdakul',
+      gender: 'kadin',
+      experience: 8,
+      rating: 4.8,
+      location: 'Ankara',
+      bio: 'Kurumsal işler ve belgesel anlatımı odaklı, ekip kurmayı sever.',
+    ),
+  ];
+
+  static List<FreelancerModel> demoFreelancersFor(String category) => [
+        for (final p in _demoProfiles)
+          FreelancerModel(
+            userId: p.id,
+            name: p.name,
+            surname: p.surname,
+            categories: [category],
+            bio: p.bio,
+            experience: p.experience,
+            location: p.location,
+            rating: p.rating,
+            portfolio: const [],
+          ),
+      ];
+
+  static List<UserModel> get demoUsers => [
+        for (final p in _demoProfiles)
+          UserModel(
+            id: p.id,
+            name: p.name,
+            surname: p.surname,
+            email: '${p.id}@set.app',
+            role: UserRole.freelancer,
+            gender: p.gender,
+            createdAt: DateTime(2026, 1, 1),
+          ),
+      ];
 }

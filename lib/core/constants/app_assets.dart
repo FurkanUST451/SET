@@ -90,4 +90,14 @@ class AppAssets {
     '$_placeholder/mercedes_project_image3.png',
     '$_placeholder/mercedes_project_image4.png',
   ];
+
+  /// Profildeki "İŞLERİ" şeridi — kendiliğinden akan galerinin bir turu.
+  /// Akış hemen başa dönmesin diye galeriden biraz daha uzun tutuldu.
+  static const List<String> portfolioWorksStrip = [
+    '$_placeholder/mercedes_project_image.png',
+    '$_placeholder/mercedes_project_image2.png',
+    '$_placeholder/mercedes_project_image3.png',
+    '$_placeholder/mercedes_bg.png',
+    '$_placeholder/mercedes_project_image4.png',
+  ];
 }

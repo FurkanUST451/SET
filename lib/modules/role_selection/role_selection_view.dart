@@ -16,6 +16,13 @@ const Color _kInk = Color(0xFF1A1A1A);
 const Color _kMuted = Color(0xFF8B8377);
 const Color _kDivider = Color(0x1F1A1A1A);
 
+/// Kartın esnemediği durumdaki doğal yüksekliği.
+const double _kCardBaseHeight = 190;
+
+/// Kartların esneyip ekranı doldurabilmesi için gereken en az ekran boyu;
+/// altında kalan cihazlarda doğal boyutlu + kaydırmalı düzene düşülür.
+const double _kFlexibleLayoutMinHeight = 640;
+
 class RoleSelectionView extends GetView<RoleSelectionController> {
   const RoleSelectionView({super.key});
 
@@ -24,55 +31,88 @@ class RoleSelectionView extends GetView<RoleSelectionController> {
     return Scaffold(
       backgroundColor: _kCream,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _Header(),
-              const SizedBox(height: 14),
-              Obx(
-                () => _RoleCard(
-                  number: '01',
-                  category: AppStrings.roleClientCategory,
-                  title: AppStrings.roleClient,
-                  description: AppStrings.roleClientDesc,
-                  ctaLabel: AppStrings.roleClientCta,
-                  image: AppAssets.roleTelephone,
-                  busy: controller.isLoading.value &&
-                      controller.selectedRole.value == UserRole.client,
-                  onTap: () => controller.selectAndContinue(UserRole.client),
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final clientCard = Obx(
+              () => _RoleCard(
+                number: '01',
+                category: AppStrings.roleClientCategory,
+                title: AppStrings.roleClient,
+                description: AppStrings.roleClientDesc,
+                ctaLabel: AppStrings.roleClientCta,
+                image: AppAssets.roleTelephone,
+                busy: controller.isLoading.value &&
+                    controller.selectedRole.value == UserRole.client,
+                onTap: () => controller.selectAndContinue(UserRole.client),
               ),
-              const SizedBox(height: 14),
-              Obx(
-                () => _RoleCard(
-                  number: '02',
-                  category: AppStrings.roleFreelancerCategory,
-                  title: AppStrings.roleFreelancer,
-                  description: AppStrings.roleFreelancerDesc,
-                  ctaLabel: AppStrings.roleFreelancerCta,
-                  image: AppAssets.roleCamera,
-                  busy: controller.isLoading.value &&
-                      controller.selectedRole.value == UserRole.freelancer,
-                  onTap: () =>
-                      controller.selectAndContinue(UserRole.freelancer),
-                ),
+            );
+            final freelancerCard = Obx(
+              () => _RoleCard(
+                number: '02',
+                category: AppStrings.roleFreelancerCategory,
+                title: AppStrings.roleFreelancer,
+                description: AppStrings.roleFreelancerDesc,
+                ctaLabel: AppStrings.roleFreelancerCta,
+                image: AppAssets.roleCamera,
+                busy: controller.isLoading.value &&
+                    controller.selectedRole.value == UserRole.freelancer,
+                onTap: () => controller.selectAndContinue(UserRole.freelancer),
               ),
-              const SizedBox(height: 36),
-              Center(
-                child: Text(
-                  AppStrings.roleSelectionFootnote,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.caption.copyWith(
-                    color: _kMuted,
-                    decoration: TextDecoration.underline,
-                    decorationColor: _kMuted,
-                  ),
+            );
+
+            // Kısa ekran: eski davranış — doğal yükseklik + kaydırma.
+            if (constraints.maxHeight < _kFlexibleLayoutMinHeight) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const _Header(),
+                    const SizedBox(height: 14),
+                    SizedBox(height: _kCardBaseHeight, child: clientCard),
+                    const SizedBox(height: 14),
+                    SizedBox(height: _kCardBaseHeight, child: freelancerCard),
+                    const SizedBox(height: 32),
+                    const _Footnote(),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              );
+            }
+
+            // Normal ekran: kartlar kalan dikey alanı paylaşır.
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _Header(),
+                const SizedBox(height: 14),
+                Expanded(child: clientCard),
+                const SizedBox(height: 14),
+                Expanded(child: freelancerCard),
+                const SizedBox(height: 28),
+                const _Footnote(),
+                const SizedBox(height: 20),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _Footnote extends StatelessWidget {
+  const _Footnote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        AppStrings.roleSelectionFootnote,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.caption.copyWith(
+          color: _kMuted,
+          decoration: TextDecoration.underline,
+          decorationColor: _kMuted,
         ),
       ),
     );
@@ -148,75 +188,94 @@ class _RoleCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         color: _kCard,
-        padding: const EdgeInsets.fromLTRB(20, 22, 12, 22),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Tipografi sabit kalır; kart uzadıkça yalnızca görsel büyür.
+            // Üst sınır 144: metin sütunu CTA satırını tek satırda taşıyacak
+            // kadar geniş kalsın diye.
+            final imageSize = constraints.hasBoundedHeight
+                ? (constraints.maxHeight * 0.6).clamp(108.0, 144.0)
+                : 108.0;
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 12, 22),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    '$number · $category',
-                    style: AppTextStyles.eyebrow.copyWith(color: _kGold),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$number · $category',
+                          style: AppTextStyles.eyebrow.copyWith(color: _kGold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          title,
+                          style: AppTextStyles.heading2.copyWith(color: _kInk),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          description,
+                          style: AppTextStyles.body2.copyWith(color: _kMuted),
+                        ),
+                        const SizedBox(height: 18),
+                        Container(width: 120, height: 1, color: _kGold),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                ctaLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.eyebrow
+                                    .copyWith(color: _kGold),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: _kGold,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: AppTextStyles.heading2.copyWith(color: _kInk),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: imageSize,
+                    height: imageSize,
+                    child: Image.asset(image, fit: BoxFit.contain),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: AppTextStyles.body2.copyWith(color: _kMuted),
-                  ),
-                  const SizedBox(height: 18),
-                  Container(width: 120, height: 1, color: _kGold),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Text(
-                        ctaLabel,
-                        style: AppTextStyles.eyebrow.copyWith(color: _kGold),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 14,
-                        color: _kGold,
-                      ),
-                    ],
+                  SizedBox(
+                    width: 36,
+                    child: Center(
+                      child: busy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kGold,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 28,
+                              color: _kGold,
+                            ),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 108,
-              height: 108,
-              child: Image.asset(image, fit: BoxFit.contain),
-            ),
-            SizedBox(
-              width: 36,
-              child: Center(
-                child: busy
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: _kGold,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 26,
-                        color: _kGold,
-                      ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

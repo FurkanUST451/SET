@@ -24,6 +24,9 @@ const _kTaupe = Color(0xFF9B8E7B);
 const _kMuted = Color(0xFFB6AD9A);
 const _kBlack = Color(0xFF000000); // UI etiket fontu - tam siyah
 const _kCardBorder = Color(0x14000000);
+// Boş seçim kutuları (üstteki yuvalar + kart sağındaki kare) ayraçlardan
+// biraz daha belirgin bir çizgi kullanır ki tıklanabilir oldukları anlaşılsın.
+const _kBoxBorder = Color(0x2E000000);
 
 TextStyle _display({
   required double size,
@@ -121,7 +124,9 @@ class FreelancersByCategoryView
                             ),
                             SizedBox(height: 8 * s),
                             Text(
-                              'En fazla 5 kişiye brief gönderebilirsin.',
+                              'En fazla '
+                              '${FreelancersByCategoryController.maxSelections}'
+                              ' kişiye brief gönderebilirsin.',
                               style: _ui(size: 12 * s, color: _kTaupe, spacing: 0.2),
                             ),
                             SizedBox(height: 22 * s),
@@ -135,7 +140,7 @@ class FreelancersByCategoryView
                                   // esnek olsaydı seçim değiştikçe sağdaki
                                   // avatar kutuları hafifçe kayardı.
                                   SizedBox(
-                                    width: 78 * s,
+                                    width: 104 * s,
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -168,29 +173,29 @@ class FreelancersByCategoryView
                                                     .maxSelections;
                                             i++) ...[
                                           if (i > 0) SizedBox(width: 8 * s),
-                                          Expanded(
-                                            child: AspectRatio(
-                                              aspectRatio: 1,
-                                              child: i < selected.length
-                                                  ? Image.asset(
-                                                      placeholderAvatarFor(
-                                                        controller
-                                                            .userFor(selected[i])
-                                                            .gender,
-                                                        selected[i].userId,
-                                                      ),
-                                                      fit: BoxFit.cover,
-                                                    )
-                                                  : Container(
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                          color: _kCardBorder,
-                                                        ),
+                                          SizedBox(
+                                            width: 56 * s,
+                                            height: 56 * s,
+                                            child: i < selected.length
+                                                ? Image.asset(
+                                                    placeholderAvatarFor(
+                                                      controller
+                                                          .userFor(selected[i])
+                                                          .gender,
+                                                      selected[i].userId,
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: _kBoxBorder,
                                                       ),
                                                     ),
-                                            ),
+                                                  ),
                                           ),
                                         ],
+                                        const Spacer(),
                                       ],
                                     ),
                                   ),
@@ -256,7 +261,10 @@ class FreelancersByCategoryView
                           );
                         }
                         return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24 * s),
+                          // Kartlar sayfa marjininden biraz içeride başlar:
+                          // seçili karttaki altın şerit ve profil fotoğrafı
+                          // sola yaklaşsın diye sol boşluk daha dar.
+                          padding: EdgeInsets.only(left: 16 * s, right: 24 * s),
                           child: Column(
                             children: [
                               for (var i = 0; i < list.length; i++) ...[
@@ -405,12 +413,17 @@ class _SelectionSummaryBar extends StatelessWidget {
             ),
             SizedBox(height: 12 * s),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              // Seçili kutucukların altında isim satırı var; boş kareler
+              // onlarla üstten hizalansın diye satır yüksekliği serbest.
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (var i = 0;
                     i < FreelancersByCategoryController.maxSelections;
                     i++) ...[
                   if (i > 0) SizedBox(width: 8 * s),
-                  Expanded(
+                  SizedBox(
+                    width: 72 * s,
                     child: i < count
                         ? _SelectedChip(
                             scale: s,
@@ -686,7 +699,7 @@ class _FreelancerCard extends StatelessWidget {
       onTap: onProfile,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: EdgeInsets.only(left: selected ? 13 * s : 16 * s),
+        padding: EdgeInsets.only(left: 6 * s),
         decoration: BoxDecoration(
           border: Border(
             left: BorderSide(
@@ -758,7 +771,7 @@ class _FreelancerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected ? _kGold : Colors.transparent,
                     border: Border.all(
-                      color: selected ? _kGold : _kCardBorder,
+                      color: selected ? _kGold : _kBoxBorder,
                     ),
                   ),
                   child: selected

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_fonts.dart';
 
@@ -739,7 +742,7 @@ class _WorksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = scale;
     final projects = freelancer?.projects ?? const [];
-    final gallery = AppAssets.portfolioMercedesGallery;
+    final gallery = AppAssets.portfolioWorksStrip;
     final hasReal = projects.isNotEmpty;
     final featured = hasReal ? projects.first : null;
     final featuredImage = featured?.thumbnailUrl ??
@@ -780,21 +783,11 @@ class _WorksSection extends StatelessWidget {
           ),
         ),
         SizedBox(height: 14 * s),
-        SizedBox(
-          height: 130 * s,
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 24 * s),
-            scrollDirection: Axis.horizontal,
-            itemCount: 3,
-            separatorBuilder: (_, _) => SizedBox(width: 10 * s),
-            itemBuilder: (_, i) => ClipRect(
-              child: SizedBox(
-                width: 130 * s,
-                height: 130 * s,
-                child: Image.asset(gallery[i % gallery.length], fit: BoxFit.cover),
-              ),
-            ),
-          ),
+        _AutoScrollWorksStrip(
+          images: gallery,
+          itemSize: 130 * s,
+          gap: 10 * s,
+          leadingPadding: 24 * s,
         ),
         SizedBox(height: 12 * s),
         Padding(
@@ -839,6 +832,142 @@ class _WorksSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// İŞLERİ ŞERİDİ — ekran açılınca sola doğru kendiliğinden akan galeri
+//
+// Şerit `images` listesini tekrarlar; bir tur tamamlandığında kaydırma
+// bir tur geriye alınır — içerik aynı olduğu için sıçrama görünmez.
+// Kullanıcı şeride dokunduğunda akış durur, bıraktıktan kısa süre sonra
+// kaldığı yerden devam eder.
+// ─────────────────────────────────────────────────────────────────
+class _AutoScrollWorksStrip extends StatefulWidget {
+  const _AutoScrollWorksStrip({
+    required this.images,
+    required this.itemSize,
+    required this.gap,
+    required this.leadingPadding,
+  });
+
+  final List<String> images;
+  final double itemSize;
+  final double gap;
+  final double leadingPadding;
+
+  @override
+  State<_AutoScrollWorksStrip> createState() => _AutoScrollWorksStripState();
+}
+
+class _AutoScrollWorksStripState extends State<_AutoScrollWorksStrip>
+    with SingleTickerProviderStateMixin {
+  /// Saniyede kaç piksel — göz takip edebilsin diye bilinçli olarak yavaş.
+  static const double _speed = 20;
+
+  /// Kullanıcı elini çektikten sonra akışın yeniden başlama gecikmesi.
+  static const Duration _resumeDelay = Duration(milliseconds: 1800);
+
+  final ScrollController _scrollController = ScrollController();
+  late final Ticker _ticker;
+  Timer? _resumeTimer;
+  Duration _lastElapsed = Duration.zero;
+  double _offset = 0;
+  bool _pausedByUser = false;
+  bool _reducedMotion = false;
+
+  double get _cycleLength =>
+      widget.images.length * (widget.itemSize + widget.gap);
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker(_onTick)..start();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reducedMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+  }
+
+  @override
+  void dispose() {
+    _resumeTimer?.cancel();
+    _ticker.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onTick(Duration elapsed) {
+    final delta = elapsed - _lastElapsed;
+    _lastElapsed = elapsed;
+    if (_pausedByUser || _reducedMotion) return;
+    if (!_scrollController.hasClients) return;
+    // İlk kare veya uzun donmalarda büyük sıçrama olmasın.
+    final dt = delta.inMicroseconds / Duration.microsecondsPerSecond;
+    if (dt <= 0 || dt > 0.1) return;
+
+    _offset += _speed * dt;
+    if (_offset >= _cycleLength) _offset -= _cycleLength;
+    _scrollController.jumpTo(_offset);
+  }
+
+  void _pause() {
+    _resumeTimer?.cancel();
+    _pausedByUser = true;
+  }
+
+  void _scheduleResume() {
+    _resumeTimer?.cancel();
+    _resumeTimer = Timer(_resumeDelay, () {
+      if (!mounted || !_scrollController.hasClients) return;
+      // Kullanıcının bıraktığı yerden devam et; tur uzunluğunun katları
+      // görsel olarak aynı noktaya denk geldiği için normalize etmek güvenli.
+      var offset = _scrollController.offset;
+      while (offset >= _cycleLength) {
+        offset -= _cycleLength;
+      }
+      if (offset < 0) offset = 0;
+      _offset = offset;
+      _scrollController.jumpTo(_offset);
+      _pausedByUser = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Bir tur akarken hem mevcut hem sonraki tur ekranda olabildiği için
+    // en az üç tur besleniyor.
+    final itemCount = widget.images.length * 3;
+
+    return SizedBox(
+      height: widget.itemSize,
+      child: Listener(
+        onPointerDown: (_) => _pause(),
+        onPointerUp: (_) => _scheduleResume(),
+        onPointerCancel: (_) => _scheduleResume(),
+        child: ListView.builder(
+          controller: _scrollController,
+          padding: EdgeInsets.only(left: widget.leadingPadding),
+          scrollDirection: Axis.horizontal,
+          itemCount: itemCount,
+          itemBuilder: (_, i) => Padding(
+            padding: EdgeInsets.only(right: widget.gap),
+            child: ClipRect(
+              child: SizedBox(
+                width: widget.itemSize,
+                height: widget.itemSize,
+                child: Image.asset(
+                  widget.images[i % widget.images.length],
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

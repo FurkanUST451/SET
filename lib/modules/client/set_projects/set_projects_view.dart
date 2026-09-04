@@ -8,14 +8,12 @@ import '../../../routes/app_routes.dart';
 
 // ─── Palet ────────────────────────────────────────────────────────────────────
 const _kCream = Color(0xFFF6F4EF); // sayfa gövdesi
-const _kNight = Color(0xFF121212); // üst blok (başlık + künye)
 const _kBlackout = Color(0xFF000000); // muhatap bloğu ve alt kart
 const _kGold = Color(0xFFD9A84E);
 const _kInk = Color(0xFF16150F); // krem üzeri başlık/gövde
 const _kTaupe = Color(0xFF8E877B); // krem üzeri ikincil
 const _kMuted = Color(0xFFB3ABA0); // krem üzeri pasif
 const _kLine = Color(0x14000000); // krem üzeri hairline
-const _kGoldLine = Color(0x59D9A84E); // bölüm üstü altın hairline
 const _kNightLine = Color(0xFF262626); // siyah üzeri hairline
 const _kOnDarkSoft = Color(0xFF8C877E); // siyah üzeri ikincil
 const _kOnline = Color(0xFF4CAF50);
@@ -83,7 +81,7 @@ class _SetProjectsViewState extends State<SetProjectsView> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: _kCream,
         body: MediaQuery.withNoTextScaling(
@@ -100,7 +98,7 @@ class _SetProjectsViewState extends State<SetProjectsView> {
 
                 // ── SÜREÇ ─────────────────────────────────────────────────
                 SizedBox(height: 26 * s),
-                _pad(s, const _SectionRule()),
+                _pad(s, _SectionRule(scale: s)),
                 SizedBox(height: 14 * s),
                 _pad(s, _SectionLabel(scale: s, text: 'SÜREÇ')),
                 SizedBox(height: 10 * s),
@@ -116,7 +114,7 @@ class _SetProjectsViewState extends State<SetProjectsView> {
 
                 // ── EKİP ──────────────────────────────────────────────────
                 SizedBox(height: 26 * s),
-                _pad(s, const _SectionRule()),
+                _pad(s, _SectionRule(scale: s)),
                 SizedBox(height: 14 * s),
                 _pad(
                   s,
@@ -141,7 +139,7 @@ class _SetProjectsViewState extends State<SetProjectsView> {
 
                 // ── SON GÜNCELLEME ────────────────────────────────────────
                 SizedBox(height: 26 * s),
-                _pad(s, const _SectionRule()),
+                _pad(s, _SectionRule(scale: s)),
                 SizedBox(height: 14 * s),
                 _pad(s, _SectionLabel(scale: s, text: 'SON GÜNCELLEME')),
                 SizedBox(height: 14 * s),
@@ -159,7 +157,7 @@ class _SetProjectsViewState extends State<SetProjectsView> {
 
                 // ── DOSYALAR ──────────────────────────────────────────────
                 SizedBox(height: 26 * s),
-                _pad(s, const _SectionRule()),
+                _pad(s, _SectionRule(scale: s)),
                 SizedBox(height: 14 * s),
                 _pad(s, _SectionLabel(scale: s, text: 'DOSYALAR')),
                 SizedBox(height: 6 * s),
@@ -190,13 +188,14 @@ class _SetProjectsViewState extends State<SetProjectsView> {
 // Ortak küçük parçalar
 // ---------------------------------------------------------------------------
 
-/// Bölüm başlıklarının üstündeki ince altın çizgi.
+/// Bölüm başlıklarının üstündeki kısa altın işaret.
 class _SectionRule extends StatelessWidget {
-  const _SectionRule();
+  const _SectionRule({required this.scale});
+  final double scale;
 
   @override
   Widget build(BuildContext context) =>
-      Container(height: 1, color: _kGoldLine);
+      Container(height: 2 * scale, width: 28 * scale, color: _kGold);
 }
 
 class _SectionLabel extends StatelessWidget {
@@ -250,13 +249,11 @@ class _Portrait extends StatelessWidget {
     required this.size,
     required this.gender,
     required this.seed,
-    this.circle = false,
   });
 
   final double size;
   final String gender;
   final String seed;
-  final bool circle;
 
   @override
   Widget build(BuildContext context) {
@@ -274,9 +271,7 @@ class _Portrait extends StatelessWidget {
         placeholder: placeholder,
       ),
     );
-    return circle
-        ? ClipOval(child: photo)
-        : ClipRect(child: SizedBox(width: size, height: size, child: photo));
+    return ClipRect(child: SizedBox(width: size, height: size, child: photo));
   }
 }
 
@@ -294,7 +289,7 @@ class _HeaderBlock extends StatelessWidget {
     final s = scale;
     return Container(
       width: double.infinity,
-      color: _kNight,
+      color: _kCream,
       padding: EdgeInsets.only(top: topInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,7 +309,7 @@ class _HeaderBlock extends StatelessWidget {
                       child: Icon(
                         Icons.arrow_back_rounded,
                         size: 22 * s,
-                        color: Colors.white,
+                        color: _kInk,
                       ),
                     ),
                   ),
@@ -324,7 +319,7 @@ class _HeaderBlock extends StatelessWidget {
                     style: _ui(
                       size: 10 * s,
                       weight: FontWeight.w500,
-                      color: Colors.white,
+                      color: _kInk,
                       spacing: 1.4,
                     ),
                   ),
@@ -332,7 +327,11 @@ class _HeaderBlock extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 14 * s),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24 * s),
+            child: Container(height: 1, color: _kLine),
+          ),
+          SizedBox(height: 22 * s),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24 * s),
             child: Column(
@@ -353,42 +352,49 @@ class _HeaderBlock extends StatelessWidget {
                   style: _display(
                     size: 44 * s,
                     weight: FontWeight.w700,
-                    color: Colors.white,
+                    color: _kInk,
                     height: 0.98,
                   ),
                 ),
                 SizedBox(height: 10 * s),
                 Text(
                   'Tanıtım Filmi · İstanbul Avrupa',
-                  style: _ui(size: 11.5 * s, color: _kOnDarkSoft, spacing: 0.2),
+                  style: _ui(size: 11.5 * s, color: _kTaupe, spacing: 0.2),
                 ),
               ],
             ),
           ),
           SizedBox(height: 20 * s),
-          Container(height: 1, color: _kNightLine),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24 * s),
+            child: Container(height: 1, color: _kLine),
+          ),
           // Sayaçlar
-          IntrinsicHeight(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24 * s),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _stat(s, '03/06', 'AŞAMA'),
-                Container(width: 1, color: _kNightLine),
+                _divider(s),
                 _stat(s, '12 GÜN', 'KALAN'),
-                Container(width: 1, color: _kNightLine),
+                _divider(s),
                 _stat(s, '48.000 ₺', 'BÜTÇE'),
               ],
             ),
           ),
-          Container(height: 1, color: _kNightLine),
+          SizedBox(height: 22 * s),
         ],
       ),
     );
   }
 
+  Widget _divider(double s) =>
+      Container(width: 1, height: 44 * s, color: _kLine);
+
   Widget _stat(double s, String value, String label) => Expanded(
     child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 18 * s, vertical: 18 * s),
+      padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 10 * s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -401,14 +407,14 @@ class _HeaderBlock extends StatelessWidget {
               style: _display(
                 size: 25 * s,
                 weight: FontWeight.w700,
-                color: Colors.white,
+                color: _kInk,
               ),
             ),
           ),
           SizedBox(height: 7 * s),
           Text(
             label,
-            style: _ui(size: 8.5 * s, color: _kOnDarkSoft, spacing: 1.4),
+            style: _ui(size: 8.5 * s, color: _kTaupe, spacing: 1.4),
           ),
         ],
       ),
@@ -463,7 +469,7 @@ class _ManagerBlock extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _Portrait(size: 64 * s, gender: 'kadin', seed: 'selin-a-pm'),
+              _Portrait(size: 84 * s, gender: 'kadin', seed: 'selin-a-pm'),
               SizedBox(width: 16 * s),
               Expanded(
                 child: Column(
@@ -594,7 +600,7 @@ class _Timeline extends StatelessWidget {
       _StepState.current,
     ),
     (
-      '',
+      '02 HAZ',
       'Çekim',
       'Belirlenen lokasyonda çekim gerçekleştirilecek.',
       _StepState.upcoming,
@@ -838,12 +844,7 @@ class _LastUpdate extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Portrait(
-          size: 38 * s,
-          gender: 'kadin',
-          seed: 'selin-a-pm',
-          circle: true,
-        ),
+        _Portrait(size: 38 * s, gender: 'kadin', seed: 'selin-a-pm'),
         SizedBox(width: 12 * s),
         Expanded(
           child: Column(
@@ -958,7 +959,7 @@ class _NextStepCard extends StatelessWidget {
     final s = scale;
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 18 * s),
+      margin: EdgeInsets.symmetric(horizontal: 8 * s),
       padding: EdgeInsets.fromLTRB(22 * s, 22 * s, 22 * s, 20 * s),
       color: _kBlackout,
       child: Column(
